@@ -56,3 +56,20 @@ Controller of the Raspberry Pi hardware
 #
 #-------------------------------------------------------------------------------
 
+class MRSM_Controller():
+
+     def __init__(self):
+        error_message(message = "This is CamScan, Version " + __version__)
+
+        self.camPort = camport 
+        self.currentImage = None
+        self.currentResult = 0
+                                                       # for Microsoft Lifecam Studio HD
+        self.actualFocusValue = args.focus             # IH230310 I found this to be in the range 0 (far) to 40 (near)
+        self.actualExposureValue = args.exposure       # IH230310 I found this to be in the range -16 (dark) to 0 (bright)
+
+        self.selectedROI = None
+
+        self.GetCameraMaxResolution()
+        # for the Microsoft lifecam studi
+

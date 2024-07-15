@@ -55,3 +55,5 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #
 #-------------------------------------------------------------------------------
 
+class MRSM_Presentation():
+    

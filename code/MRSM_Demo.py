@@ -55,3 +55,11 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #
 #-------------------------------------------------------------------------------
 
+
+from PyQt6.QtWidgets import     \
+        QApplication           
+
+import sys
+
+
+MRSM_application = QApplication(sys.argv)
