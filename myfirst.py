@@ -43,6 +43,7 @@ b = QPushButton("QUIT",window)
 b.clicked.connect(quit_clicked)
 b.setGeometry(1000,100,300,100)
 
+#bla bla bla
 
 # window.show()  # IMPORTANT!!!!! Windows are hidden by default.
 window.showFullScreen()
