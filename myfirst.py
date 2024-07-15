@@ -15,6 +15,7 @@
 #
 
 # 
+# this was added from my other working environment  240715 12:30PM
 
 from PyQt6.QtWidgets import     \
         QApplication,           \
