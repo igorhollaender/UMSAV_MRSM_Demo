@@ -60,6 +60,9 @@ from PyQt6.QtWidgets import     \
         QApplication           
 
 import sys
+import MRSM_Controller
+import MRSM_Presentation
 
 
 MRSM_application = QApplication(sys.argv)
+

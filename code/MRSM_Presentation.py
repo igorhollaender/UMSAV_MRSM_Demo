@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-__version__ = "IH240715a"
+__version__ = "IH240716a"
 #
 #
 """
@@ -56,4 +56,5 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #-------------------------------------------------------------------------------
 
 class MRSM_Presentation():
-    
+     def __init__(self):
+          pass
