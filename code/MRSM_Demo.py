@@ -10,7 +10,7 @@
 #      M  R  S  M  _  D  e  m  o  .  p  y 
 #
 #
-__version__ = "IH240715a"
+__version__ = "MRSM_Demo IH240717a"
 #
 #
 """
@@ -56,13 +56,56 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #-------------------------------------------------------------------------------
 
 
+from typing import List
 from PyQt6.QtWidgets import     \
-        QApplication           
+    QApplication,           \
+    QWidget,                \
+    QPushButton           
+from PyQt6.QtCore import        \
+    QCommandLineOption,     \
+    QCommandLineParser
 
 import sys
 import MRSM_Controller
-import MRSM_Presentation
+from MRSM_Presentation import MRSM_Presentation
 
 
-MRSM_application = QApplication(sys.argv)
+from MRSM_Globals import IsWaveShareDisplayEmulated
+from MRSM_Globals import IsRaspberryPi5Emulated
+
+
+class MSRM_Demo_QApplication(QApplication):
+    """
+    Main QApplication 
+    """
+    #IH240717 for debugging only
+    QT_STYLES = ["windows", "windowsvista", "fusion", "macos"]
+
+    def __init__(self, argv: List[str]) -> None:
+        super().__init__(argv)
+        
+    def parseCommandLine(self):
+        parser = QCommandLineParser()
+        parser.addHelpOption()
+        parser.addVersionOption()
+                
+        #IH240717 for debugging only
+        style_option = QCommandLineOption(
+            "s",
+            "Use the specified Qt style, one of: " + ', '.join(self.QT_STYLES),
+            "style"
+        )
+        parser.addOption(style_option)
+                
+        self.setApplicationVersion(__version__)
+
+        parser.process(self)
+                
+
+#-------------------------------------------------------------------------------
+MRSM_application = MSRM_Demo_QApplication(sys.argv)
+MRSM_application.parseCommandLine()
+MRSM_presentation = MRSM_Presentation()
+MRSM_presentation.show()
+MRSM_application.exec()
 

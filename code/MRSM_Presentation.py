@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-__version__ = "IH240716a"
+#       Last update: IH240717
 #
 #
 """
@@ -55,6 +55,64 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #
 #-------------------------------------------------------------------------------
 
+from PyQt6.QtWidgets import         \
+    QApplication,                   \
+    QWidget,                        \
+    QGridLayout,                    \
+    QPushButton
+
+
+from MRSM_Globals import IsWaveShareDisplayEmulated
+from MRSM_Globals import IsRaspberryPi5Emulated
+
+
 class MRSM_Presentation():
-     def __init__(self):
-          pass
+     
+    class MRSM_PushButton(QPushButton):
+        def __init_subclass__(cls) -> None:
+            return super().__init_subclass__()
+          
+
+    def __init__(self):
+        self.MRSM_Window = QWidget()
+
+        #   This implementation targets the 
+        #   https://www.waveshare.com/11.9inch-HDMI-LCD.htm
+        #   display.
+        #   Resolution 320 x 1480
+
+        if IsWaveShareDisplayEmulated:
+            self.MRSM_Window.setGeometry(100,200,1480,320)
+
+        # see https://doc.qt.io/qtforpython-6/overviews/stylesheet-examples.html
+        self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")
+
+        grid = QGridLayout()
+        self.MRSM_Window.setLayout(grid)
+     
+        #IH240717 for debugging only
+        b1 = self.MRSM_PushButton("QUIT",self.MRSM_Window)
+        b1.clicked.connect(self.quit_clicked)
+        grid.addWidget(b1,0,0)
+        
+        #IH240717 for debugging only
+        b2 = self.MRSM_PushButton("QUIT",self.MRSM_Window)
+        b2.clicked.connect(self.quit_clicked)
+        grid.addWidget(b2,1,1)
+
+        #IH240717 for debugging only
+        b3 = self.MRSM_PushButton("QUIT",self.MRSM_Window)
+        b3.clicked.connect(self.quit_clicked)
+        grid.addWidget(b3,2,2)
+
+    def quit_clicked(self):
+        """
+        TODO implement fully
+        """
+        QApplication.quit()
+     
+    def show(self):
+        if IsWaveShareDisplayEmulated:
+            self.MRSM_Window.show()
+        else:
+            self.MRSM_Window.showFullScreen()
