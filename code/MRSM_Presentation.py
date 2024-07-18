@@ -78,6 +78,8 @@ class PoorMansLocalizer():
     """
     Primitive localizer: translates the source English terms and phrases used in GUI
     to target language
+
+    TODO:  implement translation for longer text portions
     """    
     
     class MRSM_Dictionary():
@@ -118,7 +120,6 @@ class PoorMansLocalizer():
              
         def localizeString(self,sourceEnTerm: str):
             l = list(map(lambda dictRecord: self.getTgtTerm(sourceEnTerm,dictRecord), self.d))
-            print(l)
             # Get first non None value from List
             return next((elem for elem in l if elem is not None), None)
 
@@ -130,9 +131,27 @@ class PoorMansLocalizer():
     
     def localizeString(self,sourceEnTerm: str):
         return self.dictionary.localizeString(sourceEnTerm)
+    
+    def UNITTEST(self):
+        self.targetLangauge = Language.SLOVAK
+        print(
+            self.localizeString('QUIT'),
+            self.localizeString('STOP'),
+            self.localizeString('stop'),
+            self.localizeString('FINISH'),
+            self.localizeString('NONSEnse'),
+        )
+        self.targetLangauge = Language.GERMAN
+        print(
+            self.localizeString('QUIT'),
+            self.localizeString('STOP'),
+            self.localizeString('stop'),
+            self.localizeString('FINISH'),
+            self.localizeString('NONSEnse'),
+        )
 
 class MRSM_Presentation():
-     
+             
     class MRSM_PushButton(QPushButton):
         def __init_subclass__(cls) -> None:
             return super().__init_subclass__()
@@ -142,7 +161,10 @@ class MRSM_Presentation():
             # return super().__init_subclass__(self.localizer.localizeString(label),parent)
             return super().__init_subclass__(label,parent)
 
-    def __init__(self):
+    def __init__(self,
+            language=Language.ENGLISH
+            ):
+        self.language = language
         self.MRSM_Window = QWidget()
 
         #   This implementation targets the 
@@ -153,25 +175,11 @@ class MRSM_Presentation():
         if IsWaveShareDisplayEmulated:
             self.MRSM_Window.setGeometry(100,200,1480,320)
 
+
+        self.localizer = PoorMansLocalizer(self.language)
         #IH240717 for debugging only
-        self.localizer = PoorMansLocalizer(Language.SLOVAK)
-        print(
-            self.localizer.localizeString('QUIT'),
-            self.localizer.localizeString('STOP'),
-            self.localizer.localizeString('stop'),
-            self.localizer.localizeString('FINISH'),
-            self.localizer.localizeString('NONSEnse'),
-        )
-        self.localizer = PoorMansLocalizer(Language.GERMAN)
-        print(
-            self.localizer.localizeString('QUIT'),
-            self.localizer.localizeString('STOP'),
-            self.localizer.localizeString('stop'),
-            self.localizer.localizeString('FINISH'),
-            self.localizer.localizeString('NONSEnse'),
-        )
-
-
+        # self.localizer.UNITTEST()
+        
 
         # see https://doc.qt.io/qtforpython-6/overviews/stylesheet-examples.html
         # self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")

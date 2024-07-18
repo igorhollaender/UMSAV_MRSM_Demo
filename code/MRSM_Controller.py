@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-__version__ = "IH240718a"
+#      Last update: IH240718
 #
 #
 """

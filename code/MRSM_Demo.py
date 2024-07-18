@@ -66,21 +66,21 @@ from PyQt6.QtCore import        \
     QCommandLineParser
 
 import sys
-import MRSM_Controller
+
+from MRSM_Controller import MRSM_Controller
 from MRSM_Presentation import MRSM_Presentation
+from MRSM_Presentation import Language
 
 
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
-
+from MRSM_Globals import VerboseLevel
 
 class MSRM_Demo_QApplication(QApplication):
     """
     Main QApplication 
     """
-    #IH240717 for debugging only
-    QT_STYLES = ["windows", "windowsvista", "fusion", "macos"]
-
+    
     def __init__(self, argv: List[str]) -> None:
         super().__init__(argv)
         
@@ -88,25 +88,38 @@ class MSRM_Demo_QApplication(QApplication):
         parser = QCommandLineParser()
         parser.addHelpOption()
         parser.addVersionOption()
-                
-        #IH240717 for debugging only
-        style_option = QCommandLineOption(
-            "s",
-            "Use the specified Qt style, one of: " + ', '.join(self.QT_STYLES),
-            "style"
-        )
-        parser.addOption(style_option)
-                
         self.setApplicationVersion(__version__)
 
-        parser.process(self)
+        language_dict = {'EN':Language.ENGLISH, 'SK':Language.SLOVAK, 'GE':Language.GERMAN}        
+        language_option = QCommandLineOption(
+            "l",
+            f"Use the specified GUI language, one of: {list(language_dict.keys())}",
+            "language",
+            "EN"
+        )
+        parser.addOption(language_option)
                 
+        parser.process(self)
+
+        self.app_language = language_dict.get(parser.value(language_option))
+        if self.app_language is None:
+            self.error_message(f'Invalid language: {parser.value(language_option)}. Using EN instead.')
+            self.app_language = Language.ENGLISH
+                
+            
+    
+    def error_message(self,m):
+        if VerboseLevel>0:
+            print(m)
+    
 
 #-------------------------------------------------------------------------------
 MRSM_application = MSRM_Demo_QApplication(sys.argv)
 MRSM_application.parseCommandLine()
 MRSM_controller = MRSM_Controller()
-MRSM_presentation = MRSM_Presentation()
+MRSM_presentation = MRSM_Presentation(
+        language=MRSM_application.app_language
+        )
 MRSM_presentation.show()
 MRSM_application.exec()
 
