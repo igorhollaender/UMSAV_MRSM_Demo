@@ -19,7 +19,8 @@
             "args":
                 [""
                 /* "--version" */  
-                ,"-s=fusion",
+                /*,"--help" */
+                ,"-l=GE"
                 /* , "--nonsense" */
                 ]
         }

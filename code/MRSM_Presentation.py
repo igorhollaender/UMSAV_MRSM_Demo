@@ -57,12 +57,25 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 
 from enum import Enum
 
-from PyQt6.QtWidgets import         \
-    QApplication,                   \
-    QWidget,                        \
-    QGridLayout,                    \
-    QPushButton
+from PyQt6.QtCore import (
+    QUrl,
+    Qt
+)
 
+from PyQt6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QGridLayout,
+    QPushButton
+)                  
+    
+from PyQt6.QtMultimedia import (
+    QMediaPlayer,
+    QAudioOutput
+)
+
+from PyQt6.QtMultimediaWidgets import \
+    QVideoWidget
 
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
@@ -119,6 +132,8 @@ class PoorMansLocalizer():
                 return None
              
         def localizeString(self,sourceEnTerm: str):
+            if self.targetLanguage==Language.ENGLISH:
+                return sourceEnTerm
             l = list(map(lambda dictRecord: self.getTgtTerm(sourceEnTerm,dictRecord), self.d))
             # Get first non None value from List
             return next((elem for elem in l if elem is not None), None)
@@ -153,14 +168,17 @@ class PoorMansLocalizer():
 class MRSM_Presentation():
              
     class MRSM_PushButton(QPushButton):
+    # TODO IH240718 implement inherent label localization
         def __init_subclass__(cls) -> None:
             return super().__init_subclass__()
-        
-        def __init_subclass__(cls,label,parent) -> None:
-            #TODO IH240717 solve this
-            # return super().__init_subclass__(self.localizer.localizeString(label),parent)
-            return super().__init_subclass__(label,parent)
+    
+    class MRSM_VideoWidget(QVideoWidget):
+        def __init__(self, parent: QWidget | None = ...) -> None:
+            super().__init__(parent)
 
+    def lcl(self,s):
+        return self.localizer.localizeString(s)
+    
     def __init__(self,
             language=Language.ENGLISH
             ):
@@ -187,21 +205,36 @@ class MRSM_Presentation():
 
         grid = QGridLayout()
         self.MRSM_Window.setLayout(grid)
+
+        
+        #videoplayer test
+        self.media_player = QMediaPlayer()
+        self.media_player.setSource(QUrl.fromLocalFile("resources/video/BAMBU1.mp4"))
+        self.video_widget = QVideoWidget()
+        self.video_widget.setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatioByExpanding)
+        self.media_player.setVideoOutput(self.video_widget)
+        self.media_player.setLoops(1000)
+            #IH240718 should be set to Infinite, but I do not know where to find the constant
+            # QMediaPlayer.Infinite is not defined
+        grid.addWidget(self.video_widget,0,0,3,2)
      
         #IH240717 for debugging only
-        b1 = self.MRSM_PushButton(self.localizer.localizeString('QUIT'),self.MRSM_Window)
+        b1 = self.MRSM_PushButton(self.lcl('QUIT'),self.MRSM_Window)
         b1.clicked.connect(self.quit_clicked)
-        grid.addWidget(b1,0,0)
+        grid.addWidget(b1,0,2)
         
         #IH240717 for debugging only
-        b2 = self.MRSM_PushButton("STOP",self.MRSM_Window)
+        b2 = self.MRSM_PushButton(self.lcl('STOP'),self.MRSM_Window)
         b2.clicked.connect(self.quit_clicked)
-        grid.addWidget(b2,1,1)
+        grid.addWidget(b2,1,2)
 
         #IH240717 for debugging only
-        b3 = self.MRSM_PushButton("FINISH",self.MRSM_Window)
+        b3 = self.MRSM_PushButton(self.lcl('FINISH'),self.MRSM_Window)
         b3.clicked.connect(self.quit_clicked)
         grid.addWidget(b3,2,2)
+
+        self.media_player.play()
+
 
     def quit_clicked(self):
         """
