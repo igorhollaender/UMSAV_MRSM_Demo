@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240717
+#       Last update: IH240718
 #
 #
 """
@@ -66,6 +66,8 @@ from PyQt6.QtWidgets import         \
 
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
+
+from MRSM_Stylesheet import MRSM_Stylesheet
 
 class Language(Enum):
         ENGLISH         = 0
@@ -172,7 +174,8 @@ class MRSM_Presentation():
 
 
         # see https://doc.qt.io/qtforpython-6/overviews/stylesheet-examples.html
-        self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")
+        # self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")
+        self.MRSM_Window.setStyleSheet(MRSM_Stylesheet())
 
         grid = QGridLayout()
         self.MRSM_Window.setLayout(grid)

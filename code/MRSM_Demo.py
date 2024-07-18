@@ -10,7 +10,7 @@
 #      M  R  S  M  _  D  e  m  o  .  p  y 
 #
 #
-__version__ = "MRSM_Demo IH240717a"
+__version__ = "MRSM_Demo IH240718a"
 #
 #
 """
@@ -105,6 +105,7 @@ class MSRM_Demo_QApplication(QApplication):
 #-------------------------------------------------------------------------------
 MRSM_application = MSRM_Demo_QApplication(sys.argv)
 MRSM_application.parseCommandLine()
+MRSM_controller = MRSM_Controller()
 MRSM_presentation = MRSM_Presentation()
 MRSM_presentation.show()
 MRSM_application.exec()
