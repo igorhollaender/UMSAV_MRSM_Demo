@@ -191,6 +191,7 @@ class MRSM_Presentation():
         """
         
         INTRO_DURATION_SEC  = 5
+        INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
 
@@ -198,7 +199,7 @@ class MRSM_Presentation():
             self.parent = parent
             self.remaining_time_s = self.INTRO_DURATION_SEC
 
-            self.l1 = QLabel(f"{parent.lcll(101)} {self.remaining_time_s} s")
+            self.l1 = QLabel(self.composeTimeoutMessageText())
             self.grid.addWidget(self.l1,1,2)
 
             self.b1 = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
@@ -208,19 +209,28 @@ class MRSM_Presentation():
             self.timer = QTimer()
             self.timer.timeout.connect(self.on_timeout)
 
-        def on_timeout(self):
+        def composeTimeoutMessageText(self):
+            return f"{self.parent.lcll(101)} {self.remaining_time_s} {self.parent.lcll(102)}"
+            
 
-            self.parent.quit_intro_start_main()
+        def on_timeout(self):
+            self.remaining_time_s = self.remaining_time_s - 1
+            if self.remaining_time_s <= 0:
+                self.parent.quit_intro_start_main()
+            else:
+                self.l1.setText(self.composeTimeoutMessageText())
+                self.timer.start(self.INTRO_MESSAGE_UPDATE_INTERVAL_SEC*1000)
         
         def activate(self):
             self.l1.show()
             self.b1.show()
-            self.timer.start(self.INTRO_DURATION_SEC*1000)
+            self.remaining_time_s = self.INTRO_DURATION_SEC
+            self.timer.start(self.INTRO_MESSAGE_UPDATE_INTERVAL_SEC*1000)
     
-
         def deactivate(self):
             self.l1.hide()
             self.b1.hide()
+            self.timer.stop()
             pass
     
     class ShowMain():
