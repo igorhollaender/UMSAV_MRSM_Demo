@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240718
+#       Last update: IH240719
 #
 #
 """
@@ -56,9 +56,11 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #-------------------------------------------------------------------------------
 
 from enum import Enum
+from typing import Any
 
 from PyQt6.QtCore import (
     QUrl,
+    QTimer,
     Qt
 )
 
@@ -66,7 +68,8 @@ from PyQt6.QtWidgets import (
     QApplication,
     QWidget,
     QGridLayout,
-    QPushButton
+    QPushButton,
+    QLabel
 )                  
     
 from PyQt6.QtMultimedia import (
@@ -131,12 +134,12 @@ class PoorMansLocalizer():
             else:
                 return None
              
-        def localizeString(self,sourceEnTerm: str):
+        def localizeShortString(self,sourceEnTerm: str):
             if self.targetLanguage==Language.ENGLISH:
                 return sourceEnTerm
             l = list(map(lambda dictRecord: self.getTgtTerm(sourceEnTerm,dictRecord), self.d))
             # Get first non None value from List
-            return next((elem for elem in l if elem is not None), None)
+            return next((elem for elem in l if elem is not None), sourceEnTerm)  #IH240719 if the term is not found in the dictionary, the english term is returned
 
     
     def __init__(self,tgtLanguage: Language) -> None:
@@ -144,25 +147,29 @@ class PoorMansLocalizer():
         """
         self.dictionary = self.MRSM_Dictionary(tgtLanguage)
     
-    def localizeString(self,sourceEnTerm: str):
-        return self.dictionary.localizeString(sourceEnTerm)
+    def localizeShortString(self,sourceEnTerm: str):
+        return self.dictionary.localizeShortString(sourceEnTerm)
+    
+    def localizeLongString(self,sourceEnStringID: int):
+        #IH240729 TODO implement
+        return "NOT IMPLEMENTED"
     
     def UNITTEST(self):
         self.targetLangauge = Language.SLOVAK
         print(
-            self.localizeString('QUIT'),
-            self.localizeString('STOP'),
-            self.localizeString('stop'),
-            self.localizeString('FINISH'),
-            self.localizeString('NONSEnse'),
+            self.localizeShortString('QUIT'),
+            self.localizeShortString('STOP'),
+            self.localizeShortString('stop'),
+            self.localizeShortString('FINISH'),
+            self.localizeShortString('NONSEnse'),
         )
         self.targetLangauge = Language.GERMAN
         print(
-            self.localizeString('QUIT'),
-            self.localizeString('STOP'),
-            self.localizeString('stop'),
-            self.localizeString('FINISH'),
-            self.localizeString('NONSEnse'),
+            self.localizeShortString('QUIT'),
+            self.localizeShortString('STOP'),
+            self.localizeShortString('stop'),
+            self.localizeShortString('FINISH'),
+            self.localizeShortString('NONSEnse'),
         )
 
 class MRSM_Presentation():
@@ -176,8 +183,103 @@ class MRSM_Presentation():
         def __init__(self, parent: QWidget | None = ...) -> None:
             super().__init__(parent)
 
-    def lcl(self,s):
-        return self.localizer.localizeString(s)
+    class ShowIntro():
+        """
+        The app starts with this scenario. If the user does not click 'QUIT'
+        within the INTRO_DURATION timeslot, the app continues with ShowMain, otherwise
+        it exits to OS. 
+        """
+        
+        INTRO_DURATION_SEC  = 5
+
+        def __init__(self,parent) -> None:
+
+            self.grid = parent.grid
+            self.parent = parent
+            self.remaining_time_s = self.INTRO_DURATION_SEC
+
+            self.l1 = QLabel(f"{parent.lcll(101)} {self.remaining_time_s} s")
+            self.grid.addWidget(self.l1,1,2)
+
+            self.b1 = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
+            self.b1.clicked.connect(self.parent.quit_clicked)
+            self.grid.addWidget(self.b1,2,2)
+
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.on_timeout)
+
+        def on_timeout(self):
+
+            self.parent.quit_intro_start_main()
+        
+        def activate(self):
+            self.l1.show()
+            self.b1.show()
+            self.timer.start(self.INTRO_DURATION_SEC*1000)
+    
+
+        def deactivate(self):
+            self.l1.hide()
+            self.b1.hide()
+            pass
+    
+    class ShowMain():
+        
+        def __init__(self,parent) -> None:
+            
+            self.grid = parent.grid
+
+            #videoplayer test
+            self.media_player = QMediaPlayer()
+            self.media_player.setSource(QUrl.fromLocalFile("resources/video/BAMBU1.mp4"))
+            self.video_widget = QVideoWidget()
+            self.video_widget.setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatioByExpanding)
+            self.media_player.setVideoOutput(self.video_widget)
+            self.media_player.setLoops(1000)
+                #IH240718 should be set to Infinite, but I do not know where to find the constant
+                # QMediaPlayer.Infinite is not defined
+            self.grid.addWidget(self.video_widget,0,0,3,2)
+        
+            #IH240717 for debugging only
+            self.b1 = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
+            self.b1.clicked.connect(parent.quit_clicked)
+            self.grid.addWidget(self.b1,0,2)
+            
+            #IH240717 for debugging only
+            self.b2 = parent.MRSM_PushButton(parent.lcls('STOP'),parent.MRSM_Window)
+            self.b2.clicked.connect(parent.quit_clicked)
+            self.grid.addWidget(self.b2,1,2)
+
+            #IH240717 for debugging only
+            self.b3 = parent.MRSM_PushButton(parent.lcls('FINISH'),parent.MRSM_Window)
+            self.b3.clicked.connect(parent.quit_clicked)
+            self.grid.addWidget(self.b3,2,2)
+
+            self.deactivate()
+            
+        def activate(self):
+            self.b1.show()
+            self.b2.show()
+            self.b3.show()
+            self.video_widget.show()
+            
+            self.media_player.play()
+            
+
+        def deactivate(self):
+            self.b1.hide()
+            self.b2.hide()
+            self.b3.hide()
+            self.video_widget.hide()
+            
+            self.media_player.stop()
+            
+
+    def lcls(self,s):
+        return self.localizer.localizeShortString(s)
+    
+    def lcll(self,id):
+        return self.localizer.localizeLongString(id)
     
     def __init__(self,
             language=Language.ENGLISH
@@ -203,38 +305,18 @@ class MRSM_Presentation():
         # self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")
         self.MRSM_Window.setStyleSheet(MRSM_Stylesheet())
 
-        grid = QGridLayout()
-        self.MRSM_Window.setLayout(grid)
+        self.grid = QGridLayout()
+        self.MRSM_Window.setLayout(self.grid)
 
+        self.showIntro = self.ShowIntro(self)
+        self.showMain = self.ShowMain(self)
+
+        self.showIntro.activate()
+        # self.showMain.activate()
         
-        #videoplayer test
-        self.media_player = QMediaPlayer()
-        self.media_player.setSource(QUrl.fromLocalFile("resources/video/BAMBU1.mp4"))
-        self.video_widget = QVideoWidget()
-        self.video_widget.setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatioByExpanding)
-        self.media_player.setVideoOutput(self.video_widget)
-        self.media_player.setLoops(1000)
-            #IH240718 should be set to Infinite, but I do not know where to find the constant
-            # QMediaPlayer.Infinite is not defined
-        grid.addWidget(self.video_widget,0,0,3,2)
-     
-        #IH240717 for debugging only
-        b1 = self.MRSM_PushButton(self.lcl('QUIT'),self.MRSM_Window)
-        b1.clicked.connect(self.quit_clicked)
-        grid.addWidget(b1,0,2)
-        
-        #IH240717 for debugging only
-        b2 = self.MRSM_PushButton(self.lcl('STOP'),self.MRSM_Window)
-        b2.clicked.connect(self.quit_clicked)
-        grid.addWidget(b2,1,2)
-
-        #IH240717 for debugging only
-        b3 = self.MRSM_PushButton(self.lcl('FINISH'),self.MRSM_Window)
-        b3.clicked.connect(self.quit_clicked)
-        grid.addWidget(b3,2,2)
-
-        self.media_player.play()
-
+    def quit_intro_start_main(self):
+        self.showIntro.deactivate()
+        self.showMain.activate()
 
     def quit_clicked(self):
         """

@@ -20,7 +20,7 @@
                 [""
                 /* "--version" */  
                 /*,"--help" */
-                ,"-l=GE"
+                ,"-l=SK"
                 /* , "--nonsense" */
                 ]
         }
