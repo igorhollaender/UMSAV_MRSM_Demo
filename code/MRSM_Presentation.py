@@ -203,7 +203,7 @@ class MRSM_Presentation():
             self.grid.addWidget(self.l1,1,2)
 
             self.b1 = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
-            self.b1.clicked.connect(self.parent.quit_clicked)
+            self.b1.clicked.connect(self.parent.quit_app)
             self.grid.addWidget(self.b1,2,2)
 
             self.timer = QTimer()
@@ -231,14 +231,14 @@ class MRSM_Presentation():
             self.l1.hide()
             self.b1.hide()
             self.timer.stop()
-            pass
     
     class ShowMain():
         
         def __init__(self,parent) -> None:
             
+            self.parent = parent
             self.grid = parent.grid
-
+            
             #videoplayer test
             self.media_player = QMediaPlayer()
             self.media_player.setSource(QUrl.fromLocalFile("resources/video/BAMBU1.mp4"))
@@ -251,18 +251,23 @@ class MRSM_Presentation():
             self.grid.addWidget(self.video_widget,0,0,3,2)
         
             #IH240717 for debugging only
-            self.b1 = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
-            self.b1.clicked.connect(parent.quit_clicked)
+            self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
+            self.b1.clicked.connect(self.parent.quit_app)
             self.grid.addWidget(self.b1,0,2)
             
             #IH240717 for debugging only
-            self.b2 = parent.MRSM_PushButton(parent.lcls('STOP'),parent.MRSM_Window)
-            self.b2.clicked.connect(parent.quit_clicked)
+            self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
+            self.b2.clicked.connect(self.video_stop)
             self.grid.addWidget(self.b2,1,2)
 
             #IH240717 for debugging only
-            self.b3 = parent.MRSM_PushButton(parent.lcls('FINISH'),parent.MRSM_Window)
-            self.b3.clicked.connect(parent.quit_clicked)
+            self.b4 = self.parent.MRSM_PushButton(self.parent.lcls('START VIDEO'),self.parent.MRSM_Window)
+            self.b4.clicked.connect(self.video_start)
+            self.grid.addWidget(self.b4,1,3)
+
+            #IH240717 for debugging only
+            self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
+            self.b3.clicked.connect(self.parent.quit_main_start_idle)
             self.grid.addWidget(self.b3,2,2)
 
             self.deactivate()
@@ -271,20 +276,57 @@ class MRSM_Presentation():
             self.b1.show()
             self.b2.show()
             self.b3.show()
+            self.b4.show()
+            
             self.video_widget.show()
-            
             self.media_player.play()
+            self.reset_idle_timer()
             
-
         def deactivate(self):
             self.b1.hide()
             self.b2.hide()
             self.b3.hide()
+            self.b4.hide()
             self.video_widget.hide()
-            
             self.media_player.stop()
+
+        def video_start(self):
+            self.media_player.play()
+            self.reset_idle_timer()
+
+        def video_stop(self):
+            self.media_player.stop()
+            self.reset_idle_timer()     
+            #IH240719 TODO implement implicit adding self.reset_idle_timer()  to all user actions
+    
+        def reset_idle_timer(self):
+            self.parent.idle_timer.stop()
+            self.parent.idle_timer.start(self.parent.ShowIdle.IDLE_BREAK_DURATION_SEC*1000)
             
 
+    class ShowIdle():
+        """
+        This scenario applies after a longer inactivity break (IDLE_BREAK_DURATION_SEC) of the ShowMain.
+        """
+        IDLE_BREAK_DURATION_SEC  = 5
+
+        def __init__(self,parent) -> None:
+
+            self.grid = parent.grid
+            self.parent = parent
+
+            self.b5 = parent.MRSM_PushButton('...',parent.MRSM_Window)
+            self.b5.clicked.connect(self.parent.quit_idle_start_main)
+            self.grid.addWidget(self.b5,2,2)
+
+            self.deactivate()
+
+        def activate(self):
+            self.b5.show()
+    
+        def deactivate(self):
+            self.b5.hide()
+    
     def lcls(self,s):
         return self.localizer.localizeShortString(s)
     
@@ -320,15 +362,31 @@ class MRSM_Presentation():
 
         self.showIntro = self.ShowIntro(self)
         self.showMain = self.ShowMain(self)
+        self.showIdle = self.ShowIdle(self)
+
+        self.actual_idle_break_sec = 0
+
+        self.idle_timer = QTimer()
+        self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         self.showIntro.activate()
-        # self.showMain.activate()
-        
+
+    def on_idle_timeout(self):
+            self.quit_main_start_idle()
+
     def quit_intro_start_main(self):
         self.showIntro.deactivate()
+        self.showMain.activate() 
+
+    def quit_idle_start_main(self):
+        self.showIdle.deactivate()
         self.showMain.activate()
 
-    def quit_clicked(self):
+    def quit_main_start_idle(self):
+        self.showMain.deactivate()
+        self.showIdle.activate()
+
+    def quit_app(self):
         """
         TODO implement fully
         """
