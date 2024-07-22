@@ -216,7 +216,8 @@ class MRSM_Presentation():
         it exits to OS. 
         """
         
-        INTRO_DURATION_SEC  = 5
+        # IH240722 TODO: set this to 5 secs for real app
+        INTRO_DURATION_SEC  = 2   
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -230,7 +231,7 @@ class MRSM_Presentation():
 
             self.b1 = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
             self.b1.clicked.connect(self.parent.quit_app)
-            self.grid.addWidget(self.b1,2,2)
+            self.grid.addWidget(self.b1,2,7)
 
             self.timer = QTimer()
             self.timer.timeout.connect(self.on_timeout)
@@ -354,7 +355,7 @@ class MRSM_Presentation():
                 self.video_widget.show()
                 self.media_player.play()
             self.reset_idle_timer()
-
+            self.parent.ShowFullScreen()
             
         def deactivate(self):
             self.b1.hide()
@@ -392,21 +393,36 @@ class MRSM_Presentation():
 
         def __init__(self,parent) -> None:
 
-            self.grid = parent.grid
-            self.parent = parent
+            self.grid :   QGridLayout   = parent.grid
+            self.parent : QWidget       = parent
+
+            self.bgLabel = QLabel("",self.parent.MRSM_Window)
+            self.grid.addWidget(self.bgLabel,0,0,3,7)
+            self.bgPixmap = QPixmap("resources/images/diverse/MRSM_fullview_240722.jpg")            
+            self.bgLabel.setPixmap(self.bgPixmap.scaled(1480,320,Qt.AspectRatioMode.IgnoreAspectRatio))
 
             self.b5 = parent.MRSM_PushButton('...',parent.MRSM_Window)
             self.b5.clicked.connect(self.parent.quit_idle_start_main)
-            self.grid.addWidget(self.b5,2,2)
+            self.grid.addWidget(self.b5,2,6)
 
             self.deactivate()
 
         def activate(self):
+            self.bgLabel.show()
             self.b5.show()
+            # self.parent.ShowFullScreen()
+            self.parent.MRSM_Window.showFullScreen()
     
         def deactivate(self):
+            self.bgLabel.hide()
             self.b5.hide()
     
+    def ShowFullScreen(self):
+        if IsWaveShareDisplayEmulated:
+            self.MRSM_Window.show()
+        else:
+            self.MRSM_Window.showFullScreen()
+
     def lcls(self,s):
         return self.localizer.localizeShortString(s)
     
