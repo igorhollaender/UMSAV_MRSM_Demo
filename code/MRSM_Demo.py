@@ -44,6 +44,18 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 # IH DEVELOPMENT NOTES
 #-------------------------------------------------------------------------------
 #
+#   Installations on RIP:
+#
+#   ---------------
+#   IH240722
+#   To get rid of message: qt.qpa: Could not find the Qt platform plugin "wayland" in "",
+#   I installed>
+#       sudo apt install qt6-wayland
+#   see
+#   https://stackoverflow.com/questions/69994530/qt-qpa-plugin-could-not-find-the-qt-platform-plugin-wayland
+#
+#
+#
 
 
 # TODOs
