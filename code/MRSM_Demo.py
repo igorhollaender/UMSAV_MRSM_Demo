@@ -49,6 +49,12 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 # TODOs
 #-------------------------------------------------------------------------------
 
+# PROBLEMs
+#
+#   IH240722 Problem with installing PyQt6/QtMultimedia on RPI
+#   Try using PySide6 as a replacement for PyQt6
+
+
 # BUGs
 #
 #   IH2407151 XXX

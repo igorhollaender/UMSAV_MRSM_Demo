@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240719
+#       Last update: IH240722
 #
 #
 """
@@ -44,6 +44,12 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 # IH DEVELOPMENT NOTES
 #-------------------------------------------------------------------------------
 #
+#       IH240722
+#       I had problems with PyQt6.QtMultimedia not found/ This DID NOT HELP
+#           sudo apt-get install libqt5multimedia5-plugins qml-module-qtmultimedia
+#       see 
+#           https://stackoverflow.com/questions/58042974/module-qtmultimedia-is-not-installed
+#
 
 
 # TODOs
@@ -55,6 +61,14 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #
 #-------------------------------------------------------------------------------
 
+
+from MRSM_Globals import IsWaveShareDisplayEmulated
+from MRSM_Globals import IsRaspberryPi5Emulated
+from MRSM_Globals import IsQtMultimediaAvailable
+
+from PyQt6.QtGui import (
+    QPixmap
+)
 from enum import Enum
 from typing import Any
 
@@ -71,17 +85,16 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QLabel
 )                  
-    
-from PyQt6.QtMultimedia import (
-    QMediaPlayer,
-    QAudioOutput
-)
 
-from PyQt6.QtMultimediaWidgets import \
-    QVideoWidget
+if IsQtMultimediaAvailable:    
+    from PyQt6.QtMultimedia import (
+        QMediaPlayer,
+        QAudioOutput
+        )
 
-from MRSM_Globals import IsWaveShareDisplayEmulated
-from MRSM_Globals import IsRaspberryPi5Emulated
+    from PyQt6.QtMultimediaWidgets import \
+        QVideoWidget
+
 
 from MRSM_Stylesheet import MRSM_Stylesheet
 
@@ -115,6 +128,16 @@ class PoorMansLocalizer():
                 'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SKONČIŤ'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'FERTIGMACHEN'},
             ]},
+            {   'enSrcTerm': '#101',
+                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'App starts in'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'App startet in'},
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Apka štartuje o'},
+            ]},
+            {   'enSrcTerm': '#102',
+                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'secs.'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Sekunden.'},
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'sek.'},
+            ]},
         ]
 
         def __init__(self,targetLanguage: Language) -> None:
@@ -135,8 +158,8 @@ class PoorMansLocalizer():
                 return None
              
         def localizeShortString(self,sourceEnTerm: str):
-            if self.targetLanguage==Language.ENGLISH:
-                return sourceEnTerm
+            # if self.targetLanguage==Language.ENGLISH:
+            #     return sourceEnTerm
             l = list(map(lambda dictRecord: self.getTgtTerm(sourceEnTerm,dictRecord), self.d))
             # Get first non None value from List
             return next((elem for elem in l if elem is not None), sourceEnTerm)  #IH240719 if the term is not found in the dictionary, the english term is returned
@@ -162,6 +185,7 @@ class PoorMansLocalizer():
             self.localizeShortString('stop'),
             self.localizeShortString('FINISH'),
             self.localizeShortString('NONSEnse'),
+            self.localizeShortString('#101'),
         )
         self.targetLangauge = Language.GERMAN
         print(
@@ -170,6 +194,7 @@ class PoorMansLocalizer():
             self.localizeShortString('stop'),
             self.localizeShortString('FINISH'),
             self.localizeShortString('NONSEnse'),
+            self.localizeShortString('#101'),
         )
 
 class MRSM_Presentation():
@@ -179,9 +204,10 @@ class MRSM_Presentation():
         def __init_subclass__(cls) -> None:
             return super().__init_subclass__()
     
-    class MRSM_VideoWidget(QVideoWidget):
-        def __init__(self, parent: QWidget | None = ...) -> None:
-            super().__init__(parent)
+    if IsQtMultimediaAvailable:
+        class MRSM_VideoWidget(QVideoWidget):
+            def __init__(self, parent: QWidget | None = ...) -> None:
+                super().__init__(parent)
 
     class ShowIntro():
         """
@@ -210,7 +236,7 @@ class MRSM_Presentation():
             self.timer.timeout.connect(self.on_timeout)
 
         def composeTimeoutMessageText(self):
-            return f"{self.parent.lcll(101)} {self.remaining_time_s} {self.parent.lcll(102)}"
+            return f"{self.parent.lcls('#101')} {self.remaining_time_s} {self.parent.lcls('#102')}"
             
 
         def on_timeout(self):
@@ -240,35 +266,62 @@ class MRSM_Presentation():
             self.grid = parent.grid
             
             #videoplayer test
-            self.media_player = QMediaPlayer()
-            self.media_player.setSource(QUrl.fromLocalFile("resources/video/BAMBU1.mp4"))
-            self.video_widget = QVideoWidget()
-            self.video_widget.setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatioByExpanding)
-            self.media_player.setVideoOutput(self.video_widget)
-            self.media_player.setLoops(1000)
-                #IH240718 should be set to Infinite, but I do not know where to find the constant
-                # QMediaPlayer.Infinite is not defined
-            self.grid.addWidget(self.video_widget,0,0,3,2)
+            if IsQtMultimediaAvailable:    
+                #IH240722 PROBLEM cannot load PyQt6.QtMultimedia for RPI        
+                self.media_player = QMediaPlayer()
+                self.media_player.setSource(QUrl.fromLocalFile("resources/video/BAMBU1.mp4"))
+                self.video_widget = QVideoWidget()
+                self.video_widget.setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatioByExpanding)
+                self.media_player.setVideoOutput(self.video_widget)
+                self.media_player.setLoops(1000)
+                    #IH240718 should be set to Infinite, but I do not know where to find the constant
+                    # QMediaPlayer.Infinite is not defined
+                self.grid.addWidget(self.video_widget,0,0,3,2)
         
             #IH240717 for debugging only
             self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
             self.b1.clicked.connect(self.parent.quit_app)
-            self.grid.addWidget(self.b1,0,2)
+            self.grid.addWidget(self.b1,0,6)
             
             #IH240717 for debugging only
             self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
             self.b2.clicked.connect(self.video_stop)
-            self.grid.addWidget(self.b2,1,2)
+            self.grid.addWidget(self.b2,1,6)
 
             #IH240717 for debugging only
             self.b4 = self.parent.MRSM_PushButton(self.parent.lcls('START VIDEO'),self.parent.MRSM_Window)
             self.b4.clicked.connect(self.video_start)
-            self.grid.addWidget(self.b4,1,3)
+            self.grid.addWidget(self.b4,1,7)
 
             #IH240717 for debugging only
             self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
             self.b3.clicked.connect(self.parent.quit_main_start_idle)
-            self.grid.addWidget(self.b3,2,2)
+            self.grid.addWidget(self.b3,2,6)
+
+            #IH240717 test
+            self.imagePaneLeft  = QLabel("",self.parent.MRSM_Window)
+            self.imagePaneMid   = QLabel("",self.parent.MRSM_Window)
+            self.imagePaneRight = QLabel("",self.parent.MRSM_Window)
+
+            self.imagePaneLeft.setScaledContents(True)
+            self.imagePaneMid.setScaledContents(True)
+            self.imagePaneRight.setScaledContents(True)
+
+            self.imagePaneLeft.resize(300,300)
+            self.imagePaneMid.resize(300,300)
+            self.imagePaneRight.resize(300,300)
+
+            self.grid.addWidget(self.imagePaneLeft, 0,0,2,2)
+            self.grid.addWidget(self.imagePaneMid,  0,2,2,2)
+            self.grid.addWidget(self.imagePaneRight,  0,4,2,2)
+
+            self.pixmapHeadSag = QPixmap("resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg")
+            self.pixmapHeadCor = QPixmap("resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg")
+            self.pixmapHeadTra = QPixmap("resources/images/Free-Max/Head/2c_Head_t2_tse_tra_p4.jpg")
+
+            self.imagePaneLeft.setPixmap(self.pixmapHeadSag)
+            self.imagePaneMid.setPixmap(self.pixmapHeadCor)
+            self.imagePaneRight.setPixmap(self.pixmapHeadTra)
 
             self.deactivate()
             
@@ -277,9 +330,14 @@ class MRSM_Presentation():
             self.b2.show()
             self.b3.show()
             self.b4.show()
+
+            self.imagePaneLeft.show()
+            self.imagePaneMid.show()
+            self.imagePaneRight.show()
             
-            self.video_widget.show()
-            self.media_player.play()
+            if IsQtMultimediaAvailable:
+                self.video_widget.show()
+                self.media_player.play()
             self.reset_idle_timer()
             
         def deactivate(self):
@@ -287,15 +345,23 @@ class MRSM_Presentation():
             self.b2.hide()
             self.b3.hide()
             self.b4.hide()
-            self.video_widget.hide()
-            self.media_player.stop()
+
+            self.imagePaneLeft.hide()
+            self.imagePaneMid.hide()
+            self.imagePaneRight.hide()
+
+            if IsQtMultimediaAvailable:                
+                self.video_widget.hide()
+                self.media_player.stop()    
 
         def video_start(self):
-            self.media_player.play()
+            if IsQtMultimediaAvailable:                
+                self.media_player.play()
             self.reset_idle_timer()
 
         def video_stop(self):
-            self.media_player.stop()
+            if IsQtMultimediaAvailable:                
+                self.media_player.stop()
             self.reset_idle_timer()     
             #IH240719 TODO implement implicit adding self.reset_idle_timer()  to all user actions
     
