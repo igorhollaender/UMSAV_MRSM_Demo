@@ -14,7 +14,7 @@
 #-------------------------------------------------------------------------------
 
 
-IsWaveShareDisplayEmulated  = False   # set to False for real application
+IsWaveShareDisplayEmulated  = True   # set to False for real application
 IsRaspberryPi5Emulated      = False  # set to False for real application
 IsQtMultimediaAvailable     = False  # IH240722 I had problems 
                                      # installing QtMultimedia on Raspberry OS,
