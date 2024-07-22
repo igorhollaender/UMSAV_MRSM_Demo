@@ -303,25 +303,30 @@ class MRSM_Presentation():
             self.imagePaneMid   = QLabel("",self.parent.MRSM_Window)
             self.imagePaneRight = QLabel("",self.parent.MRSM_Window)
 
-            self.imagePaneLeft.setScaledContents(True)
-            self.imagePaneMid.setScaledContents(True)
-            self.imagePaneRight.setScaledContents(True)
-
-            self.imagePaneLeft.resize(300,300)
-            self.imagePaneMid.resize(300,300)
-            self.imagePaneRight.resize(300,300)
-
-            self.grid.addWidget(self.imagePaneLeft, 0,0,2,2)
-            self.grid.addWidget(self.imagePaneMid,  0,2,2,2)
-            self.grid.addWidget(self.imagePaneRight,  0,4,2,2)
+            self.grid.addWidget(self.imagePaneLeft, 0,0,3,2)
+            self.grid.addWidget(self.imagePaneMid,  0,2,3,2)
+            self.grid.addWidget(self.imagePaneRight,  0,4,3,2)
 
             self.pixmapHeadSag = QPixmap("resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg")
             self.pixmapHeadCor = QPixmap("resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg")
             self.pixmapHeadTra = QPixmap("resources/images/Free-Max/Head/2c_Head_t2_tse_tra_p4.jpg")
 
-            self.imagePaneLeft.setPixmap(self.pixmapHeadSag)
-            self.imagePaneMid.setPixmap(self.pixmapHeadCor)
-            self.imagePaneRight.setPixmap(self.pixmapHeadTra)
+            self.pixmapHeadSagScaled = self.pixmapHeadSag.scaled(300,300,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            self.pixmapHeadCorScaled = self.pixmapHeadCor.scaled(300,300,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            self.pixmapHeadTraScaled = self.pixmapHeadTra.scaled(300,300,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+
+            self.imagePaneLeft.setPixmap(self.pixmapHeadSagScaled)
+            self.imagePaneMid.setPixmap(self.pixmapHeadCorScaled)
+            self.imagePaneRight.setPixmap(self.pixmapHeadTraScaled)
+
+            # self.imagePaneLeft.resize(300,300)
+            # self.imagePaneMid.resize(300,300)
+            # self.imagePaneRight.resize(300,300)
+
+            self.imagePaneLeft.setScaledContents(True)
+            self.imagePaneMid.setScaledContents(True)
+            self.imagePaneRight.setScaledContents(True)
+            
 
             self.deactivate()
             
@@ -339,6 +344,7 @@ class MRSM_Presentation():
                 self.video_widget.show()
                 self.media_player.play()
             self.reset_idle_timer()
+
             
         def deactivate(self):
             self.b1.hide()
@@ -369,7 +375,6 @@ class MRSM_Presentation():
             self.parent.idle_timer.stop()
             self.parent.idle_timer.start(self.parent.ShowIdle.IDLE_BREAK_DURATION_SEC*1000)
             
-
     class ShowIdle():
         """
         This scenario applies after a longer inactivity break (IDLE_BREAK_DURATION_SEC) of the ShowMain.
