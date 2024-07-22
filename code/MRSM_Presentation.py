@@ -262,9 +262,9 @@ class MRSM_Presentation():
         
         def __init__(self,parent) -> None:
             
-            self.parent = parent
-            self.grid = parent.grid
-            
+            self.parent : QWidget       = parent
+            self.grid : QGridLayout     = parent.grid 
+
             #videoplayer test
             if IsQtMultimediaAvailable:    
                 #IH240722 PROBLEM cannot load PyQt6.QtMultimedia for RPI        
@@ -302,31 +302,42 @@ class MRSM_Presentation():
             self.imagePaneLeft  = QLabel("",self.parent.MRSM_Window)
             self.imagePaneMid   = QLabel("",self.parent.MRSM_Window)
             self.imagePaneRight = QLabel("",self.parent.MRSM_Window)
+            self.imagePanels = [self.imagePaneLeft,self.imagePaneMid,self.imagePaneRight]
 
             self.grid.addWidget(self.imagePaneLeft, 0,0,3,2)
             self.grid.addWidget(self.imagePaneMid,  0,2,3,2)
             self.grid.addWidget(self.imagePaneRight,  0,4,3,2)
 
+            self.pixmapStandardSize = 300
+            
             self.pixmapHeadSag = QPixmap("resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg")
             self.pixmapHeadCor = QPixmap("resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg")
             self.pixmapHeadTra = QPixmap("resources/images/Free-Max/Head/2c_Head_t2_tse_tra_p4.jpg")
 
-            self.pixmapHeadSagScaled = self.pixmapHeadSag.scaled(300,300,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            self.pixmapHeadCorScaled = self.pixmapHeadCor.scaled(300,300,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            self.pixmapHeadTraScaled = self.pixmapHeadTra.scaled(300,300,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            self.pixmapHeadSagScaled = self.pixmapHeadSag.scaled(
+                    self.pixmapStandardSize,self.pixmapStandardSize,
+                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            self.pixmapHeadCorScaled = self.pixmapHeadCor.scaled(
+                    self.pixmapStandardSize,
+                    self.pixmapStandardSize,
+                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            self.pixmapHeadTraScaled = self.pixmapHeadTra.scaled(
+                    self.pixmapStandardSize,
+                    self.pixmapStandardSize,
+                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
 
             self.imagePaneLeft.setPixmap(self.pixmapHeadSagScaled)
             self.imagePaneMid.setPixmap(self.pixmapHeadCorScaled)
             self.imagePaneRight.setPixmap(self.pixmapHeadTraScaled)
 
-            # self.imagePaneLeft.resize(300,300)
-            # self.imagePaneMid.resize(300,300)
-            # self.imagePaneRight.resize(300,300)
+            for panel in self.imagePanels:
+                panel.setMinimumHeight(self.pixmapStandardSize)
+                panel.setMaximumHeight(self.pixmapStandardSize)
+                panel.setMinimumWidth(self.pixmapStandardSize)
+                panel.setMaximumWidth(self.pixmapStandardSize)
 
-            self.imagePaneLeft.setScaledContents(True)
-            self.imagePaneMid.setScaledContents(True)
-            self.imagePaneRight.setScaledContents(True)
-            
+                panel.setScaledContents(True)
+
 
             self.deactivate()
             
@@ -336,9 +347,8 @@ class MRSM_Presentation():
             self.b3.show()
             self.b4.show()
 
-            self.imagePaneLeft.show()
-            self.imagePaneMid.show()
-            self.imagePaneRight.show()
+            for panel in self.imagePanels:
+                panel.show()
             
             if IsQtMultimediaAvailable:
                 self.video_widget.show()
@@ -352,9 +362,8 @@ class MRSM_Presentation():
             self.b3.hide()
             self.b4.hide()
 
-            self.imagePaneLeft.hide()
-            self.imagePaneMid.hide()
-            self.imagePaneRight.hide()
+            for panel in self.imagePanels:
+                panel.hide()
 
             if IsQtMultimediaAvailable:                
                 self.video_widget.hide()
