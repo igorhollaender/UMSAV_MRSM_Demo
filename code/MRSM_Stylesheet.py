@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 #
-#      Last update: IH240718
+#      Last update: IH240722
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -22,5 +22,12 @@ def MRSM_Stylesheet():
 QPushButton 
 { 
     background-color: yellow;
+    border: 2px;
+    border-style: outset;
+    border-radius:  25px;
+    border-color: black;
+    min-width:  20px;
+    max-width:  100px;
+    min-height:  50px;
 }
     """
