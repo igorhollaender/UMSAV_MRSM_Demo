@@ -283,39 +283,40 @@ class MRSM_Presentation():
             #IH240717 for debugging only
             self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
             self.b1.clicked.connect(self.parent.quit_app)
-            self.grid.addWidget(self.b1,0,22)
+            self.grid.addWidget(self.b1,0,22,1,10)
             
             #IH240717 for debugging only
             self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
             self.b2.clicked.connect(self.video_stop)
-            self.grid.addWidget(self.b2,1,22)
+            self.grid.addWidget(self.b2,1,22,1,10)
 
             #IH240717 for debugging only
             self.b4 = self.parent.MRSM_PushButton(self.parent.lcls('START VIDEO'),self.parent.MRSM_Window)
             self.b4.clicked.connect(self.video_start)
-            self.grid.addWidget(self.b4,3,22)
+            self.grid.addWidget(self.b4,3,22,1,10)
 
             #IH240717 for debugging only
             self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
             self.b3.clicked.connect(self.parent.quit_main_start_idle)
-            self.grid.addWidget(self.b3,4,22)
+            self.grid.addWidget(self.b3,4,22,1,10)
 
+        
             self.imagePaneRightmost  = QLabel("",self.parent.MRSM_Window)
             self.pixmapPatient = QPixmap("resources\images\diverse\MRSM_patient_240722.jpg")
-            #self.pixmapPatientScaled = self.pixmapPatient.scaled(220,500,
-            #    aspectRatioMode=Qt.AspectRatioMode.IgnoreAspectRatio)
-            self.imagePaneRightmost.setPixmap(self.pixmapPatient)        
-            self.grid.addWidget(self.imagePaneRightmost, 0,12,4,10)  
-            # self.imagePaneRightmost.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-            # self.imagePaneRightmost.sizePolicy().setHorizontalStretch(3)
-
+            self.pixmapPatientScaled = self.pixmapPatient.scaled(800,220,  #IH240723 do not change this!!: 800,200
+                aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            self.imagePaneRightmost.setPixmap(self.pixmapPatientScaled)        
+            self.imagePaneRightmost.setStyleSheet("background-color: green")
+            self.grid.addWidget(self.imagePaneRightmost, 0,12,5,10)  
+            
             self.imagePanels = [self.imagePaneRightmost]
 
             #IH240717 test
             self.imagePaneLeft  = QLabel("",self.parent.MRSM_Window)
             self.imagePaneMid   = QLabel("",self.parent.MRSM_Window)
             self.imagePaneRight = QLabel("",self.parent.MRSM_Window)
-            self.imagePanels += [self.imagePaneLeft,self.imagePaneMid,self.imagePaneRight]
+            self.imagePanelsMRI = [self.imagePaneLeft,self.imagePaneMid,self.imagePaneRight]
+            self.imagePanels += self.imagePanelsMRI
             
             self.grid.addWidget(self.imagePaneLeft, 0,0,4,4)
             self.grid.addWidget(self.imagePaneMid,  0,4,4,4)
@@ -343,7 +344,7 @@ class MRSM_Presentation():
             self.imagePaneMid.setPixmap(self.pixmapHeadCorScaled)
             self.imagePaneRight.setPixmap(self.pixmapHeadTraScaled)
 
-            for panel in self.imagePanels:
+            for panel in self.imagePanelsMRI:
                 panel.setMinimumHeight(self.pixmapStandardSize)
                 panel.setMaximumHeight(self.pixmapStandardSize)
                 panel.setMinimumWidth(self.pixmapStandardSize)
@@ -410,13 +411,13 @@ class MRSM_Presentation():
             self.parent : QWidget       = parent
 
             self.bgLabel = QLabel("",self.parent.MRSM_Window)
-            self.grid.addWidget(self.bgLabel,0,0,4,22)
+            self.grid.addWidget(self.bgLabel,0,0,4,32)
             self.bgPixmap = QPixmap("resources/images/diverse/MRSM_fullview_240722.jpg")            
             self.bgLabel.setPixmap(self.bgPixmap.scaled(1480,320,Qt.AspectRatioMode.KeepAspectRatioByExpanding))
 
             self.b5 = parent.MRSM_PushButton('...',parent.MRSM_Window)
             self.b5.clicked.connect(self.parent.quit_idle_start_main)
-            self.grid.addWidget(self.b5,2,20)
+            self.grid.addWidget(self.b5,2,28,1,4)
 
             self.deactivate()
 
