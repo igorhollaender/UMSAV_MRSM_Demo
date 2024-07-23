@@ -68,6 +68,7 @@ from MRSM_Globals import IsQtMultimediaAvailable
 from MRSM_Globals import __version__
 
 from PyQt6.QtGui import (
+    QPainter,
     QPixmap
 )
 from enum import Enum
@@ -81,6 +82,9 @@ from PyQt6.QtCore import (
 
 from PyQt6.QtWidgets import (
     QApplication,
+    QGraphicsEllipseItem,
+    QGraphicsScene,
+    QGraphicsView,
     QGridLayout,
     QLabel,
     QPushButton,
@@ -317,18 +321,35 @@ class MRSM_Presentation():
             self.b3.clicked.connect(self.parent.quit_main_start_idle)
             self.grid.addWidget(self.b3,4,22,1,10)
 
-        
-            self.imagePaneRightmost  = QLabel("",self.parent.MRSM_Window)
             self.pixmapPatient = QPixmap("resources\images\diverse\MRSM_patient_240722.jpg")
             self.pixmapPatientScaled = self.pixmapPatient.scaled(800,220,  #IH240723 do not change this!!: 800,200
-                aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            self.imagePaneRightmost.setPixmap(self.pixmapPatientScaled)        
-            self.imagePaneRightmost.setStyleSheet("background-color: green")
-            self.grid.addWidget(self.imagePaneRightmost, 0,12,5,10)  
+                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
             
+            #IH240723 experimenting
+            QLabelAsPixmapContainer = False
+            QGraphicsSceneAsPixmapContainer = True
+            if QLabelAsPixmapContainer:
+                self.imagePaneRightmost  = QLabel("",self.parent.MRSM_Window)    
+                self.imagePaneRightmost.setPixmap(self.pixmapPatientScaled)     
+                self.imagePaneRightmost.setStyleSheet("background-color: green")
+            if QGraphicsSceneAsPixmapContainer:
+                 self.patientScene  = QGraphicsScene(self.parent.MRSM_Window)                                  
+                 self.pixmapPatientScaled = self.pixmapPatient.scaled(700,220,
+                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+                 self.patientPixmapOnScene = self.patientScene.addPixmap(self.pixmapPatientScaled)                 
+                 t=self.patientScene.addText("Select organ for imaging...")
+                 
+                 self.kneeCircle = QGraphicsEllipseItem(0,0,40,40)
+                 self.kneeCircle.setPos(120,100)
+                 self.kneeCircle.setPen(Qt.GlobalColor.green)
+                 self.patientScene.addItem(self.kneeCircle)
+
+                 self.imagePaneRightmost = QGraphicsView(self.patientScene)
+
+
+            self.grid.addWidget(self.imagePaneRightmost, 0,12,5,10)              
             self.imagePanels = [self.imagePaneRightmost]
 
-            #IH240717 test
             self.imagePaneLeft  = QLabel("",self.parent.MRSM_Window)
             self.imagePaneMid   = QLabel("",self.parent.MRSM_Window)
             self.imagePaneRight = QLabel("",self.parent.MRSM_Window)
