@@ -61,6 +61,7 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #
 #-------------------------------------------------------------------------------
 
+import time  # IH240723 for debugging only
 
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
@@ -263,7 +264,6 @@ class MRSM_Presentation():
         def composeTimeoutMessageText(self):
             return f"{self.parent.lcls('#101')} {self.remaining_time_s} {self.parent.lcls('#102')}"
             
-
         def on_timeout(self):
             self.remaining_time_s = self.remaining_time_s - 1
             if self.remaining_time_s <= 0:
@@ -292,24 +292,29 @@ class MRSM_Presentation():
                 self.rect = QRectF(x, y, width, height)                
                 self.setAcceptHoverEvents(True)
                 self.setAcceptTouchEvents(True)
+                self.isMousePressed = False
 
             def boundingRect(self):
                 return self.rect
 
             def paint(self, painter, option, widget):
-                painter.setPen(Qt.GlobalColor.yellow)
-                painter.setBrush(Qt.GlobalColor.yellow)
+                if self.isMousePressed:
+                    painter.setPen(Qt.GlobalColor.red)
+                    painter.setBrush(Qt.GlobalColor.red)
+                else:
+                    painter.setPen(Qt.GlobalColor.yellow)
+                    painter.setBrush(Qt.GlobalColor.yellow)
                 painter.setOpacity(0.5)
                 painter.drawEllipse(self.rect)
 
-            def mousePressEvent(self, event):
-                self.color = Qt.GlobalColor.red
+            def mousePressEvent(self, event):                
+                self.isMousePressed = True
+                print(f"{time.time()}: selected organ: {self.data(1)}")
                 self.update()
                 super().mousePressEvent(event)
-
-            #IH240723 PROBLEM these mouse event do not work
-            def mouseReleaseEvent(self, event):
-                self.color = Qt.GlobalColor.yellow
+            
+            def mouseReleaseEvent(self, event):                
+                self.isMousePressed = False
                 self.update()
                 super().mouseReleaseEvent(event)
 
@@ -377,15 +382,20 @@ class MRSM_Presentation():
                  self.patientPixmapOnScene = self.patientScene.addPixmap(self.pixmapPatientScaled)                 
                  self.patientScene.addText("Select organ for imaging...")
                  
-                 self.kneeCircle = QGraphicsEllipseItem(0,0,40,40)
-                 self.kneeCircle.setPos(120,100)
-                 self.kneeCircle.setPen(Qt.GlobalColor.green)
-                 self.kneeCircle.setBrush(Qt.GlobalColor.green)
-                 self.kneeCircle.setOpacity(0.5)
-                 self.patientScene.addItem(self.kneeCircle)
+                #  self.kneeCircle = QGraphicsEllipseItem(0,0,40,40)
+                #  self.kneeCircle.setPos(120,100)
+                #  self.kneeCircle.setPen(Qt.GlobalColor.green)
+                #  self.kneeCircle.setBrush(Qt.GlobalColor.green)
+                #  self.kneeCircle.setOpacity(0.5)
+                #  self.patientScene.addItem(self.kneeCircle)
                  
-                 self.kneeOrganButton = self.OrganButton(210,100,40,40)
+                 self.kneeOrganButton = self.OrganButton(120,100,40,40)
+                 self.kneeOrganButton.setData(1,"KNEE")
                  self.patientScene.addItem(self.kneeOrganButton)
+
+                 self.headOrganButton = self.OrganButton(410,120,40,40)
+                 self.headOrganButton.setData(1,"HEAD")
+                 self.patientScene.addItem(self.headOrganButton)
 
                  self.imagePaneRightmost = QGraphicsView(self.patientScene)
 
