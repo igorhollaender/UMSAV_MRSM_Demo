@@ -13,7 +13,7 @@
 #      Last update: IH240723
 #-------------------------------------------------------------------------------
 
-
+__version__                 = "MRSM_Demo IH240723a"
 
 IsWaveShareDisplayEmulated  = True   # set to False for real application
 IsRaspberryPi5Emulated      = True  # set to False for real application
@@ -22,4 +22,5 @@ IsQtMultimediaAvailable     = False  # IH240722 I had problems
                                      # so this is a workaround
 
 VerboseLevel                = 1     # 0 is complete muted
+
 

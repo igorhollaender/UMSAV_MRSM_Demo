@@ -65,6 +65,7 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Globals import IsQtMultimediaAvailable
+from MRSM_Globals import __version__
 
 from PyQt6.QtGui import (
     QPixmap
@@ -227,12 +228,28 @@ class MRSM_Presentation():
             self.parent = parent
             self.remaining_time_s = self.INTRO_DURATION_SEC
 
-            self.l1 = QLabel(self.composeTimeoutMessageText())
-            self.grid.addWidget(self.l1,1,2)
+            self.introWidgets = []
 
-            self.b1 = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
-            self.b1.clicked.connect(self.parent.quit_app)
-            self.grid.addWidget(self.b1,2,7)
+            self.lTitle = QLabel("Magnetic Resonance Scanner Mockup")
+            self.grid.addWidget(self.lTitle,0,2,4,30)
+            self.lTitle.setObjectName("lTitle")  # this is for stylesheet reference 
+            self.introWidgets += [self.lTitle]
+
+            self.lVersion = QLabel(__version__)
+            self.grid.addWidget(self.lVersion,4,2)
+            self.lVersion.setObjectName("lVersion")  
+            self.introWidgets += [self.lVersion]
+
+            self.lCountdown = QLabel(self.composeTimeoutMessageText())
+            self.grid.addWidget(self.lCountdown,4,22,1,4)
+            self.lCountdown.setObjectName("lCountdown")  
+            self.introWidgets += [self.lCountdown]
+
+            self.bQuitApp = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
+            self.bQuitApp.clicked.connect(self.parent.quit_app)
+            self.grid.addWidget(self.bQuitApp,4,28,1,4)
+            self.introWidgets += [self.bQuitApp]
+
 
             self.timer = QTimer()
             self.timer.timeout.connect(self.on_timeout)
@@ -246,18 +263,18 @@ class MRSM_Presentation():
             if self.remaining_time_s <= 0:
                 self.parent.quit_intro_start_main()
             else:
-                self.l1.setText(self.composeTimeoutMessageText())
+                self.lCountdown.setText(self.composeTimeoutMessageText())
                 self.timer.start(self.INTRO_MESSAGE_UPDATE_INTERVAL_SEC*1000)
         
         def activate(self):
-            self.l1.show()
-            self.b1.show()
+            for w in self.introWidgets:
+                w.show()
             self.remaining_time_s = self.INTRO_DURATION_SEC
             self.timer.start(self.INTRO_MESSAGE_UPDATE_INTERVAL_SEC*1000)
     
         def deactivate(self):
-            self.l1.hide()
-            self.b1.hide()
+            for w in self.introWidgets:
+                w.hide()            
             self.timer.stop()
     
     class ShowMain():
@@ -286,14 +303,14 @@ class MRSM_Presentation():
             self.grid.addWidget(self.b1,0,22,1,10)
             
             #IH240717 for debugging only
-            self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
-            self.b2.clicked.connect(self.video_stop)
-            self.grid.addWidget(self.b2,1,22,1,10)
+            # self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
+            # self.b2.clicked.connect(self.video_stop)
+            # self.grid.addWidget(self.b2,1,22,1,10)
 
             #IH240717 for debugging only
-            self.b4 = self.parent.MRSM_PushButton(self.parent.lcls('START VIDEO'),self.parent.MRSM_Window)
-            self.b4.clicked.connect(self.video_start)
-            self.grid.addWidget(self.b4,3,22,1,10)
+            # self.b4 = self.parent.MRSM_PushButton(self.parent.lcls('START VIDEO'),self.parent.MRSM_Window)
+            # self.b4.clicked.connect(self.video_start)
+            # self.grid.addWidget(self.b4,3,22,1,10)
 
             #IH240717 for debugging only
             self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
@@ -357,9 +374,9 @@ class MRSM_Presentation():
             
         def activate(self):
             self.b1.show()
-            self.b2.show()
+            # self.b2.show()
             self.b3.show()
-            self.b4.show()
+            # self.b4.show()
 
             for panel in self.imagePanels:
                 panel.show()
@@ -373,9 +390,9 @@ class MRSM_Presentation():
             
         def deactivate(self):
             self.b1.hide()
-            self.b2.hide()
+            # self.b2.hide()
             self.b3.hide()
-            self.b4.hide()
+            # self.b4.hide()
 
             for panel in self.imagePanels:
                 panel.hide()
@@ -411,25 +428,25 @@ class MRSM_Presentation():
             self.parent : QWidget       = parent
 
             self.bgLabel = QLabel("",self.parent.MRSM_Window)
-            self.grid.addWidget(self.bgLabel,0,0,4,32)
+            self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
             self.bgPixmap = QPixmap("resources/images/diverse/MRSM_fullview_240722.jpg")            
             self.bgLabel.setPixmap(self.bgPixmap.scaled(1480,320,Qt.AspectRatioMode.KeepAspectRatioByExpanding))
 
-            self.b5 = parent.MRSM_PushButton('...',parent.MRSM_Window)
-            self.b5.clicked.connect(self.parent.quit_idle_start_main)
-            self.grid.addWidget(self.b5,2,28,1,4)
+            self.bResumeApp = parent.MRSM_PushButton('...',parent.MRSM_Window)
+            self.bResumeApp.clicked.connect(self.parent.quit_idle_start_main)
+            self.grid.addWidget(self.bResumeApp,2,28,1,4)
 
             self.deactivate()
 
         def activate(self):
             self.bgLabel.show()
-            self.b5.show()            
+            self.bResumeApp.show()            
             if not IsWaveShareDisplayEmulated:
                 self.parent.ShowFullScreen()
     
         def deactivate(self):
             self.bgLabel.hide()
-            self.b5.hide()
+            self.bResumeApp.hide()
     
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:

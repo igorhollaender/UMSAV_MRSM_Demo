@@ -10,7 +10,7 @@
 #      M  R  S  M  _  D  e  m  o  .  p  y 
 #
 #
-__version__ = "MRSM_Demo IH240718a"
+#   for __version__ , see MRSM_Globals
 #
 #
 """
@@ -93,6 +93,7 @@ from MRSM_Presentation import Language
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Globals import VerboseLevel
+from MRSM_Globals import __version__
 
 class MSRM_Demo_QApplication(QApplication):
     """

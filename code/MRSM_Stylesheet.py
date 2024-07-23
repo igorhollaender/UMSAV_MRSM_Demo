@@ -38,4 +38,15 @@ QPushButton
     max-width:  100px;
     min-height:  50px;
 }
+
+QLabel#lCountdown, 
+QLabel#lVersion  
+{        
+    font: bold 14px;
+}
+
+QLabel#lTitle 
+{        
+    font: bold 80px;
+}
     """
