@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240722
+#       Last update: IH240723
 #
 #
 """
@@ -72,18 +72,19 @@ from PyQt6.QtGui import (
 from enum import Enum
 from typing import Any
 
-from PyQt6.QtCore import (
-    QUrl,
+from PyQt6.QtCore import (    
+    Qt,
     QTimer,
-    Qt
+    QUrl
 )
 
 from PyQt6.QtWidgets import (
     QApplication,
-    QWidget,
     QGridLayout,
+    QLabel,
     QPushButton,
-    QLabel
+    QSizePolicy,
+    QWidget        
 )                  
 
 if IsQtMultimediaAvailable:    
@@ -217,7 +218,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 5   
+        INTRO_DURATION_SEC  = 1   
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -264,9 +265,9 @@ class MRSM_Presentation():
         def __init__(self,parent) -> None:
             
             self.parent : QWidget       = parent
-            self.grid : QGridLayout     = parent.grid 
+            self.grid   : QGridLayout   = parent.grid 
 
-            #videoplayer test
+            #videoplayer test only
             if IsQtMultimediaAvailable:    
                 #IH240722 PROBLEM cannot load PyQt6.QtMultimedia for RPI        
                 self.media_player = QMediaPlayer()
@@ -282,34 +283,45 @@ class MRSM_Presentation():
             #IH240717 for debugging only
             self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
             self.b1.clicked.connect(self.parent.quit_app)
-            self.grid.addWidget(self.b1,0,6)
+            self.grid.addWidget(self.b1,0,22)
             
             #IH240717 for debugging only
             self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
             self.b2.clicked.connect(self.video_stop)
-            self.grid.addWidget(self.b2,1,6)
+            self.grid.addWidget(self.b2,1,22)
 
             #IH240717 for debugging only
             self.b4 = self.parent.MRSM_PushButton(self.parent.lcls('START VIDEO'),self.parent.MRSM_Window)
             self.b4.clicked.connect(self.video_start)
-            self.grid.addWidget(self.b4,1,7)
+            self.grid.addWidget(self.b4,3,22)
 
             #IH240717 for debugging only
             self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
             self.b3.clicked.connect(self.parent.quit_main_start_idle)
-            self.grid.addWidget(self.b3,2,6)
+            self.grid.addWidget(self.b3,4,22)
+
+            self.imagePaneRightmost  = QLabel("",self.parent.MRSM_Window)
+            self.pixmapPatient = QPixmap("resources\images\diverse\MRSM_patient_240722.jpg")
+            #self.pixmapPatientScaled = self.pixmapPatient.scaled(220,500,
+            #    aspectRatioMode=Qt.AspectRatioMode.IgnoreAspectRatio)
+            self.imagePaneRightmost.setPixmap(self.pixmapPatient)        
+            self.grid.addWidget(self.imagePaneRightmost, 0,12,4,10)  
+            # self.imagePaneRightmost.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            # self.imagePaneRightmost.sizePolicy().setHorizontalStretch(3)
+
+            self.imagePanels = [self.imagePaneRightmost]
 
             #IH240717 test
             self.imagePaneLeft  = QLabel("",self.parent.MRSM_Window)
             self.imagePaneMid   = QLabel("",self.parent.MRSM_Window)
             self.imagePaneRight = QLabel("",self.parent.MRSM_Window)
-            self.imagePanels = [self.imagePaneLeft,self.imagePaneMid,self.imagePaneRight]
+            self.imagePanels += [self.imagePaneLeft,self.imagePaneMid,self.imagePaneRight]
+            
+            self.grid.addWidget(self.imagePaneLeft, 0,0,4,4)
+            self.grid.addWidget(self.imagePaneMid,  0,4,4,4)
+            self.grid.addWidget(self.imagePaneRight,  0,8,4,4)
 
-            self.grid.addWidget(self.imagePaneLeft, 0,0,3,2)
-            self.grid.addWidget(self.imagePaneMid,  0,2,3,2)
-            self.grid.addWidget(self.imagePaneRight,  0,4,3,2)
-
-            self.pixmapStandardSize = 300
+            self.pixmapStandardSize = 290
             
             self.pixmapHeadSag = QPixmap("resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg")
             self.pixmapHeadCor = QPixmap("resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg")
@@ -355,7 +367,8 @@ class MRSM_Presentation():
                 self.video_widget.show()
                 self.media_player.play()
             self.reset_idle_timer()
-            self.parent.ShowFullScreen()
+            if not IsWaveShareDisplayEmulated:
+                self.parent.ShowFullScreen()
             
         def deactivate(self):
             self.b1.hide()
@@ -389,7 +402,7 @@ class MRSM_Presentation():
         """
         This scenario applies after a longer inactivity break (IDLE_BREAK_DURATION_SEC) of the ShowMain.
         """
-        IDLE_BREAK_DURATION_SEC  = 5
+        IDLE_BREAK_DURATION_SEC  = 30
 
         def __init__(self,parent) -> None:
 
@@ -397,21 +410,21 @@ class MRSM_Presentation():
             self.parent : QWidget       = parent
 
             self.bgLabel = QLabel("",self.parent.MRSM_Window)
-            self.grid.addWidget(self.bgLabel,0,0,3,7)
+            self.grid.addWidget(self.bgLabel,0,0,4,22)
             self.bgPixmap = QPixmap("resources/images/diverse/MRSM_fullview_240722.jpg")            
-            self.bgLabel.setPixmap(self.bgPixmap.scaled(1480,320,Qt.AspectRatioMode.IgnoreAspectRatio))
+            self.bgLabel.setPixmap(self.bgPixmap.scaled(1480,320,Qt.AspectRatioMode.KeepAspectRatioByExpanding))
 
             self.b5 = parent.MRSM_PushButton('...',parent.MRSM_Window)
             self.b5.clicked.connect(self.parent.quit_idle_start_main)
-            self.grid.addWidget(self.b5,2,6)
+            self.grid.addWidget(self.b5,2,20)
 
             self.deactivate()
 
         def activate(self):
             self.bgLabel.show()
-            self.b5.show()
-            # self.parent.ShowFullScreen()
-            self.parent.MRSM_Window.showFullScreen()
+            self.b5.show()            
+            if not IsWaveShareDisplayEmulated:
+                self.parent.ShowFullScreen()
     
         def deactivate(self):
             self.bgLabel.hide()
@@ -442,6 +455,8 @@ class MRSM_Presentation():
 
         if IsWaveShareDisplayEmulated:
             self.MRSM_Window.setGeometry(100,200,1480,320)
+            self.MRSM_Window.setMinimumSize(1480,320)
+            self.MRSM_Window.setMaximumSize(1480,320)
 
 
         self.localizer = PoorMansLocalizer(self.language)
@@ -453,6 +468,7 @@ class MRSM_Presentation():
         # self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")
         self.MRSM_Window.setStyleSheet(MRSM_Stylesheet())
 
+        #IH240723 the standard grid layout is ...(TODO)
         self.grid = QGridLayout()
         self.MRSM_Window.setLayout(self.grid)
 
