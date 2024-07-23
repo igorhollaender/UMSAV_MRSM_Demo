@@ -76,6 +76,7 @@ from typing import Any
 
 from PyQt6.QtCore import (    
     Qt,
+    QRectF,
     QTimer,
     QUrl
 )
@@ -83,6 +84,7 @@ from PyQt6.QtCore import (
 from PyQt6.QtWidgets import (
     QApplication,
     QGraphicsEllipseItem,
+    QGraphicsItem,
     QGraphicsScene,
     QGraphicsView,
     QGridLayout,
@@ -282,6 +284,42 @@ class MRSM_Presentation():
             self.timer.stop()
     
     class ShowMain():
+
+        class OrganButton(QGraphicsItem):   
+
+            def __init__(self, x, y, width, height):
+                super().__init__()
+                self.rect = QRectF(x, y, width, height)                
+                self.setAcceptHoverEvents(True)
+                self.setAcceptTouchEvents(True)
+
+            def boundingRect(self):
+                return self.rect
+
+            def paint(self, painter, option, widget):
+                painter.setPen(Qt.GlobalColor.yellow)
+                painter.setBrush(Qt.GlobalColor.yellow)
+                painter.setOpacity(0.5)
+                painter.drawEllipse(self.rect)
+
+            def mousePressEvent(self, event):
+                self.color = Qt.GlobalColor.red
+                self.update()
+                super().mousePressEvent(event)
+
+            #IH240723 PROBLEM these mouse event do not work
+            def mouseReleaseEvent(self, event):
+                self.color = Qt.GlobalColor.yellow
+                self.update()
+                super().mouseReleaseEvent(event)
+
+            def hoverEnterEvent(self, event):
+                self.setCursor(Qt.CursorShape.PointingHandCursor)
+                super().hoverEnterEvent(event)
+
+            def hoverLeaveEvent(self, event):
+                self.setCursor(Qt.CursorShape.ArrowCursor)
+                super().hoverLeaveEvent(event)
         
         def __init__(self,parent) -> None:
             
@@ -337,12 +375,17 @@ class MRSM_Presentation():
                  self.pixmapPatientScaled = self.pixmapPatient.scaled(700,220,
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
                  self.patientPixmapOnScene = self.patientScene.addPixmap(self.pixmapPatientScaled)                 
-                 t=self.patientScene.addText("Select organ for imaging...")
+                 self.patientScene.addText("Select organ for imaging...")
                  
                  self.kneeCircle = QGraphicsEllipseItem(0,0,40,40)
                  self.kneeCircle.setPos(120,100)
                  self.kneeCircle.setPen(Qt.GlobalColor.green)
+                 self.kneeCircle.setBrush(Qt.GlobalColor.green)
+                 self.kneeCircle.setOpacity(0.5)
                  self.patientScene.addItem(self.kneeCircle)
+                 
+                 self.kneeOrganButton = self.OrganButton(210,100,40,40)
+                 self.patientScene.addItem(self.kneeOrganButton)
 
                  self.imagePaneRightmost = QGraphicsView(self.patientScene)
 
