@@ -304,29 +304,34 @@ class MRSM_Presentation():
 
         class OrganButton(QGraphicsItem):   
 
-            def __init__(self, x, y, width, height):
+            def __init__(self, x, y, width, height, showMainInstance):
                 super().__init__()
                 self.rect = QRectF(x, y, width, height)                
                 self.setAcceptHoverEvents(True)
                 self.setAcceptTouchEvents(True)
                 self.isMousePressed = False
+                self.showMainInstance = showMainInstance
 
             def boundingRect(self):
                 return self.rect
 
             def paint(self, painter, option, widget):
-                if self.isMousePressed:
-                    painter.setPen(Qt.GlobalColor.red)
-                    painter.setBrush(Qt.GlobalColor.red)
-                else:
-                    painter.setPen(Qt.GlobalColor.yellow)
-                    painter.setBrush(Qt.GlobalColor.yellow)
+                #IH240724 PROBLEM this does not work as expected
+                #if self.isMousePressed:
+                #    painter.setPen(Qt.GlobalColor.red)
+                #    painter.setBrush(Qt.GlobalColor.red)
+                #else:
+                #    painter.setPen(Qt.GlobalColor.yellow)
+                #    painter.setBrush(Qt.GlobalColor.yellow)
+                painter.setPen(Qt.GlobalColor.yellow)
+                painter.setBrush(Qt.GlobalColor.yellow)
                 painter.setOpacity(0.5)
                 painter.drawEllipse(self.rect)
 
             def mousePressEvent(self, event):                
                 self.isMousePressed = True
                 print(f"{time.time()}: selected organ: {self.data(1)}")
+                self.ScanOrgan(self.data(1))
                 self.update()
                 super().mousePressEvent(event)
             
@@ -343,6 +348,9 @@ class MRSM_Presentation():
                 self.setCursor(Qt.CursorShape.ArrowCursor)
                 super().hoverLeaveEvent(event)
         
+            def ScanOrgan(self,organ: Organ ):
+                self.showMainInstance.presentMRScanning(organ)
+
         def __init__(self,parent) -> None:
             
             self.parent : QWidget       = parent
@@ -385,7 +393,6 @@ class MRSM_Presentation():
             self.pixmapPatientScaled = self.pixmapPatient.scaled(800,220,  #IH240723 do not change this!!: 800,200
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
             
-            #IH240723 experimenting
             QLabelAsPixmapContainer = False
             QGraphicsSceneAsPixmapContainer = True
             if QLabelAsPixmapContainer:
@@ -413,13 +420,15 @@ class MRSM_Presentation():
                  
                  # organ graphics buttons
                  #  
-                 self.kneeOrganButton = self.OrganButton(120,100,40,40)
+                 self.kneeOrganButton = self.OrganButton(120,100,40,40,self)
                  self.kneeOrganButton.setData(1,Organ.KNEE)
                  self.patientScene.addItem(self.kneeOrganButton)
 
-                 self.headOrganButton = self.OrganButton(410,120,40,40)
+                 self.headOrganButton = self.OrganButton(410,40,40,40,self)
                  self.headOrganButton.setData(1,Organ.HEAD)
                  self.patientScene.addItem(self.headOrganButton)
+
+                 # IH240724 TODO add more organs
 
                  self.imagePaneRightmost = QGraphicsView(self.patientScene)
 
@@ -471,7 +480,7 @@ class MRSM_Presentation():
 
                 panel.setScaledContents(True)
 
-            self.presentMRScanning(Organ.KNEE)
+            self.presentMRScanning(Organ.NONE)
             self.deactivate()
             
         def activate(self) -> None:
@@ -503,18 +512,18 @@ class MRSM_Presentation():
                 self.video_widget.hide()
                 self.media_player.stop()    
 
-
         def presentMRScanning(self,organ :Organ) -> None:
             """
             Scenario following pressing an organ button on the patient graphics
             """            
             self.organ = organ
             
-            self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.SAGITTAL))
-            self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.CORONAL))
-            self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.TRANSVERSAL))
+            if organ !=organ.NONE:
+                self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.SAGITTAL))
+                self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.CORONAL))
+                self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.TRANSVERSAL))
 
-            self.parent.hardwareController.runScanningSimulationShow(self, self.organ)
+                self.parent.hardwareController.runScanningSimulationShow(self, self.organ)
             
         #IH240724 OBSOLETE
         def video_start(self):
