@@ -137,7 +137,8 @@ MRSM_application = MSRM_Demo_QApplication(sys.argv)
 MRSM_application.parseCommandLine()
 MRSM_controller = MRSM_Controller()
 MRSM_presentation = MRSM_Presentation(
-        language=MRSM_application.app_language
+        language=MRSM_application.app_language,
+        hardwareController=MRSM_controller
         )
 MRSM_presentation.show()
 MRSM_application.exec()

@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240723
+#       Last update: IH240724
 #
 #
 """
@@ -69,7 +69,7 @@ from MRSM_Globals import IsQtMultimediaAvailable
 from MRSM_Globals import __version__
 
 from PyQt6.QtGui import (
-    QPainter,
+    QFont,
     QPixmap
 )
 from enum import Enum
@@ -105,6 +105,8 @@ if IsQtMultimediaAvailable:
         QVideoWidget
 
 
+from MRSM_Controller import MRSM_Controller
+from MRSM_ImageBase import ImageBase, Organ, ImagingPlane
 from MRSM_Stylesheet import MRSM_Stylesheet
 
 class Language(Enum):
@@ -146,6 +148,21 @@ class PoorMansLocalizer():
                 'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'secs.'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Sekunden.'},
                          {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'sek.'},
+            ]},
+             {   'enSrcTerm': '#103',
+                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Magnetic Resonance Imaging'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Kernspintomographie'},
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Magnetická rezonancia'},
+            ]},
+            {   'enSrcTerm': '#104',
+                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Institute of Measurement Science, SAS'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Institut für Messtechnik, SAW'},
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Ústav merania SAV'},
+            ]},
+            {   'enSrcTerm': '#105',
+                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Select organ for imaging...'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Organ für Untesuchung auswählen...'},
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Vyber orgán, ktorý chceš vyšetriť...'},
             ]},
         ]
 
@@ -226,7 +243,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 1   
+        INTRO_DURATION_SEC  = 1  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -364,7 +381,7 @@ class MRSM_Presentation():
             self.b3.clicked.connect(self.parent.quit_main_start_idle)
             self.grid.addWidget(self.b3,4,22,1,10)
 
-            self.pixmapPatient = QPixmap("resources\images\diverse\MRSM_patient_240722.jpg")
+            self.pixmapPatient = QPixmap("resources/images/diverse/MRSM_patient_240722.jpg")
             self.pixmapPatientScaled = self.pixmapPatient.scaled(800,220,  #IH240723 do not change this!!: 800,200
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
             
@@ -380,8 +397,13 @@ class MRSM_Presentation():
                  self.pixmapPatientScaled = self.pixmapPatient.scaled(700,220,
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
                  self.patientPixmapOnScene = self.patientScene.addPixmap(self.pixmapPatientScaled)                 
-                 self.patientScene.addText("Select organ for imaging...")
                  
+                 f = QFont()
+                 f.setPointSize(15)
+                 f.setBold(True)
+                 self.patientScene.addText(parent.lcls("#105")).setFont(f)
+    
+                # IH240724 OBSOLETE
                 #  self.kneeCircle = QGraphicsEllipseItem(0,0,40,40)
                 #  self.kneeCircle.setPos(120,100)
                 #  self.kneeCircle.setPen(Qt.GlobalColor.green)
@@ -389,12 +411,14 @@ class MRSM_Presentation():
                 #  self.kneeCircle.setOpacity(0.5)
                 #  self.patientScene.addItem(self.kneeCircle)
                  
+                 # organ graphics buttons
+                 #  
                  self.kneeOrganButton = self.OrganButton(120,100,40,40)
-                 self.kneeOrganButton.setData(1,"KNEE")
+                 self.kneeOrganButton.setData(1,Organ.KNEE)
                  self.patientScene.addItem(self.kneeOrganButton)
 
                  self.headOrganButton = self.OrganButton(410,120,40,40)
-                 self.headOrganButton.setData(1,"HEAD")
+                 self.headOrganButton.setData(1,Organ.HEAD)
                  self.patientScene.addItem(self.headOrganButton)
 
                  self.imagePaneRightmost = QGraphicsView(self.patientScene)
@@ -415,25 +439,29 @@ class MRSM_Presentation():
 
             self.pixmapStandardSize = 290
             
-            self.pixmapHeadSag = QPixmap("resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg")
-            self.pixmapHeadCor = QPixmap("resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg")
-            self.pixmapHeadTra = QPixmap("resources/images/Free-Max/Head/2c_Head_t2_tse_tra_p4.jpg")
+            # IH240724 OBSOLETE
+            # self.pixmapHeadSag = QPixmap("resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg")
+            # self.pixmapHeadCor = QPixmap("resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg")
+            # self.pixmapHeadTra = QPixmap("resources/images/Free-Max/Head/2c_Head_t2_tse_tra_p4.jpg")
 
-            self.pixmapHeadSagScaled = self.pixmapHeadSag.scaled(
-                    self.pixmapStandardSize,self.pixmapStandardSize,
-                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            self.pixmapHeadCorScaled = self.pixmapHeadCor.scaled(
-                    self.pixmapStandardSize,
-                    self.pixmapStandardSize,
-                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            self.pixmapHeadTraScaled = self.pixmapHeadTra.scaled(
-                    self.pixmapStandardSize,
-                    self.pixmapStandardSize,
-                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            # self.pixmapHeadSagScaled = self.pixmapHeadSag.scaled(
+            #         self.pixmapStandardSize,self.pixmapStandardSize,
+            #         aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            # self.pixmapHeadCorScaled = self.pixmapHeadCor.scaled(
+            #         self.pixmapStandardSize,
+            #         self.pixmapStandardSize,
+            #         aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            # self.pixmapHeadTraScaled = self.pixmapHeadTra.scaled(
+            #         self.pixmapStandardSize,
+            #         self.pixmapStandardSize,
+            #         aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            # self.imagePaneLeft.setPixmap(self.pixmapHeadSagScaled)
+            # self.imagePaneMid.setPixmap(self.pixmapHeadCorScaled)
+            # self.imagePaneRight.setPixmap(self.pixmapHeadTraScaled)
 
-            self.imagePaneLeft.setPixmap(self.pixmapHeadSagScaled)
-            self.imagePaneMid.setPixmap(self.pixmapHeadCorScaled)
-            self.imagePaneRight.setPixmap(self.pixmapHeadTraScaled)
+            # self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.SAGITTAL))
+            # self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.CORONAL))
+            # self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.TRANSVERSAL))
 
             for panel in self.imagePanelsMRI:
                 panel.setMinimumHeight(self.pixmapStandardSize)
@@ -443,10 +471,10 @@ class MRSM_Presentation():
 
                 panel.setScaledContents(True)
 
-
+            self.presentMRScanning(Organ.KNEE)
             self.deactivate()
             
-        def activate(self):
+        def activate(self) -> None:
             self.b1.show()
             # self.b2.show()
             self.b3.show()
@@ -462,7 +490,7 @@ class MRSM_Presentation():
             if not IsWaveShareDisplayEmulated:
                 self.parent.ShowFullScreen()
             
-        def deactivate(self):
+        def deactivate(self) -> None:
             self.b1.hide()
             # self.b2.hide()
             self.b3.hide()
@@ -475,11 +503,26 @@ class MRSM_Presentation():
                 self.video_widget.hide()
                 self.media_player.stop()    
 
+
+        def presentMRScanning(self,organ :Organ) -> None:
+            """
+            Scenario following pressing an organ button on the patient graphics
+            """            
+            self.organ = organ
+            
+            self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.SAGITTAL))
+            self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.CORONAL))
+            self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.TRANSVERSAL))
+
+            self.parent.hardwareController.runScanningSimulationShow(self, self.organ)
+            
+        #IH240724 OBSOLETE
         def video_start(self):
             if IsQtMultimediaAvailable:                
                 self.media_player.play()
             self.reset_idle_timer()
 
+        #IH240724 OBSOLETE
         def video_stop(self):
             if IsQtMultimediaAvailable:                
                 self.media_player.stop()
@@ -500,27 +543,40 @@ class MRSM_Presentation():
 
             self.grid :   QGridLayout   = parent.grid
             self.parent : QWidget       = parent
+            self.idleWidgets = []
 
             self.bgLabel = QLabel("",self.parent.MRSM_Window)
             self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
             self.bgPixmap = QPixmap("resources/images/diverse/MRSM_fullview_240722.jpg")            
             self.bgLabel.setPixmap(self.bgPixmap.scaled(1480,320,Qt.AspectRatioMode.KeepAspectRatioByExpanding))
+            self.idleWidgets += [self.bgLabel]
+
+            self.lIdleTitleBig = QLabel(parent.lcls("#103"))
+            self.grid.addWidget(self.lIdleTitleBig,1,2,1,20)
+            self.lIdleTitleBig.setObjectName("lIdleTitleBig")  # this is for stylesheet reference 
+            self.idleWidgets += [self.lIdleTitleBig]
+
+            self.lIdleTitleSmall = QLabel(parent.lcls("#104"))
+            self.grid.addWidget(self.lIdleTitleSmall,2,2,1,15)
+            self.lIdleTitleSmall.setObjectName("lIdleTitleSmall")  # this is for stylesheet reference 
+            self.idleWidgets += [self.lIdleTitleSmall]
 
             self.bResumeApp = parent.MRSM_PushButton('...',parent.MRSM_Window)
             self.bResumeApp.clicked.connect(self.parent.quit_idle_start_main)
             self.grid.addWidget(self.bResumeApp,2,28,1,4)
+            self.idleWidgets += [self.bResumeApp]
 
             self.deactivate()
 
         def activate(self):
-            self.bgLabel.show()
-            self.bResumeApp.show()            
+            for w in self.idleWidgets:
+                w.show()            
             if not IsWaveShareDisplayEmulated:
                 self.parent.ShowFullScreen()
     
         def deactivate(self):
-            self.bgLabel.hide()
-            self.bResumeApp.hide()
+            for w in self.idleWidgets:
+                w.hide()
     
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:
@@ -535,10 +591,12 @@ class MRSM_Presentation():
         return self.localizer.localizeLongString(id)
     
     def __init__(self,
-            language=Language.ENGLISH
+            language : Language=Language.ENGLISH,
+            hardwareController : MRSM_Controller =None,
             ):
         self.language = language
         self.MRSM_Window = QWidget()
+        self.hardwareController = hardwareController
 
         #   This implementation targets the 
         #   https://www.waveshare.com/11.9inch-HDMI-LCD.htm
@@ -559,6 +617,7 @@ class MRSM_Presentation():
         # see https://doc.qt.io/qtforpython-6/overviews/stylesheet-examples.html
         # self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")
         self.MRSM_Window.setStyleSheet(MRSM_Stylesheet())
+        self.MRSM_ImageBase = ImageBase(pixmapStandardSize=290)
 
         #IH240723 the standard grid layout is ...(TODO)
         self.grid = QGridLayout()

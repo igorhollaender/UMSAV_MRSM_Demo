@@ -7,58 +7,88 @@
 #   The Magnetic Resonance Scanner Mockup Project
 #
 #
-#      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
+#      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
 #      Last update: IH240724
 #-------------------------------------------------------------------------------
 
-# for examples, see
-# https://github.com/Axel-Erfurt/Python-QT-VideoPlayer/blob/master/QT6_VideoPlayer.py
-# https://doc.qt.io/qtforpython-6/overviews/stylesheet-examples.html
+from enum import Enum
 
-# for a guide on colors, see
-# https://doc.qt.io/qtforpython-5/PySide2/QtGui/QColor.html
+from PyQt6.QtCore import (
+    Qt
+)
 
-def MRSM_Stylesheet():
-    return """
-QWidget 
-{ 
-    background-color: darkCyan; /* this is the general bg color */
-}
+from PyQt6.QtGui import (
+    QPixmap
+)
 
-QPushButton 
-{ 
-    background-color: yellow;
-    border: 2px;
-    border-style: outset;
-    border-radius:  25px;
-    border-color: black;
-    min-width:  20px;
-    max-width:  100px;
-    min-height:  50px;
-}
+class Organ(Enum):
+        NONE        =   0
+        HEAD        =   1
+        KNEE        =   2
+        ABDOMEN     =   3
 
-QLabel#lCountdown, 
-QLabel#lVersion  
-{        
-    font: bold 14px;
-}
+class ImagingPlane(Enum):
+        SAGITTAL    =   0
+        CORONAL     =   1
+        TRANSVERSAL =   2
+    
 
-QLabel#lTitle 
-{        
-    font: bold 80px;
-}
+class ImageBase():
+    
+    def __init__(self,pixmapStandardSize=290) -> None:
 
-QLabel#lIdleTitleBig 
-{        
-    font: bold 60px;
-    background-color: none;
-}
+        self.pixmapStandardSize = pixmapStandardSize
 
-QLabel#lIdleTitleSmall 
-{        
-    font: bold 30px;
-    background-color: none;
-}
-    """
+        self.MRimages= [
+            {'organ':  Organ.HEAD, 
+             'imagingPlane' : ImagingPlane.SAGITTAL, 
+                'JPGFileRelativePath': "resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg",
+                'pixmapOriginal':   None,  # to be populated later
+                'pixmapScaled':    None   # to be populated later
+            },  
+            {'organ':  Organ.HEAD, 
+             'imagingPlane' : ImagingPlane.CORONAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg",
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
+            },
+            {'organ':  Organ.HEAD, 
+             'imagingPlane' : ImagingPlane.TRANSVERSAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Head/2c_Head_t2_tse_tra_p4.jpg",
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
+            },
+            {'organ':  Organ.KNEE, 
+             'imagingPlane' : ImagingPlane.SAGITTAL, 
+                'JPGFileRelativePath': "resources/images/Free-Max/Knee/13d_Knee_pd_tse_fs_sag_p4_DRB.jpg",
+                'pixmapOriginal':   None,  
+                'pixmapScaled':    None   
+            },  
+            {'organ':  Organ.KNEE	, 
+             'imagingPlane' : ImagingPlane.CORONAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Knee/13b_Knee_pd_tse_fs_cor_p4_DRB.jpg",
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
+            },
+            {'organ':  Organ.KNEE, 
+             'imagingPlane' : ImagingPlane.TRANSVERSAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Knee/13c_Knee_pd_tse_fs_tra_p4_DRB.jpg", 
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
+            },  
+        ]
+
+        for im in self.MRimages:
+              #IH240724 WARNING  We do not check file accessibility here
+              im['pixmapOriginal'] = QPixmap(im['JPGFileRelativePath'])
+              im['pixmapScaled'] = im['pixmapOriginal'].scaled(
+                    self.pixmapStandardSize,self.pixmapStandardSize,
+                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+                    
+    def getScaledPixmap(self,organ: Organ,imagingPlane : ImagingPlane):
+        for im in self.MRimages:
+            if im['organ']==organ and im['imagingPlane']==imagingPlane:
+                 return im['pixmapScaled'] 
+        return None
