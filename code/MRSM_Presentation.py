@@ -77,7 +77,10 @@ from typing import Any
 
 from PyQt6.QtCore import (    
     Qt,
+    QPoint,
+    QPropertyAnimation,
     QRectF,
+    QSequentialAnimationGroup,
     QTimer,
     QUrl
 )
@@ -302,6 +305,11 @@ class MRSM_Presentation():
     
     class ShowMain():
 
+        class RollShade(QLabel):
+            def __init_subclass__(cls) -> None:
+                super().__init_subclass__()
+            #IH240724 implement
+                
         class OrganButton(QGraphicsItem):   
 
             def __init__(self, x, y, width, height, showMainInstance):
@@ -355,6 +363,7 @@ class MRSM_Presentation():
             
             self.parent : QWidget       = parent
             self.grid   : QGridLayout   = parent.grid 
+            self.mainWidgets = []
 
             #videoplayer test only
             if IsQtMultimediaAvailable:    
@@ -373,6 +382,7 @@ class MRSM_Presentation():
             self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
             self.b1.clicked.connect(self.parent.quit_app)
             self.grid.addWidget(self.b1,0,22,1,10)
+            self.mainWidgets += [self.b1]
             
             #IH240717 for debugging only
             # self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
@@ -388,6 +398,7 @@ class MRSM_Presentation():
             self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
             self.b3.clicked.connect(self.parent.quit_main_start_idle)
             self.grid.addWidget(self.b3,4,22,1,10)
+            self.mainWidgets += [self.b3]
 
             self.pixmapPatient = QPixmap("resources/images/diverse/MRSM_patient_240722.jpg")
             self.pixmapPatientScaled = self.pixmapPatient.scaled(800,220,  #IH240723 do not change this!!: 800,200
@@ -441,11 +452,31 @@ class MRSM_Presentation():
             self.imagePaneRight = QLabel("",self.parent.MRSM_Window)
             self.imagePanelsMRI = [self.imagePaneLeft,self.imagePaneMid,self.imagePaneRight]
             self.imagePanels += self.imagePanelsMRI
+            self.mainWidgets += self.imagePanels
+
+            self.lRollerShadePaneLeft = QLabel("",self.imagePaneLeft)
+            self.lRollerShadePaneLeft.setFixedHeight(320)
+            self.lRollerShadePaneLeft.setObjectName("lRollerShadePaneLeft")
+            self.lRollerShadePaneMid = QLabel("",self.imagePaneMid)
+            self.lRollerShadePaneMid.setFixedHeight(320)
+            self.lRollerShadePaneMid.setObjectName("lRollerShadePaneMid")
+            self.lRollerShadePaneRight = QLabel("",self.imagePaneRight)
+            self.lRollerShadePaneRight.setFixedHeight(320)
+            self.lRollerShadePaneRight.setObjectName("lRollerShadePaneRight")
+
             
             self.grid.addWidget(self.imagePaneLeft, 0,0,4,4)
             self.grid.addWidget(self.imagePaneMid,  0,4,4,4)
             self.grid.addWidget(self.imagePaneRight,  0,8,4,4)
 
+            self.grid.addWidget(self.lRollerShadePaneLeft, 0,0,5,4,alignment=Qt.AlignmentFlag.AlignBottom)
+            self.grid.addWidget(self.lRollerShadePaneMid, 0,4,5,4,alignment=Qt.AlignmentFlag.AlignBottom)
+            self.grid.addWidget(self.lRollerShadePaneRight, 0,8,5,4,alignment=Qt.AlignmentFlag.AlignBottom)
+
+            self.mainWidgets += [self.lRollerShadePaneLeft,
+                                 self.lRollerShadePaneMid,
+                                 self.lRollerShadePaneRight]
+            
             self.pixmapStandardSize = 290
             
             # IH240724 OBSOLETE
@@ -480,17 +511,43 @@ class MRSM_Presentation():
 
                 panel.setScaledContents(True)
 
+            # animation setup
+            self.animation_rollerLeft = QPropertyAnimation(self.lRollerShadePaneLeft,b"pos")
+            self.animation_rollerMid  = QPropertyAnimation(self.lRollerShadePaneMid,b"pos")
+            self.animation_rollerRight= QPropertyAnimation(self.lRollerShadePaneRight,b"pos")
+
+            self.animation_rollerLeft.setDuration(2000)
+            self.animation_rollerLeft.setStartValue(QPoint(11,-10))
+            self.animation_rollerLeft.setEndValue(QPoint(11,320))
+
+            self.animation_rollerMid.setDuration(2000)
+            self.animation_rollerMid.setStartValue(QPoint(307,-10))
+            self.animation_rollerMid.setEndValue(QPoint(307,320))
+
+            self.animation_rollerRight.setDuration(2000)
+            self.animation_rollerRight.setStartValue(QPoint(603,-10))
+            self.animation_rollerRight.setEndValue(QPoint(603,320))
+
+            self.animation_all = QSequentialAnimationGroup()
+            self.animation_all.addAnimation(self.animation_rollerLeft)
+            self.animation_all.addAnimation(self.animation_rollerMid)
+            self.animation_all.addAnimation(self.animation_rollerRight)
+            
             self.presentMRScanning(Organ.NONE)
             self.deactivate()
-            
-        def activate(self) -> None:
-            self.b1.show()
-            # self.b2.show()
-            self.b3.show()
-            # self.b4.show()
 
-            for panel in self.imagePanels:
+        
+        def setRollerShadesToInitialPosition(self):
+            #IH240724 TODO
+            self.lRollerShadePaneLeft.setGeometry(11,-10,320,320)
+            self.lRollerShadePaneMid.setGeometry(307,-10,320,320)
+            self.lRollerShadePaneRight.setGeometry(603,-10,320,320)
+
+        def activate(self) -> None:
+            for panel in self.mainWidgets:
                 panel.show()
+            
+            self.setRollerShadesToInitialPosition()
             
             if IsQtMultimediaAvailable:
                 self.video_widget.show()
@@ -500,13 +557,9 @@ class MRSM_Presentation():
                 self.parent.ShowFullScreen()
             
         def deactivate(self) -> None:
-            self.b1.hide()
-            # self.b2.hide()
-            self.b3.hide()
-            # self.b4.hide()
-
-            for panel in self.imagePanels:
+            for panel in self.mainWidgets:
                 panel.hide()
+            self.animation_all.stop()
 
             if IsQtMultimediaAvailable:                
                 self.video_widget.hide()
@@ -524,6 +577,7 @@ class MRSM_Presentation():
                 self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.TRANSVERSAL))
 
                 self.parent.hardwareController.runScanningSimulationShow(self, self.organ)
+                self.animation_all.start()
             
         #IH240724 OBSOLETE
         def video_start(self):

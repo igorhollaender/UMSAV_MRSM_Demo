@@ -61,4 +61,12 @@ QLabel#lIdleTitleSmall
     font: bold 30px;
     background-color: none;
 }
+
+QLabel#lRollerShadePaneLeft,
+QLabel#lRollerShadePaneMid,
+QLabel#lRollerShadePaneRight
+{        
+    background-color: darkCyan;
+    /* background-color: black; */ 
+}
     """
