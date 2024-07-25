@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240724
+#       Last update: IH240725
 #
 #
 """
@@ -61,12 +61,14 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #
 #-------------------------------------------------------------------------------
 
-import time  # IH240723 for debugging only
 
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Globals import IsQtMultimediaAvailable
 from MRSM_Globals import __version__
+
+from MRSM_Globals import error_message, debug_message
+
 
 from PyQt6.QtGui import (
     QFont,
@@ -208,7 +210,7 @@ class PoorMansLocalizer():
     
     def UNITTEST(self):
         self.targetLangauge = Language.SLOVAK
-        print(
+        debug_message(
             self.localizeShortString('QUIT'),
             self.localizeShortString('STOP'),
             self.localizeShortString('stop'),
@@ -217,7 +219,7 @@ class PoorMansLocalizer():
             self.localizeShortString('#101'),
         )
         self.targetLangauge = Language.GERMAN
-        print(
+        debug_message(
             self.localizeShortString('QUIT'),
             self.localizeShortString('STOP'),
             self.localizeShortString('stop'),
@@ -246,7 +248,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 1  
+        INTRO_DURATION_SEC  = 5  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -319,9 +321,18 @@ class MRSM_Presentation():
                 self.setAcceptTouchEvents(True)
                 self.isMousePressed = False
                 self.showMainInstance = showMainInstance
+                self.brushActive = Qt.GlobalColor.green
+                self.penActive = Qt.GlobalColor.green
+                self.brushIdle = Qt.GlobalColor.yellow
+                self.penIdle = Qt.GlobalColor.yellow
+                self.setActiveState(False)
 
             def boundingRect(self):
                 return self.rect
+            
+            def setActiveState(self, active : bool = False):
+                self.myBrush = self.brushActive if active else self.brushIdle    	        
+                self.myPen = self.penActive if active else self.penIdle
 
             def paint(self, painter, option, widget):
                 #IH240724 PROBLEM this does not work as expected
@@ -331,14 +342,14 @@ class MRSM_Presentation():
                 #else:
                 #    painter.setPen(Qt.GlobalColor.yellow)
                 #    painter.setBrush(Qt.GlobalColor.yellow)
-                painter.setPen(Qt.GlobalColor.yellow)
-                painter.setBrush(Qt.GlobalColor.yellow)
+                painter.setPen(self.myPen)
+                painter.setBrush(self.myBrush)
                 painter.setOpacity(0.5)
                 painter.drawEllipse(self.rect)
 
             def mousePressEvent(self, event):                
                 self.isMousePressed = True
-                print(f"{time.time()}: selected organ: {self.data(1)}")
+                # debug_message(f"selected organ: {self.data(1)}")
                 self.ScanOrgan(self.data(1))
                 self.update()
                 super().mousePressEvent(event)
@@ -411,15 +422,15 @@ class MRSM_Presentation():
                 self.imagePaneRightmost.setPixmap(self.pixmapPatientScaled)     
                 self.imagePaneRightmost.setStyleSheet("background-color: green")
             if QGraphicsSceneAsPixmapContainer:
-                 self.patientScene  = QGraphicsScene(self.parent.MRSM_Window)                                  
-                 self.pixmapPatientScaled = self.pixmapPatient.scaled(700,220,
+                self.patientScene  = QGraphicsScene(self.parent.MRSM_Window)                                  
+                self.pixmapPatientScaled = self.pixmapPatient.scaled(700,220,
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-                 self.patientPixmapOnScene = self.patientScene.addPixmap(self.pixmapPatientScaled)                 
+                self.patientPixmapOnScene = self.patientScene.addPixmap(self.pixmapPatientScaled)                 
                  
-                 f = QFont()
-                 f.setPointSize(15)
-                 f.setBold(True)
-                 self.patientScene.addText(parent.lcls("#105")).setFont(f)
+                f = QFont()
+                f.setPointSize(15)
+                f.setBold(True)
+                self.patientScene.addText(parent.lcls("#105")).setFont(f)
     
                 # IH240724 OBSOLETE
                 #  self.kneeCircle = QGraphicsEllipseItem(0,0,40,40)
@@ -429,19 +440,30 @@ class MRSM_Presentation():
                 #  self.kneeCircle.setOpacity(0.5)
                 #  self.patientScene.addItem(self.kneeCircle)
                  
-                 # organ graphics buttons
-                 #  
-                 self.kneeOrganButton = self.OrganButton(120,100,40,40,self)
-                 self.kneeOrganButton.setData(1,Organ.KNEE)
-                 self.patientScene.addItem(self.kneeOrganButton)
+                # organ graphics buttons
+                #  
+                self.organButton = dict()
+                 
+                # IH240725 OBSOLETE
+                # self.kneeOrganButton = self.OrganButton(120,100,40,40,self)
+                # self.kneeOrganButton.setData(1,Organ.KNEE)
+                # self.patientScene.addItem(self.kneeOrganButton)
 
-                 self.headOrganButton = self.OrganButton(410,40,40,40,self)
-                 self.headOrganButton.setData(1,Organ.HEAD)
-                 self.patientScene.addItem(self.headOrganButton)
+                # self.headOrganButton = self.OrganButton(410,40,40,40,self)
+                # self.headOrganButton.setData(1,Organ.HEAD)
+                # self.patientScene.addItem(self.headOrganButton)
 
-                 # IH240724 TODO add more organs
+                self.organButton[Organ.KNEE] = self.OrganButton(120,100,40,40,self)
+                self.organButton[Organ.KNEE].setData(1,Organ.KNEE)
+                self.patientScene.addItem(self.organButton[Organ.KNEE])
 
-                 self.imagePaneRightmost = QGraphicsView(self.patientScene)
+                self.organButton[Organ.HEAD] = self.OrganButton(410,40,40,40,self)
+                self.organButton[Organ.HEAD].setData(1,Organ.HEAD)
+                self.patientScene.addItem(self.organButton[Organ.HEAD])
+
+                # IH240724 TODO add more organs
+
+                self.imagePaneRightmost = QGraphicsView(self.patientScene)
 
 
             self.grid.addWidget(self.imagePaneRightmost, 0,12,5,10)              
@@ -516,15 +538,23 @@ class MRSM_Presentation():
             self.animation_rollerMid  = QPropertyAnimation(self.lRollerShadePaneMid,b"pos")
             self.animation_rollerRight= QPropertyAnimation(self.lRollerShadePaneRight,b"pos")
 
-            self.animation_rollerLeft.setDuration(2000)
+            ROLLING_DURATION_MSEC = 2000
+
+            self.animation_rollerLeft.setDuration(ROLLING_DURATION_MSEC)
             self.animation_rollerLeft.setStartValue(QPoint(11,-10))
             self.animation_rollerLeft.setEndValue(QPoint(11,320))
 
-            self.animation_rollerMid.setDuration(2000)
+            #IH240725 this does not work, since at this moment, the x is 0 (and not 11)
+            #IH240725 TODO implement correctly
+            # debug_message(self.imagePaneLeft.geometry().x())
+            # self.animation_rollerLeft.setStartValue(QPoint(self.imagePaneLeft.geometry().x(),-10))
+            # self.animation_rollerLeft.setEndValue(QPoint(self.imagePaneLeft.geometry().x(),self.imagePaneLeft.geometry().height()+30))
+            
+            self.animation_rollerMid.setDuration(ROLLING_DURATION_MSEC)
             self.animation_rollerMid.setStartValue(QPoint(307,-10))
             self.animation_rollerMid.setEndValue(QPoint(307,320))
 
-            self.animation_rollerRight.setDuration(2000)
+            self.animation_rollerRight.setDuration(ROLLING_DURATION_MSEC)
             self.animation_rollerRight.setStartValue(QPoint(603,-10))
             self.animation_rollerRight.setEndValue(QPoint(603,320))
 
@@ -532,23 +562,38 @@ class MRSM_Presentation():
             self.animation_all.addAnimation(self.animation_rollerLeft)
             self.animation_all.addAnimation(self.animation_rollerMid)
             self.animation_all.addAnimation(self.animation_rollerRight)
+            self.animation_all.finished.connect(self.on_animation_finished)
             
+            self.isSimulationShowRunning = False
             self.presentMRScanning(Organ.NONE)
             self.deactivate()
 
         
         def setRollerShadesToInitialPosition(self):
-            #IH240724 TODO
-            self.lRollerShadePaneLeft.setGeometry(11,-10,320,320)
-            self.lRollerShadePaneMid.setGeometry(307,-10,320,320)
-            self.lRollerShadePaneRight.setGeometry(603,-10,320,320)
+            """
+            Initial position is 'fully shading/covering the images'
+            """
+            # debug_message(self.imagePaneLeft.geometry())
+            # debug_message(self.imagePaneMid.geometry())
+            # debug_message(self.imagePaneRight.geometry())
 
+            self.lRollerShadePaneLeft.setGeometry(self.imagePaneLeft.geometry())
+            self.lRollerShadePaneLeft.y = self.imagePaneLeft.geometry().y()-20
+            self.lRollerShadePaneMid.setGeometry(self.imagePaneMid.geometry())
+            self.lRollerShadePaneMid.y = self.imagePaneMid.geometry().y()-20
+            self.lRollerShadePaneRight.setGeometry(self.imagePaneRight.geometry())
+            self.lRollerShadePaneRight.y = self.imagePaneRight.geometry().y()-20
+            
         def activate(self) -> None:
             for panel in self.mainWidgets:
                 panel.show()
             
             self.setRollerShadesToInitialPosition()
-            
+            self.isSimulationShowRunning = False
+            for o in self.organButton.keys(): 
+                self.organButton[o].setActiveState(False)
+            self.imagePaneRightmost.update()
+
             if IsQtMultimediaAvailable:
                 self.video_widget.show()
                 self.media_player.play()
@@ -561,6 +606,8 @@ class MRSM_Presentation():
                 panel.hide()
             self.animation_all.stop()
 
+            self.isSimulationShowRunning = False
+
             if IsQtMultimediaAvailable:                
                 self.video_widget.hide()
                 self.media_player.stop()    
@@ -569,15 +616,36 @@ class MRSM_Presentation():
             """
             Scenario following pressing an organ button on the patient graphics
             """            
-            self.organ = organ
+            if self.isSimulationShowRunning:
+                return
             
-            if organ !=organ.NONE:
-                self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.SAGITTAL))
-                self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.CORONAL))
-                self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(organ,ImagingPlane.TRANSVERSAL))
+            self.currentOrgan = organ
+            
+            for o in self.organButton.keys(): 
+                self.organButton[o].setActiveState(False)
+            self.imagePaneRightmost.update()
 
-                self.parent.hardwareController.runScanningSimulationShow(self, self.organ)
+            if organ !=organ.NONE:
+                self.setRollerShadesToInitialPosition()
+
+                self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.SAGITTAL))
+                self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.CORONAL))
+                self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.TRANSVERSAL))
+
+                self.isSimulationShowRunning = True
+                self.parent.hardwareController.scanningSimulationShowStart(self, self.currentOrgan)
                 self.animation_all.start()
+
+                self.organButton[self.currentOrgan].setActiveState(True)
+
+                self.reset_idle_timer()
+
+        def on_animation_finished(self):
+            debug_message('animation finished')
+            self.isSimulationShowRunning = False
+            self.organButton[self.currentOrgan].setActiveState(False)
+            self.parent.hardwareController.scanningSimulationShowStop()
+            self.imagePaneRightmost.update()
             
         #IH240724 OBSOLETE
         def video_start(self):

@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240724
+#      Last update: IH240725
 #
 #
 """
@@ -63,6 +63,10 @@ class MRSM_Controller():
     def __init__(self) -> None:
         pass
 
-    def runScanningSimulationShow(self, organ : Organ, imagingPlane : ImagingPlane) -> None:
+    def scanningSimulationShowStart(self, organ : Organ, imagingPlane : ImagingPlane) -> None:
+        #IH240724 TODO implement
+        pass
+
+    def scanningSimulationShowStop(self) -> None:
         #IH240724 TODO implement
         pass

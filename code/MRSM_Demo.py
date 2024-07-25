@@ -89,11 +89,12 @@ from MRSM_Controller import MRSM_Controller
 from MRSM_Presentation import MRSM_Presentation
 from MRSM_Presentation import Language
 
-
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Globals import VerboseLevel
 from MRSM_Globals import __version__
+
+from MRSM_Globals import error_message, debug_message
 
 class MSRM_Demo_QApplication(QApplication):
     """
@@ -122,15 +123,9 @@ class MSRM_Demo_QApplication(QApplication):
 
         self.app_language = language_dict.get(parser.value(language_option))
         if self.app_language is None:
-            self.error_message(f'Invalid language: {parser.value(language_option)}. Using EN instead.')
+            error_message(f'Invalid language: {parser.value(language_option)}. Using EN instead.')
             self.app_language = Language.ENGLISH
                 
-            
-    
-    def error_message(self,m):
-        if VerboseLevel>0:
-            print(m)
-    
 
 #-------------------------------------------------------------------------------
 MRSM_application = MSRM_Demo_QApplication(sys.argv)
