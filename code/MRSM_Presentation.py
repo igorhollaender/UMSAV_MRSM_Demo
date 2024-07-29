@@ -701,7 +701,7 @@ class MRSM_Presentation():
 
             self.bResumeApp = parent.MRSM_PushButton('...',parent.MRSM_Window)
             self.bResumeApp.clicked.connect(self.parent.quit_idle_start_main)
-            self.grid.addWidget(self.bResumeApp,2,28,1,4)
+            self.grid.addWidget(self.bResumeApp,2,27,1,4)
             self.idleWidgets += [self.bResumeApp]
 
             self.deactivate()

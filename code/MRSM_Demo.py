@@ -55,8 +55,21 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #   https://stackoverflow.com/questions/69994530/qt-qpa-plugin-could-not-find-the-qt-platform-plugin-wayland
 #
 #
+#-------------------------------------------------------------------------------
+#  On RPI, the python code resides here>
 #
-
+#   /home/um/Projekty_UM_ODD4/MRSM/code
+#
+#-------------------------------------------------------------------------------
+#
+#  For autostart apps in the desktop enviroment, use the Main Menu Editor
+#
+#      https://stackoverflow.com/questions/17939480/executing-a-script-after-the-user-has-logged-in-on-raspberry-pi/64957268#64957268
+#
+#   the autostart script is here>
+#      /etc/xdg/lxsession/LXDE-pi/autostart
+#  also see (for manual setup)
+#      https://raspberry-projects.com/pi/pi-operating-systems/raspbian/auto-running-programs-gui#
 
 # TODOs
 #-------------------------------------------------------------------------------
