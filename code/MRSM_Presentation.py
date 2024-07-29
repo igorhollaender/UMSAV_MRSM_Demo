@@ -408,7 +408,7 @@ class MRSM_Presentation():
             #IH240717 for debugging only
             self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
             self.b3.clicked.connect(self.parent.quit_main_start_idle)
-            self.grid.addWidget(self.b3,4,22,1,10)
+            self.grid.addWidget(self.b3,3,22,1,10)
             self.mainWidgets += [self.b3]
 
             self.pixmapPatient = QPixmap("resources/images/diverse/MRSM_patient_240722.jpg")
@@ -668,7 +668,7 @@ class MRSM_Presentation():
         """
         This scenario applies after a longer inactivity break (IDLE_BREAK_DURATION_SEC) of the ShowMain.
         """
-        IDLE_BREAK_DURATION_SEC  = 30
+        IDLE_BREAK_DURATION_SEC  = 30  # IH240729 set to 30 for real app
 
         def __init__(self,parent) -> None:
 
@@ -680,6 +680,13 @@ class MRSM_Presentation():
             self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
             self.bgPixmap = QPixmap("resources/images/diverse/MRSM_fullview_240722.jpg")            
             self.bgLabel.setPixmap(self.bgPixmap.scaled(1480,320,Qt.AspectRatioMode.KeepAspectRatioByExpanding))
+            
+            #IH240729 This is necessary to prevent the image from voluntarily resizing
+            self.bgLabel.setMinimumHeight(300)            
+            self.bgLabel.setMaximumHeight(300)            
+            self.bgLabel.setMinimumWidth(1460)            
+            self.bgLabel.setMaximumWidth(1460)            
+
             self.idleWidgets += [self.bgLabel]
 
             self.lIdleTitleBig = QLabel(parent.lcls("#103"))
@@ -699,11 +706,10 @@ class MRSM_Presentation():
 
             self.deactivate()
 
-        def activate(self):
-            for w in self.idleWidgets:
-                w.show()            
-            if not IsWaveShareDisplayEmulated:
-                self.parent.ShowFullScreen()
+        def activate(self):            
+            for w in self.idleWidgets:                                
+                w.show()      
+            self.parent.show()
     
         def deactivate(self):
             for w in self.idleWidgets:

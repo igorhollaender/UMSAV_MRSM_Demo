@@ -9,8 +9,8 @@
 #
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
-#
-#      Last update: IH240724
+9
+#      Last update: IH240729
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -47,7 +47,7 @@ QLabel#lVersion
 
 QLabel#lTitle 
 {        
-    font: bold 80px;
+    font: bold 65px;    /* IH240729 65px is ok for RPI */
 }
 
 QLabel#lIdleTitleBig 
