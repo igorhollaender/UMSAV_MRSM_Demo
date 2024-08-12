@@ -99,6 +99,7 @@ from PyQt6.QtWidgets import (
     QGridLayout,
     QLabel,
     QPushButton,
+    QScrollArea,
     QSizePolicy,
     QWidget        
 )                  
@@ -134,6 +135,37 @@ class PoorMansLocalizer():
         """
         ENGLISH to (targetLanguage) TRANSLATIONS
         """
+
+        #IH240812 for debugging only
+        LoremIpsumHTMLText = """
+                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
+                          Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+
+                        <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
+                          fringilla vel, aliquet nec, vulputate eget, arcu.</p>
+
+                        <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
+                          Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
+                          Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
+                          <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
+                          Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+                          Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
+                          fringilla vel, aliquet nec, vulputate eget, arcu.
+                          In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
+                          Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
+                          Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
+
+                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
+                          Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+
+                        <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
+                          fringilla vel, aliquet nec, vulputate eget, arcu.</p>
+
+                        <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
+                          Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
+                          Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
+
+                        """
         d = [
             {   'enSrcTerm': 'QUIT',
                 'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'OPUSTIŤ'},
@@ -183,7 +215,15 @@ class PoorMansLocalizer():
             {   'enSrcTerm': '#106',
                 'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'This is text1'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Das ist Text1'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Toto je Text1'},
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': """
+                        <b>O tomografii na báze magnetickej rezonancie</b>
+                        <p><i>Toto je nový odstavec (kurzívou)</i></p>
+                        <p>Nasleduje obrázok</p>
+                        <p><img src="resources/images/diverse/MRSM_fullview_240722.jpg" height="200">  
+                        <img src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="200"></p>  
+                        """ + LoremIpsumHTMLText
+                        #IH240812 TODO updated contents
+                        },
             ]},
         ]
 
@@ -264,7 +304,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 5  
+        INTRO_DURATION_SEC  = 1  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -763,13 +803,25 @@ class MRSM_Presentation():
             self.infoWidgets += [self.bgLabel]
 
             self.lHTMLText1 = QLabel(parent.lcls("#106"))
-            self.grid.addWidget(self.lHTMLText1,1,2,1,20)
+            self.lHTMLText1.setWordWrap(True)
+            self.lHTMLText1.setMinimumWidth(1000)
+            self.lHTMLText1.setMaximumWidth(1000)
+            
+            # self.grid.addWidget(self.lHTMLText1,0,0,4,27)
+            self.saHTMLText1 = QScrollArea()
+            self.saHTMLText1.setWidget(self.lHTMLText1)
+            self.saHTMLText1.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            self.saHTMLText1.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+            self.grid.addWidget(self.saHTMLText1,0,0,4,28)
+
             self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
-            self.infoWidgets += [self.lHTMLText1]
+            
+            # self.infoWidgets += [self.lHTMLText1]
+            self.infoWidgets += [self.saHTMLText1]
 
             self.bResumeApp = parent.MRSM_PushButton(parent.lcls('BACK'),parent.MRSM_Window)
             self.bResumeApp.clicked.connect(self.parent.quit_info_start_main)
-            self.grid.addWidget(self.bResumeApp,2,27,1,4)
+            self.grid.addWidget(self.bResumeApp,3,29,1,4)
             self.infoWidgets += [self.bResumeApp]
 
             self.deactivate()
