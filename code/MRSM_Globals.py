@@ -22,8 +22,8 @@ IsRaspberryPi5Emulated      = True  # set to False for real application
 IsQtMultimediaAvailable     = False  # IH240722 I had problems 
                                      # installing QtMultimedia on Raspberry OS,
                                      # so this is a workaround
-HasToShowExitButton         = True   # set to False for real application
-HasToShowGoIdleButton       = True   # set to False for real application
+HasToShowExitButton         = False   # set to False for real application
+HasToShowGoIdleButton       = False   # set to False for real application
 
 VerboseLevel                = 2     # 0 is complete muted, 1 is standard, 2 is for debugging
 

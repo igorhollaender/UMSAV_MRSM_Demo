@@ -65,6 +65,9 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 from MRSM_Globals import IsWaveShareDisplayEmulated
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Globals import IsQtMultimediaAvailable
+from MRSM_Globals import HasToShowExitButton
+from MRSM_Globals import HasToShowGoIdleButton
+
 from MRSM_Globals import __version__
 
 from MRSM_Globals import error_message, debug_message
@@ -144,6 +147,14 @@ class PoorMansLocalizer():
                 'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SKONČIŤ'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'FERTIGMACHEN'},
             ]},
+            {   'enSrcTerm': 'BACK',
+                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SPÄŤ'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'ZURÜCK'},
+            ]},
+            {   'enSrcTerm': 'INFO',
+                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'INFO'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'INFO'},
+            ]},
             {   'enSrcTerm': '#101',
                 'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'App starts in'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'App startet in'},
@@ -168,6 +179,11 @@ class PoorMansLocalizer():
                 'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Select organ for imaging...'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Organ für Untesuchung auswählen...'},
                          {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Vyber orgán, ktorý chceš vyšetriť...'},
+            ]},
+            {   'enSrcTerm': '#106',
+                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'This is text1'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Das ist Text1'},
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Toto je Text1'},
             ]},
         ]
 
@@ -248,7 +264,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 1  
+        INTRO_DURATION_SEC  = 5  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -388,12 +404,18 @@ class MRSM_Presentation():
                     #IH240718 should be set to Infinite, but I do not know where to find the constant
                     # QMediaPlayer.Infinite is not defined
                 self.grid.addWidget(self.video_widget,0,0,3,2)
-        
+                
+            self.bInfo = self.parent.MRSM_PushButton(self.parent.lcls('INFO'),self.parent.MRSM_Window)
+            self.bInfo.clicked.connect(self.parent.quit_main_start_info)
+            self.grid.addWidget(self.bInfo,0,22,1,10)
+            self.mainWidgets += [self.bInfo]
+
             #IH240717 for debugging only
-            self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
-            self.b1.clicked.connect(self.parent.quit_app)
-            self.grid.addWidget(self.b1,0,22,1,10)
-            self.mainWidgets += [self.b1]
+            if HasToShowExitButton:
+                self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
+                self.b1.clicked.connect(self.parent.quit_app)
+                self.grid.addWidget(self.b1,1,22,1,10)
+                self.mainWidgets += [self.b1]
             
             #IH240717 for debugging only
             # self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
@@ -406,10 +428,11 @@ class MRSM_Presentation():
             # self.grid.addWidget(self.b4,3,22,1,10)
 
             #IH240717 for debugging only
-            self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
-            self.b3.clicked.connect(self.parent.quit_main_start_idle)
-            self.grid.addWidget(self.b3,3,22,1,10)
-            self.mainWidgets += [self.b3]
+            if HasToShowGoIdleButton:
+                self.b3 = self.parent.MRSM_PushButton(self.parent.lcls('GO IDLE'),self.parent.MRSM_Window)
+                self.b3.clicked.connect(self.parent.quit_main_start_idle)
+                self.grid.addWidget(self.b3,3,22,1,10)
+                self.mainWidgets += [self.b3]
 
             self.pixmapPatient = QPixmap("resources/images/diverse/MRSM_patient_240722.jpg")
             self.pixmapPatientScaled = self.pixmapPatient.scaled(800,220,  #IH240723 do not change this!!: 800,200
@@ -636,10 +659,10 @@ class MRSM_Presentation():
                 self.isSimulationShowRunning = True
                 self.parent.hardwareController.scanningSimulationShowStart(organ=self.currentOrgan,imagingPlane=ImagingPlane.ARBITRARY)
                 self.animation_all.start()
+                self.parent.idle_timer.stop()   #IH240812 avoid going idle during animation
 
                 self.organButton[self.currentOrgan].setActiveState(True)
 
-                self.reset_idle_timer()
 
         def on_animation_finished(self):
             debug_message('animation finished')
@@ -647,6 +670,7 @@ class MRSM_Presentation():
             self.organButton[self.currentOrgan].setActiveState(False)
             self.parent.hardwareController.scanningSimulationShowStop()
             self.imagePaneRightmost.update()
+            self.reset_idle_timer()
             
         #IH240724 OBSOLETE
         def video_start(self):
@@ -715,6 +739,54 @@ class MRSM_Presentation():
         def deactivate(self):
             for w in self.idleWidgets:
                 w.hide()
+
+    class ShowInfo():
+        """
+        Info including briefing about MRI and acknowledgments for resources used
+        """
+
+        def __init__(self,parent) -> None:
+
+            self.grid :   QGridLayout   = parent.grid
+            self.parent : QWidget       = parent
+            self.infoWidgets = []
+
+            self.bgLabel = QLabel("",self.parent.MRSM_Window)
+            self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
+            
+            #IH240729 This is necessary to prevent the image from voluntarily resizing
+            self.bgLabel.setMinimumHeight(300)            
+            self.bgLabel.setMaximumHeight(300)            
+            self.bgLabel.setMinimumWidth(1460)            
+            self.bgLabel.setMaximumWidth(1460)            
+
+            self.infoWidgets += [self.bgLabel]
+
+            self.lHTMLText1 = QLabel(parent.lcls("#106"))
+            self.grid.addWidget(self.lHTMLText1,1,2,1,20)
+            self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
+            self.infoWidgets += [self.lHTMLText1]
+
+            self.bResumeApp = parent.MRSM_PushButton(parent.lcls('BACK'),parent.MRSM_Window)
+            self.bResumeApp.clicked.connect(self.parent.quit_info_start_main)
+            self.grid.addWidget(self.bResumeApp,2,27,1,4)
+            self.infoWidgets += [self.bResumeApp]
+
+            self.deactivate()
+
+        def activate(self):            
+            for w in self.infoWidgets:                                
+                w.show()      
+            self.parent.show()
+            self.reset_idle_timer()
+    
+        def deactivate(self):
+            for w in self.infoWidgets:
+                w.hide()
+
+        def reset_idle_timer(self):
+            self.parent.idle_timer.stop()
+            self.parent.idle_timer.start(self.parent.ShowIdle.IDLE_BREAK_DURATION_SEC*1000)
     
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:
@@ -764,6 +836,7 @@ class MRSM_Presentation():
         self.showIntro = self.ShowIntro(self)
         self.showMain = self.ShowMain(self)
         self.showIdle = self.ShowIdle(self)
+        self.showInfo = self.ShowInfo(self)
 
         self.actual_idle_break_sec = 0
 
@@ -774,6 +847,7 @@ class MRSM_Presentation():
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
+            self.quit_info_start_idle()
 
     def quit_intro_start_main(self):
         self.showIntro.deactivate()
@@ -786,6 +860,19 @@ class MRSM_Presentation():
     def quit_main_start_idle(self):
         self.showMain.deactivate()
         self.showIdle.activate()
+
+    def quit_info_start_main(self):    
+        self.showInfo.deactivate()
+        self.showMain.activate()
+    
+    def quit_main_start_info(self):
+        self.showMain.deactivate()
+        self.showInfo.activate()
+
+    def quit_info_start_idle(self):    
+        self.showInfo.deactivate()
+        self.showIdle.activate()
+    
 
     def quit_app(self):
         """
