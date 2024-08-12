@@ -45,6 +45,14 @@ Controller of the Raspberry Pi hardware
 # IH DEVELOPMENT NOTES
 #-------------------------------------------------------------------------------
 #
+#    For Raspberry Pi 5  documentation, see
+#       https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-5-2
+#
+# 
+#    For gpiozero documentation, see
+#       https://gpiozero.readthedocs.io/en/stable/index.html
+#
+#
 
 
 # TODOs
