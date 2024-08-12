@@ -66,6 +66,17 @@ Controller of the Raspberry Pi hardware
 
 from enum import Enum
 
+from MRSM_Globals import IsRaspberryPi5Emulated
+from MRSM_Globals import error_message, debug_message
+
+from gpiozero import (
+    Device,
+    LEDBoard
+)
+
+if IsRaspberryPi5Emulated:
+    from gpiozero.pins.mock import MockFactory
+
 from pygame import mixer
 from MRSM_ImageBase import Organ, ImagingPlane
 
@@ -80,9 +91,10 @@ class MRSM_Controller():
 
     def __init__(self) -> None:
 
+        # audio 
+
         audioFile =  "resources/audio/MRIsounds/ytmp3free.cc_listen-to-mri-sounds-with-audio-frequency-analyzer-filmed-inside-the-mri-scan-room-youtubemp3free.org.mp3"
         self.audioPlayer = AudioPlayer(audioFile)
-
         self.organSound = {
             Organ.ABDOMEN:      SoundSample.NONE,   # IH240812 TODO
             Organ.KNEE:         SoundSample.KNEEMRISOUND,
@@ -91,21 +103,27 @@ class MRSM_Controller():
             Organ.NONE:         SoundSample.NONE,
         }
 
+        # Raspberry Pi GPIO
+
+        self.rpiGPIO = RaspberryPiGPIO()
+
       
     def finalize(self):
          self.audioPlayer.finalize()
 
     def scanningSimulationShowStart(self, organ : Organ, imagingPlane : ImagingPlane) -> None:
         self.audioPlayer.play(self.organSound[organ])
-        # self.audioPlayer.play(self.organSound[Organ.KNEE])
-
+        self.rpiGPIO.setBoreLEDIlluminationOn(True)
+        self.rpiGPIO.setMainMagnetCoilOn(True)    
 
     def scanningSimulationShowStop(self) -> None:
         self.audioPlayer.stop()
+        self.rpiGPIO.setBoreLEDIlluminationOn(False)
+        self.rpiGPIO.setMainMagnetCoilOn(False)    
+
 
 class AudioPlayer():
 
-      
     def __init__(self,audioFile) -> None:
 
         self.sampleStartTime = {
@@ -135,5 +153,24 @@ class AudioPlayer():
         mixer.music.stop()
 
 
+class RaspberryPiGPIO():
+
+    def __init__(self) -> None:
+        if IsRaspberryPi5Emulated:
+            Device.pin_factory = MockFactory()
+        
+        self.boreLEDs = LEDBoard(2,3,4)     #IH240812 for debugging only
+        self.mainMagnetCoil = LEDBoard(5)   #IH240812 for debugging only
+
+    def setBoreLEDIlluminationOn(self,setON: bool) -> None:
+        self.boreLEDs.on() if setON else self.boreLEDs.off()
+        if IsRaspberryPi5Emulated:
+            debug_message(f"Bore LEDs are now {"ON" if setON else "OFF"}")
+
+    def setMainMagnetCoilOn(self,setON: bool) -> None:
+        self.mainMagnetCoil.on() if setON else self.mainMagnetCoil.off()
+        if IsRaspberryPi5Emulated:
+            debug_message(f"Main magnet is now {"ON" if setON else "OFF"}")
+        
 
 

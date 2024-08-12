@@ -223,6 +223,7 @@ class PoorMansLocalizer():
                         <img src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="200"></p>  
                         """ + LoremIpsumHTMLText
                         #IH240812 TODO updated contents
+                        #IH240812 for HTML formatting in Qt, see https://doc.qt.io/qt-6/richtext-html-subset.html
                         },
             ]},
         ]
@@ -304,7 +305,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 1  
+        INTRO_DURATION_SEC  = 5  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
