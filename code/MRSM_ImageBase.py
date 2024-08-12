@@ -10,7 +10,7 @@
 #      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
-#      Last update: IH240724
+#      Last update: IH240812
 #-------------------------------------------------------------------------------
 
 from enum import Enum
@@ -30,9 +30,10 @@ class Organ(Enum):
         ABDOMEN     =   3
 
 class ImagingPlane(Enum):
-        SAGITTAL    =   0
-        CORONAL     =   1
-        TRANSVERSAL =   2
+        ARBITRARY   =   0
+        SAGITTAL    =   1
+        CORONAL     =   2
+        TRANSVERSAL =   3
     
 
 class ImageBase():

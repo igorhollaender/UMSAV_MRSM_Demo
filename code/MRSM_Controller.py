@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240725
+#      Last update: IH240812
 #
 #
 """
@@ -56,17 +56,76 @@ Controller of the Raspberry Pi hardware
 #
 #-------------------------------------------------------------------------------
 
+from enum import Enum
+
+from pygame import mixer
 from MRSM_ImageBase import Organ, ImagingPlane
+
+
+class SoundSample(Enum):
+        NONE                    = 0
+        KNEEMRISOUND            = 1
+        HEADMRISOUND            = 2
+
 
 class MRSM_Controller():
 
     def __init__(self) -> None:
-        pass
+
+        audioFile =  "resources/audio/MRIsounds/ytmp3free.cc_listen-to-mri-sounds-with-audio-frequency-analyzer-filmed-inside-the-mri-scan-room-youtubemp3free.org.mp3"
+        self.audioPlayer = AudioPlayer(audioFile)
+
+        self.organSound = {
+            Organ.ABDOMEN:      SoundSample.NONE,   # IH240812 TODO
+            Organ.KNEE:         SoundSample.KNEEMRISOUND,
+            Organ.HEAD:         SoundSample.HEADMRISOUND,
+
+            Organ.NONE:         SoundSample.NONE,
+        }
+
+      
+    def finalize(self):
+         self.audioPlayer.finalize()
 
     def scanningSimulationShowStart(self, organ : Organ, imagingPlane : ImagingPlane) -> None:
-        #IH240724 TODO implement
-        pass
+        self.audioPlayer.play(self.organSound[organ])
+        # self.audioPlayer.play(self.organSound[Organ.KNEE])
+
 
     def scanningSimulationShowStop(self) -> None:
-        #IH240724 TODO implement
-        pass
+        self.audioPlayer.stop()
+
+class AudioPlayer():
+
+      
+    def __init__(self,audioFile) -> None:
+
+        self.sampleStartTime = {
+             # start times of the respective sample in the file referred to above
+             #IH240812 TODO tune up the exact times
+             SoundSample.HEADMRISOUND:   (2*60.0 + 20.0) , # 2:20,  IH240812 just for debugging, TODO implement properly
+             SoundSample.KNEEMRISOUND:   (8*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
+
+             SoundSample.NONE:           0
+        }
+    
+        self.mixer = mixer
+        self.audioFile = audioFile
+        self.mixer.init()   # IH240812 TODO  implement potential parameters here
+        self.mixer.music.load(self.audioFile)
+
+    def finalize(self):
+        mixer.quit()
+
+    def play(self, soundSample : SoundSample):
+        #IH240812 TODO implement
+        if soundSample!=SoundSample.NONE:
+            mixer.music.play(start=self.sampleStartTime[soundSample])
+    
+    def stop(self):
+        #IH240812 TODO implement
+        mixer.music.stop()
+
+
+
+

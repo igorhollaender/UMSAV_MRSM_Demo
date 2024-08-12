@@ -138,11 +138,15 @@ class MSRM_Demo_QApplication(QApplication):
         if self.app_language is None:
             error_message(f'Invalid language: {parser.value(language_option)}. Using EN instead.')
             self.app_language = Language.ENGLISH
-                
+
+
+def finalizeApp():
+    MRSM_controller.finalize()
 
 #-------------------------------------------------------------------------------
 MRSM_application = MSRM_Demo_QApplication(sys.argv)
 MRSM_application.parseCommandLine()
+MRSM_application.aboutToQuit.connect(finalizeApp)
 MRSM_controller = MRSM_Controller()
 MRSM_presentation = MRSM_Presentation(
         language=MRSM_application.app_language,

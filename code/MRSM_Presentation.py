@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240725
+#       Last update: IH240812
 #
 #
 """
@@ -248,7 +248,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 5  
+        INTRO_DURATION_SEC  = 1  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -468,6 +468,7 @@ class MRSM_Presentation():
 
             self.grid.addWidget(self.imagePaneRightmost, 0,12,5,10)              
             self.imagePanels = [self.imagePaneRightmost]
+            self.imagePaneRightmost.setObjectName("imagePaneRightmost")
 
             self.imagePaneLeft  = QLabel("",self.parent.MRSM_Window)
             self.imagePaneMid   = QLabel("",self.parent.MRSM_Window)
@@ -633,7 +634,7 @@ class MRSM_Presentation():
                 self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.TRANSVERSAL))
 
                 self.isSimulationShowRunning = True
-                self.parent.hardwareController.scanningSimulationShowStart(self, self.currentOrgan)
+                self.parent.hardwareController.scanningSimulationShowStart(organ=self.currentOrgan,imagingPlane=ImagingPlane.ARBITRARY)
                 self.animation_all.start()
 
                 self.organButton[self.currentOrgan].setActiveState(True)

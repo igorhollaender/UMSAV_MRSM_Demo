@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH240729
+#      Last update: IH240812
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -43,6 +43,11 @@ QLabel#lCountdown,
 QLabel#lVersion  
 {        
     font: bold 14px;
+}
+
+#imagePaneRightmost
+{
+    background-color: cyan;
 }
 
 QLabel#lTitle 
