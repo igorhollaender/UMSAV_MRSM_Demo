@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240812
+#      Last update: IH240813
 #
 #
 """
@@ -165,12 +165,12 @@ class RaspberryPiGPIO():
     def setBoreLEDIlluminationOn(self,setON: bool) -> None:
         self.boreLEDs.on() if setON else self.boreLEDs.off()
         if IsRaspberryPi5Emulated:
-            debug_message(f"Bore LEDs are now {"ON" if setON else "OFF"}")
+            debug_message(f"Bore LEDs are now {'ON' if setON else 'OFF'}")
 
     def setMainMagnetCoilOn(self,setON: bool) -> None:
         self.mainMagnetCoil.on() if setON else self.mainMagnetCoil.off()
         if IsRaspberryPi5Emulated:
-            debug_message(f"Main magnet is now {"ON" if setON else "OFF"}")
+            debug_message(f"Main magnet is now {'ON' if setON else 'OFF'}")
         
 
 
