@@ -141,16 +141,16 @@ class AudioPlayer():
         self.mixer.music.load(self.audioFile)
 
     def finalize(self):
-        mixer.quit()
+        self.mixer.quit()
 
     def play(self, soundSample : SoundSample):
         #IH240812 TODO implement
         if soundSample!=SoundSample.NONE:
-            mixer.music.play(start=self.sampleStartTime[soundSample])
+            self.mixer.music.play(start=self.sampleStartTime[soundSample])
     
     def stop(self):
         #IH240812 TODO implement
-        mixer.music.stop()
+        self.mixer.music.stop()
 
 
 class RaspberryPiGPIO():
