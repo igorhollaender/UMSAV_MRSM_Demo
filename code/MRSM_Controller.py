@@ -85,6 +85,9 @@ class SoundSample(Enum):
         NONE                    = 0
         KNEEMRISOUND            = 1
         HEADMRISOUND            = 2
+        BODYMRISOUND            = 3
+        HANDMRISOUND            = 4
+        WHOLESPINEMRISOUND      = 5
 
 
 class MRSM_Controller():
@@ -96,9 +99,11 @@ class MRSM_Controller():
         audioFile =  "resources/audio/MRIsounds/ytmp3free.cc_listen-to-mri-sounds-with-audio-frequency-analyzer-filmed-inside-the-mri-scan-room-youtubemp3free.org.mp3"
         self.audioPlayer = AudioPlayer(audioFile)
         self.organSound = {
-            Organ.ABDOMEN:      SoundSample.NONE,   # IH240812 TODO
+            Organ.BODY:         SoundSample.BODYMRISOUND,
             Organ.KNEE:         SoundSample.KNEEMRISOUND,
             Organ.HEAD:         SoundSample.HEADMRISOUND,
+            Organ.HAND:         SoundSample.HANDMRISOUND,
+            Organ.WHOLESPINE:   SoundSample.WHOLESPINEMRISOUND,
 
             Organ.NONE:         SoundSample.NONE,
         }
@@ -131,6 +136,9 @@ class AudioPlayer():
              #IH240812 TODO tune up the exact times
              SoundSample.HEADMRISOUND:   (2*60.0 + 20.0) , # 2:20,  IH240812 just for debugging, TODO implement properly
              SoundSample.KNEEMRISOUND:   (8*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
+             SoundSample.HANDMRISOUND:   (6*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
+             SoundSample.BODYMRISOUND:   (4*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
+             SoundSample.WHOLESPINEMRISOUND:   (9*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
 
              SoundSample.NONE:           0
         }

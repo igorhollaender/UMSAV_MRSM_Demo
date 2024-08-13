@@ -307,7 +307,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 5  
+        INTRO_DURATION_SEC  = 1  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -497,28 +497,12 @@ class MRSM_Presentation():
                 f.setPointSize(15)
                 f.setBold(True)
                 self.patientScene.addText(parent.lcls("#105")).setFont(f)
-    
-                # IH240724 OBSOLETE
-                #  self.kneeCircle = QGraphicsEllipseItem(0,0,40,40)
-                #  self.kneeCircle.setPos(120,100)
-                #  self.kneeCircle.setPen(Qt.GlobalColor.green)
-                #  self.kneeCircle.setBrush(Qt.GlobalColor.green)
-                #  self.kneeCircle.setOpacity(0.5)
-                #  self.patientScene.addItem(self.kneeCircle)
-                 
+             
                 # organ graphics buttons
                 #  
                 self.organButton = dict()
                  
-                # IH240725 OBSOLETE
-                # self.kneeOrganButton = self.OrganButton(120,100,40,40,self)
-                # self.kneeOrganButton.setData(1,Organ.KNEE)
-                # self.patientScene.addItem(self.kneeOrganButton)
-
-                # self.headOrganButton = self.OrganButton(410,40,40,40,self)
-                # self.headOrganButton.setData(1,Organ.HEAD)
-                # self.patientScene.addItem(self.headOrganButton)
-
+        
                 self.organButton[Organ.KNEE] = self.OrganButton(120,100,40,40,self)
                 self.organButton[Organ.KNEE].setData(1,Organ.KNEE)
                 self.patientScene.addItem(self.organButton[Organ.KNEE])
@@ -527,7 +511,13 @@ class MRSM_Presentation():
                 self.organButton[Organ.HEAD].setData(1,Organ.HEAD)
                 self.patientScene.addItem(self.organButton[Organ.HEAD])
 
-                # IH240724 TODO add more organs
+                self.organButton[Organ.HAND] = self.OrganButton(220,135,40,40,self)
+                self.organButton[Organ.HAND].setData(1,Organ.HAND)
+                self.patientScene.addItem(self.organButton[Organ.HAND])
+
+                self.organButton[Organ.BODY] = self.OrganButton(280,70,40,40,self)
+                self.organButton[Organ.BODY].setData(1,Organ.BODY)
+                self.patientScene.addItem(self.organButton[Organ.BODY])
 
                 self.imagePaneRightmost = QGraphicsView(self.patientScene)
 
@@ -568,29 +558,6 @@ class MRSM_Presentation():
             
             self.pixmapStandardSize = 290
             
-            # IH240724 OBSOLETE
-            # self.pixmapHeadSag = QPixmap("resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg")
-            # self.pixmapHeadCor = QPixmap("resources/images/Free-Max/Head/2b_Head_t2_tse_cor_p4_DRB.jpg")
-            # self.pixmapHeadTra = QPixmap("resources/images/Free-Max/Head/2c_Head_t2_tse_tra_p4.jpg")
-
-            # self.pixmapHeadSagScaled = self.pixmapHeadSag.scaled(
-            #         self.pixmapStandardSize,self.pixmapStandardSize,
-            #         aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            # self.pixmapHeadCorScaled = self.pixmapHeadCor.scaled(
-            #         self.pixmapStandardSize,
-            #         self.pixmapStandardSize,
-            #         aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            # self.pixmapHeadTraScaled = self.pixmapHeadTra.scaled(
-            #         self.pixmapStandardSize,
-            #         self.pixmapStandardSize,
-            #         aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-            # self.imagePaneLeft.setPixmap(self.pixmapHeadSagScaled)
-            # self.imagePaneMid.setPixmap(self.pixmapHeadCorScaled)
-            # self.imagePaneRight.setPixmap(self.pixmapHeadTraScaled)
-
-            # self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.SAGITTAL))
-            # self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.CORONAL))
-            # self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.TRANSVERSAL))
 
             for panel in self.imagePanelsMRI:
                 panel.setMinimumHeight(self.pixmapStandardSize)
@@ -695,9 +662,21 @@ class MRSM_Presentation():
             if organ !=organ.NONE:
                 self.setRollerShadesToInitialPosition()
 
-                self.imagePaneLeft.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.SAGITTAL))
-                self.imagePaneMid.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.CORONAL))
-                self.imagePaneRight.setPixmap(self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.TRANSVERSAL))
+                # clean all pixmaps
+                self.imagePaneLeft.setPixmap(QPixmap())
+                self.imagePaneMid.setPixmap(QPixmap())
+                self.imagePaneRight.setPixmap(QPixmap())
+
+                pm = self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.SAGITTAL)
+                if pm is not None:                
+                    self.imagePaneLeft.setPixmap(pm)
+                pm = self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.CORONAL)
+                if pm is not None:                
+                    self.imagePaneMid.setPixmap(pm)
+                pm = self.parent.MRSM_ImageBase.getScaledPixmap(self.currentOrgan,ImagingPlane.TRANSVERSAL)
+                if pm is not None:                
+                    self.imagePaneRight.setPixmap(pm)                    
+                
 
                 self.isSimulationShowRunning = True
                 self.parent.hardwareController.scanningSimulationShowStart(organ=self.currentOrgan,imagingPlane=ImagingPlane.ARBITRARY)

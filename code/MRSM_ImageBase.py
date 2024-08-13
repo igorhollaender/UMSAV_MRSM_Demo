@@ -10,7 +10,7 @@
 #      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
-#      Last update: IH240812
+#      Last update: IH240813
 #-------------------------------------------------------------------------------
 
 from enum import Enum
@@ -27,7 +27,9 @@ class Organ(Enum):
         NONE        =   0
         HEAD        =   1
         KNEE        =   2
-        ABDOMEN     =   3
+        BODY        =   3
+        HAND        =   4
+        WHOLESPINE  =   5
 
 class ImagingPlane(Enum):
         ARBITRARY   =   0
@@ -78,7 +80,43 @@ class ImageBase():
                 'JPGFileRelativePath': "resources/images/Free-Max/Knee/13c_Knee_pd_tse_fs_tra_p4_DRB.jpg", 
                 'pixmapOriginal':   None,
                 'pixmapScaled':    None,
+            },
+            {'organ':  Organ.BODY	, 
+             'imagingPlane' : ImagingPlane.CORONAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Body/3c_Body_t2_tse_cor_p4_mbh_DRB.jpg",
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
+            },
+            {'organ':  Organ.BODY, 
+             'imagingPlane' : ImagingPlane.TRANSVERSAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Body/3b_Body_t2_tse_tra_p4_mbh_DRB.jpg", 
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
             },  
+            {'organ':  Organ.HAND, 
+             'imagingPlane' : ImagingPlane.SAGITTAL, 
+                'JPGFileRelativePath': "resources/images/Free-Max/Hand/11d_Hand_t2_tse_sag_p4_DRB.jpg",
+                'pixmapOriginal':   None,  
+                'pixmapScaled':    None   
+            },  
+            {'organ':  Organ.HAND, 
+             'imagingPlane' : ImagingPlane.CORONAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Hand/11a_Hand_t1_tse_cor_p4_DRB.jpg",
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
+            },
+            {'organ':  Organ.HAND, 
+             'imagingPlane' : ImagingPlane.TRANSVERSAL,
+                'JPGFileRelativePath': "resources/images/Free-Max/Hand/11c_Hand_pd_tse_fs_tra_p4_DRB.jpg", 
+                'pixmapOriginal':   None,
+                'pixmapScaled':    None,
+            },
+            {'organ':  Organ.WHOLESPINE,
+             'imagingPlane' : ImagingPlane.SAGITTAL, 
+                'JPGFileRelativePath': "resources/images/Free-Max/WholeSpine/1a_Whole_spine_T1_TSE_2steps.jpg",
+                'pixmapOriginal':   None,  
+                'pixmapScaled':    None   
+            },
         ]
 
         for im in self.MRimages:
