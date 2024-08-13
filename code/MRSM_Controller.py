@@ -159,7 +159,7 @@ class RaspberryPiGPIO():
         if IsRaspberryPi5Emulated:
             Device.pin_factory = MockFactory()
         
-        self.boreLEDs = LEDBoard(2,3,4)     #IH240812 for debugging only
+        self.boreLEDs = LEDBoard("GPIO17")     #IH240812 for debugging only                    
         self.mainMagnetCoil = LEDBoard(5)   #IH240812 for debugging only
 
     def setBoreLEDIlluminationOn(self,setON: bool) -> None:

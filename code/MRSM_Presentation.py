@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240812
+#       Last update: IH240813
 #
 #
 """
@@ -54,6 +54,8 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 
 # TODOs
 #-------------------------------------------------------------------------------
+#
+#   IH240813    moving scroll bar in INFO window has to reset the idle timer
 
 # BUGs
 #
@@ -822,7 +824,7 @@ class MRSM_Presentation():
 
             self.bResumeApp = parent.MRSM_PushButton(parent.lcls('BACK'),parent.MRSM_Window)
             self.bResumeApp.clicked.connect(self.parent.quit_info_start_main)
-            self.grid.addWidget(self.bResumeApp,3,29,1,4)
+            self.grid.addWidget(self.bResumeApp,2,29,1,4)
             self.infoWidgets += [self.bResumeApp]
 
             self.deactivate()
