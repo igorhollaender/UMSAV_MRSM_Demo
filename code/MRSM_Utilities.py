@@ -19,7 +19,8 @@ from MRSM_Globals import VerboseLevel
 
 from PyQt6.QtCore import (
     QTimer, 
-    # Signal
+    pyqtSignal,
+    pyqtSlot
     )
 
 def error_message(m):
@@ -37,13 +38,12 @@ class TimerIterator(QTimer):
     https://stackoverflow.com/questions/68586377/iterate-with-an-interval-timer
 
     """
-    # value_changed = Signal(object)
+    value_changed = pyqtSignal(object)
 
     def __init__(self, values=None, parent=None):
         super().__init__(parent)
         self._values = []
         self.timeout.connect(self.handle_timeout)
-        
         self.values = values or []
 
     @property
