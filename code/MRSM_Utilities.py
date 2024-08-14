@@ -38,7 +38,7 @@ class TimerIterator(QTimer):
     https://stackoverflow.com/questions/68586377/iterate-with-an-interval-timer
 
     """
-    value_changed = pyqtSignal(object)
+    value_changed = pyqtSignal()
 
     def __init__(self, values=None, parent=None):
         super().__init__(parent)

@@ -68,6 +68,14 @@ from enum import Enum
 
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Utilities import error_message, debug_message
+from MRSM_Utilities import (
+    TimerIterator,
+)
+from PyQt6.QtCore import (
+    pyqtSlot,
+    Qt
+)
+    
 
 from gpiozero import (
     Device,
@@ -89,6 +97,11 @@ class SoundSample(Enum):
         HANDMRISOUND            = 4
         WHOLESPINEMRISOUND      = 5
 
+class BoreLEDGroup(Enum):
+        GROUP1                  =   1
+        GROUP2                  =   2
+        GROUP3                  =   3
+        
 
 class MRSM_Controller():
 
@@ -111,7 +124,7 @@ class MRSM_Controller():
         # Raspberry Pi GPIO
 
         self.rpiGPIO = RaspberryPiGPIO()
-
+       
       
     def finalize(self):
          self.audioPlayer.finalize()
@@ -169,16 +182,38 @@ class RaspberryPiGPIO():
         
         self.boreLEDs = LEDBoard("GPIO17")     #IH240812 for debugging only                    
         self.mainMagnetCoil = LEDBoard(5)   #IH240812 for debugging only
+        self.LEDShowScheduler = TimerIterator(
+            values=[
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 0.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP1: 0.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 1.0 },
+                ]
+            )
+        self.LEDShowScheduler.setInterval(200)  # in milliseconds
+        #IH240814 PROBLEM HERE
+        #IH240814 TODO implement slot, see
+        # https://stackoverflow.com/questions/36434706/pyqt-proper-use-of-emit-and-pyqtsignal 
+        
+        # self.LEDShowScheduler.value_changed.connect(self.LEDShowStep,type=Qt.ConnectionType.AutoConnection)
+
+
 
     def setBoreLEDIlluminationOn(self,setON: bool) -> None:
+        # simple show
         self.boreLEDs.on() if setON else self.boreLEDs.off()
+        # fancy show
+        self.LEDShowScheduler.start() if setON else self.LEDShowScheduler.stop()
+        
         if IsRaspberryPi5Emulated:
             debug_message(f"Bore LEDs are now {'ON' if setON else 'OFF'}")
 
     def setMainMagnetCoilOn(self,setON: bool) -> None:
         self.mainMagnetCoil.on() if setON else self.mainMagnetCoil.off()
         if IsRaspberryPi5Emulated:
-            debug_message(f"Main magnet is now {'ON' if setON else 'OFF'}")
-        
-
+            debug_message(f"Main magnet is now ")
+    
+    @pyqtSlot(list)
+    def LEDShowStep(self,l):
+        #IH240814 TODO implement
+        pass
 
