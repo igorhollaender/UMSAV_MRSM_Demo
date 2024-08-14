@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240813
+#       Last update: IH240814
 #
 #
 """
@@ -72,7 +72,7 @@ from MRSM_Globals import HasToShowGoIdleButton
 
 from MRSM_Globals import __version__
 
-from MRSM_Globals import error_message, debug_message
+from MRSM_Utilities import error_message, debug_message
 
 
 from PyQt6.QtGui import (

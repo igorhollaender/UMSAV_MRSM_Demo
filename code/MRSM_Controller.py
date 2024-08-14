@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240813
+#      Last update: IH240814
 #
 #
 """
@@ -67,7 +67,7 @@ Controller of the Raspberry Pi hardware
 from enum import Enum
 
 from MRSM_Globals import IsRaspberryPi5Emulated
-from MRSM_Globals import error_message, debug_message
+from MRSM_Utilities import error_message, debug_message
 
 from gpiozero import (
     Device,
@@ -135,10 +135,10 @@ class AudioPlayer():
              # start times of the respective sample in the file referred to above
              #IH240812 TODO tune up the exact times
              SoundSample.HEADMRISOUND:   (2*60.0 + 20.0) , # 2:20,  IH240812 just for debugging, TODO implement properly
-             SoundSample.KNEEMRISOUND:   (8*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
-             SoundSample.HANDMRISOUND:   (6*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
-             SoundSample.BODYMRISOUND:   (4*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
-             SoundSample.WHOLESPINEMRISOUND:   (9*60.0 + 15.0) , # 8:15,  IH240812 just for debugging, TODO implement properly
+             SoundSample.KNEEMRISOUND:   (5*60.0 +  0.0) , # 5:00,  IH240812 just for debugging, TODO implement properly
+             SoundSample.HANDMRISOUND:   (5*60.0 + 40.0) , # 5:40,  IH240812 just for debugging, TODO implement properly
+             SoundSample.BODYMRISOUND:   (6*60.0 + 25.0) , # 6:25,  IH240812 just for debugging, TODO implement properly
+             SoundSample.WHOLESPINEMRISOUND:   (7*60.0 + 20.0) , # 7:20,  IH240812 just for debugging, TODO implement properly
 
              SoundSample.NONE:           0
         }

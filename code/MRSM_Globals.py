@@ -10,12 +10,12 @@
 #      M  R  S  M  _  G l o b a l s  .  p  y 
 #
 #
-#      Last update: IH240813
+#      Last update: IH240814
 #-------------------------------------------------------------------------------
 import time
 
 
-__version__                 = "MRSM_Demo IH240813a"
+__version__                 = "MRSM_Demo IH240814a"
 
 IsWaveShareDisplayEmulated  = True   # set to False for real application
 IsRaspberryPi5Emulated      = True  # set to False for real application
@@ -29,12 +29,3 @@ VerboseLevel                = 2     # 0 is complete muted, 1 is standard, 2 is f
 
 
 #-------------------------------------------------------------------------------
-# Global utilities
-
-def error_message(m):
-    if VerboseLevel>0:
-        print(m)
-    
-def debug_message(m):
-    if VerboseLevel>1:
-        print(f"MRSM debug: {time.asctime()}: {m}")

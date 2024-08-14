@@ -107,7 +107,7 @@ from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Globals import VerboseLevel
 from MRSM_Globals import __version__
 
-from MRSM_Globals import error_message, debug_message
+from MRSM_Utilities import error_message, debug_message
 
 class MSRM_Demo_QApplication(QApplication):
     """
