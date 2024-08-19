@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240814
+#      Last update: IH240819
 #
 #
 """
@@ -176,44 +176,63 @@ class AudioPlayer():
 
 class RaspberryPiGPIO():
 
-    def __init__(self) -> None:
-        if IsRaspberryPi5Emulated:
+    if IsRaspberryPi5Emulated:
             Device.pin_factory = MockFactory()
+
+    boreLEDGroup1 = LEDBoard("GPIO17")     # RPI header pin 11
+    boreLEDGroup2 = LEDBoard("GPIO27")     # RPI header pin 13
+    boreLEDGroup3 = LEDBoard("GPIO22")     # RPI header pin 15
+
+    mainMagnetCoil = LEDBoard(5)   #IH240812 for debugging only
+
+    def __init__(self) -> None:
         
-        self.boreLEDs = LEDBoard("GPIO17")     #IH240812 for debugging only                    
-        self.mainMagnetCoil = LEDBoard(5)   #IH240812 for debugging only
-        self.LEDShowScheduler = TimerIterator(
-            values=[
-                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 0.0 },
-                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP1: 0.0 },
-                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP1: 1.0 },
+        self.HasToPlaySimpleShow = False
+        
+        self.LEDShowScenario = [
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 0.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 1.0 },
                 ]
-            )
-        self.LEDShowScheduler.setInterval(200)  # in milliseconds
-        #IH240814 PROBLEM HERE
-        #IH240814 TODO implement slot, see
-        # https://stackoverflow.com/questions/36434706/pyqt-proper-use-of-emit-and-pyqtsignal 
         
-        # self.LEDShowScheduler.value_changed.connect(self.LEDShowStep,type=Qt.ConnectionType.AutoConnection)
-
-
-
     def setBoreLEDIlluminationOn(self,setON: bool) -> None:
-        # simple show
-        self.boreLEDs.on() if setON else self.boreLEDs.off()
-        # fancy show
-        self.LEDShowScheduler.start() if setON else self.LEDShowScheduler.stop()
         
+        if setON:            
+            if self.HasToPlaySimpleShow:
+                # simple show
+                self.boreLEDGroup1.on()
+            else:
+                # fancy show
+                #IH240819 this should be done in the constructor only once, but it does not work for unknown reasons
+                self.LEDShowScheduler = TimerIterator(values=self.LEDShowScenario)
+                self.LEDShowScheduler.setInterval(1000)  # in milliseconds
+                self.LEDShowScheduler.value_changed.connect(LEDShowStep)
+                self.LEDShowScheduler.start() 
+        else:            
+            if self.HasToPlaySimpleShow:
+                # simple show
+                self.boreLEDGroup1.off()
+            else:
+                # fancy show
+                self.LEDShowScheduler.stop()
+
         if IsRaspberryPi5Emulated:
             debug_message(f"Bore LEDs are now {'ON' if setON else 'OFF'}")
 
     def setMainMagnetCoilOn(self,setON: bool) -> None:
-        self.mainMagnetCoil.on() if setON else self.mainMagnetCoil.off()
+        RaspberryPiGPIO.mainMagnetCoil.on() if setON else RaspberryPiGPIO.mainMagnetCoil.off()
         if IsRaspberryPi5Emulated:
-            debug_message(f"Main magnet is now ")
+            debug_message(f"Main magnet is now {'ON' if setON else 'OFF'}")
     
-    @pyqtSlot(list)
-    def LEDShowStep(self,l):
-        #IH240814 TODO implement
-        pass
+@pyqtSlot(dict)
+def LEDShowStep(d: dict):        
+        if IsRaspberryPi5Emulated:
+            print(f'G1> {d[BoreLEDGroup.GROUP1]}, G2> {d[BoreLEDGroup.GROUP2]}, G3> {d[BoreLEDGroup.GROUP3]}')
+        else:
+            #IH240819 simple implementation (on/off only)
+            RaspberryPiGPIO.boreLEDGroup1.on() if d[BoreLEDGroup.GROUP1]>0.5 else RaspberryPiGPIO.boreLEDGroup1.off()
+            RaspberryPiGPIO.boreLEDGroup2.on() if d[BoreLEDGroup.GROUP2]>0.5 else RaspberryPiGPIO.boreLEDGroup2.off()
+            RaspberryPiGPIO.boreLEDGroup3.on() if d[BoreLEDGroup.GROUP3]>0.5 else RaspberryPiGPIO.boreLEDGroup3.off()
+
+  
 

@@ -10,7 +10,7 @@
 #      M  R  S  M  _  U  t  i  l  i  t  i  e  s  .  p  y 
 #
 #
-#      Last update: IH240814
+#      Last update: IH240819
 #-------------------------------------------------------------------------------
 
 import time
@@ -18,7 +18,8 @@ import time
 from MRSM_Globals import VerboseLevel
 
 from PyQt6.QtCore import (
-    QTimer, 
+    QTimer,
+    Qt, 
     pyqtSignal,
     pyqtSlot
     )
@@ -38,12 +39,12 @@ class TimerIterator(QTimer):
     https://stackoverflow.com/questions/68586377/iterate-with-an-interval-timer
 
     """
-    value_changed = pyqtSignal()
+    value_changed = pyqtSignal(dict)
 
     def __init__(self, values=None, parent=None):
         super().__init__(parent)
         self._values = []
-        # self.timeout.connect(self.handle_timeout)
+        self.timeout.connect(self.handle_timeout)
         self.values = values or []
 
     @property
