@@ -43,7 +43,7 @@ class TimerIterator(QTimer):
     def __init__(self, values=None, parent=None):
         super().__init__(parent)
         self._values = []
-        self.timeout.connect(self.handle_timeout)
+        # self.timeout.connect(self.handle_timeout)
         self.values = values or []
 
     @property
