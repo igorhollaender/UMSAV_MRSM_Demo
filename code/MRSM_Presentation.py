@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240819
+#       Last update: IH240820
 #
 #
 """
@@ -460,11 +460,13 @@ class MRSM_Presentation():
                 self.grid.addWidget(self.b1,1,22,1,10)
                 self.mainWidgets += [self.b1]
             
-            #IH240717 for debugging only
-            # self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('STOP VIDEO'),self.parent.MRSM_Window)
-            # self.b2.clicked.connect(self.video_stop)
-            # self.grid.addWidget(self.b2,1,22,1,10)
+            #IH240720 for debugging only
+            # self.b2 = self.parent.MRSM_PushButton(self.parent.lcls('LED ON'),self.parent.MRSM_Window)
+            # self.b2.clicked.connect(self.parent.ledon)
+            # self.grid.addWidget(self.b2,2,22,1,20)
+            # self.mainWidgets += [self.b2]
 
+            
             #IH240717 for debugging only
             # self.b4 = self.parent.MRSM_PushButton(self.parent.lcls('START VIDEO'),self.parent.MRSM_Window)
             # self.b4.clicked.connect(self.video_start)

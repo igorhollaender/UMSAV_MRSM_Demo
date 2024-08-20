@@ -10,7 +10,7 @@
 #      M  R  S  M  _  U  t  i  l  i  t  i  e  s  .  p  y 
 #
 #
-#      Last update: IH240819
+#      Last update: IH240820
 #-------------------------------------------------------------------------------
 
 import time
@@ -41,11 +41,12 @@ class TimerIterator(QTimer):
     """
     value_changed = pyqtSignal(dict)
 
-    def __init__(self, values=None, parent=None):
+    def __init__(self, values=None, parent=None, infinite_loop=True):
         super().__init__(parent)
         self._values = []
         self.timeout.connect(self.handle_timeout)
         self.values = values or []
+        self.infinite_loop = infinite_loop
 
     @property
     def values(self):
@@ -59,8 +60,12 @@ class TimerIterator(QTimer):
     def handle_timeout(self):
         try:
             value = next(self.property("iterator"))
-        except StopIteration:
-            self.stop()
+        except StopIteration:            
+            if self.infinite_loop:
+                self.values = self._values
+            else:
+                self.stop()                
+            
         else:
             self.value_changed.emit(value)
 

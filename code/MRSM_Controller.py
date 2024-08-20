@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240819
+#      Last update: IH240820
 #
 #
 """
@@ -65,6 +65,7 @@ Controller of the Raspberry Pi hardware
 #-------------------------------------------------------------------------------
 
 from enum import Enum
+from time import sleep
 
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Utilities import error_message, debug_message
@@ -79,7 +80,7 @@ from PyQt6.QtCore import (
 
 from gpiozero import (
     Device,
-    LEDBoard
+    LEDBoard, 
 )
 
 if IsRaspberryPi5Emulated:
@@ -171,29 +172,73 @@ class AudioPlayer():
     
     def stop(self):
         #IH240812 TODO implement
-        self.mixer.music.stop()
+        self.mixer.music.stop()    
 
+class MRSMGPIOPin(LEDBoard):        
+    """
+    IH240820 
+    For some reason (probably due to our electrical connections)
+    our LEDs work opposite to the logic (on is off and vice versa)
+    This class inverts the behaviour.
+    """
+    def __init__(self, *pins, pwm=False, active_high=True, initial_value=False, _order=None, pin_factory=None, **named_pins):
+          super().__init__(*pins, pwm=pwm, active_high=active_high, initial_value=initial_value, _order=_order, pin_factory=pin_factory, **named_pins)
+    
+    def on(self):
+         super().off()
 
+    def off(self):
+         super().on()
+     
 class RaspberryPiGPIO():
 
     if IsRaspberryPi5Emulated:
             Device.pin_factory = MockFactory()
 
-    boreLEDGroup1 = LEDBoard("GPIO17")     # RPI header pin 11
-    boreLEDGroup2 = LEDBoard("GPIO27")     # RPI header pin 13
-    boreLEDGroup3 = LEDBoard("GPIO22")     # RPI header pin 15
+    
+    boreLEDGroup1 = MRSMGPIOPin("GPIO21")     # RPI header pin 40, relay IN1, white
+    boreLEDGroup2 = MRSMGPIOPin("GPIO26")     # RPI header pin 37, relay IN2, grey
+    boreLEDGroup3 = MRSMGPIOPin("GPIO20")     # RPI header pin 38, relay IN3, violet
 
-    mainMagnetCoil = LEDBoard(5)   #IH240812 for debugging only
+    # IH240820  the following currently not used
+    relaySwitch4 = MRSMGPIOPin("GPIO19")     # RPI header pin 35, relay IN4, blue
+    relaySwitch5 = MRSMGPIOPin("GPIO16")     # RPI header pin 36, relay IN5, green
+    relaySwitch6 = MRSMGPIOPin("GPIO13")     # RPI header pin 33, relay IN6, yellow
+    relaySwitch7 = MRSMGPIOPin("GPIO6")      # RPI header pin 31, relay IN7, orange
+    relaySwitch8 = MRSMGPIOPin("GPIO12")     # RPI header pin 32, relay IN8, brown
+    
+
+    mainMagnetCoil = MRSMGPIOPin(5)   #IH240812 for debugging only
 
     def __init__(self) -> None:
         
-        self.HasToPlaySimpleShow = False
+        self.HasToPlaySimpleShow = False    #IH240820 True was for debugging only
         
-        self.LEDShowScenario = [
+        self.LEDShowScenario_ScanRunning = [
                 {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },
                 {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 0.0 },
                 {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 1.0 },
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 0.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 1.0 },
                 ]
+        
+        self.LEDShowScenario_ScanFinished = [
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
+                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
+                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
+                ]
+        
+        
+        RaspberryPiGPIO.boreLEDGroup1.off()
+        RaspberryPiGPIO.boreLEDGroup2.off()
+        RaspberryPiGPIO.boreLEDGroup3.off()
+
         
     def setBoreLEDIlluminationOn(self,setON: bool) -> None:
         
@@ -203,11 +248,18 @@ class RaspberryPiGPIO():
                 self.boreLEDGroup1.on()
             else:
                 # fancy show
-                #IH240819 this should be done in the constructor only once, but it does not work for unknown reasons
-                self.LEDShowScheduler = TimerIterator(values=self.LEDShowScenario)
-                self.LEDShowScheduler.setInterval(1000)  # in milliseconds
-                self.LEDShowScheduler.value_changed.connect(LEDShowStep)
+                
+                #IH240819 Trivial scheduled show
+                for step in self.LEDShowScenario_ScanFinished:
+                     LEDShowStep(step)
+                     sleep(0.3)
+
+                #IH240819 this should be done in the constructor only once, but it does not work for unknown reasons                
+                self.LEDShowScheduler = TimerIterator(values=self.LEDShowScenario_ScanRunning,infinite_loop=True)
+                self.LEDShowScheduler.setInterval(150)  # in milliseconds
+                self.LEDShowScheduler.value_changed.connect(LEDShowStep)                
                 self.LEDShowScheduler.start() 
+
         else:            
             if self.HasToPlaySimpleShow:
                 # simple show
@@ -215,6 +267,15 @@ class RaspberryPiGPIO():
             else:
                 # fancy show
                 self.LEDShowScheduler.stop()
+                
+                self.LEDShowScheduler = TimerIterator(values=self.LEDShowScenario_ScanFinished,infinite_loop=False)
+                self.LEDShowScheduler.setInterval(150)  # in milliseconds
+                self.LEDShowScheduler.value_changed.connect(LEDShowStep)                
+                self.LEDShowScheduler.start() 
+
+                RaspberryPiGPIO.boreLEDGroup1.off()
+                RaspberryPiGPIO.boreLEDGroup2.off()
+                RaspberryPiGPIO.boreLEDGroup3.off()
 
         if IsRaspberryPi5Emulated:
             debug_message(f"Bore LEDs are now {'ON' if setON else 'OFF'}")
@@ -229,7 +290,7 @@ def LEDShowStep(d: dict):
         if IsRaspberryPi5Emulated:
             print(f'G1> {d[BoreLEDGroup.GROUP1]}, G2> {d[BoreLEDGroup.GROUP2]}, G3> {d[BoreLEDGroup.GROUP3]}')
         else:
-            #IH240819 simple implementation (on/off only)
+            # IH240819 simple implementation (on/off only)            
             RaspberryPiGPIO.boreLEDGroup1.on() if d[BoreLEDGroup.GROUP1]>0.5 else RaspberryPiGPIO.boreLEDGroup1.off()
             RaspberryPiGPIO.boreLEDGroup2.on() if d[BoreLEDGroup.GROUP2]>0.5 else RaspberryPiGPIO.boreLEDGroup2.off()
             RaspberryPiGPIO.boreLEDGroup3.on() if d[BoreLEDGroup.GROUP3]>0.5 else RaspberryPiGPIO.boreLEDGroup3.off()
