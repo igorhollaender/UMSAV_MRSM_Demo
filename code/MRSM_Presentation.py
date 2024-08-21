@@ -217,13 +217,17 @@ class PoorMansLocalizer():
             {   'enSrcTerm': '#106',
                 'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'This is text1'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Das ist Text1'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': """
-                        <b>O tomografii na báze magnetickej rezonancie</b>
+                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': """                                   
+                        <p style="font-size: 40px"><b>O tomografii na báze magnetickej rezonancie</b></p>
+                        <div style="font-size:30px">             
                         <p><i>Toto je nový odstavec (kurzívou)</i></p>
                         <p>Nasleduje obrázok</p>
                         <p><img src="resources/images/diverse/MRSM_fullview_240722.jpg" height="200">  
-                        <img src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="200"></p>  
+                        <img src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="200"></p>                                                  
                         """ + LoremIpsumHTMLText
+                        +"""
+                        </div>
+                        """
                         #IH240812 TODO updated contents
                         #IH240812 for HTML formatting in Qt, see https://doc.qt.io/qt-6/richtext-html-subset.html
                         },

@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH240812
+#      Last update: IH240821
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -44,6 +44,12 @@ QLabel#lVersion
 {        
     font: bold 14px;
 }
+
+QLabel#lHTMLText1
+{        
+    font-size: 44px;    /* IH240729 this does not work with HTML rich-text contents */
+}
+
 
 #imagePaneRightmost
 {
