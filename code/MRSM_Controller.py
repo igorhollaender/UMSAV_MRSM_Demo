@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240820
+#      Last update: IH240821
 #
 #
 """
@@ -129,6 +129,7 @@ class MRSM_Controller():
       
     def finalize(self):
          self.audioPlayer.finalize()
+         LEDShowStep(RaspberryPiGPIO.LEDShowStep_AllOff)
 
     def scanningSimulationShowStart(self, organ : Organ, imagingPlane : ImagingPlane) -> None:
         self.audioPlayer.play(self.organSound[organ])
@@ -207,12 +208,21 @@ class RaspberryPiGPIO():
     relaySwitch7 = MRSMGPIOPin("GPIO6")      # RPI header pin 31, relay IN7, orange
     relaySwitch8 = MRSMGPIOPin("GPIO12")     # RPI header pin 32, relay IN8, brown
     
-
-    mainMagnetCoil = MRSMGPIOPin(5)   #IH240812 for debugging only
+    LEDShowStep_AllOn  = {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 }
+    LEDShowStep_AllOff = {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 }
+      
+    mainMagnetCoil = relaySwitch8           #IH240821 TODO adapt to real hardware
 
     def __init__(self) -> None:
         
         self.HasToPlaySimpleShow = False    #IH240820 True was for debugging only
+        
+        
+        self.LEDShowScenario_ScanStarting = [
+                RaspberryPiGPIO.LEDShowStep_AllOn, RaspberryPiGPIO.LEDShowStep_AllOff,
+                RaspberryPiGPIO.LEDShowStep_AllOn, RaspberryPiGPIO.LEDShowStep_AllOff,
+                RaspberryPiGPIO.LEDShowStep_AllOn, RaspberryPiGPIO.LEDShowStep_AllOff
+                ]
         
         self.LEDShowScenario_ScanRunning = [
                 {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },
@@ -224,21 +234,13 @@ class RaspberryPiGPIO():
                 ]
         
         self.LEDShowScenario_ScanFinished = [
-                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
-                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
-                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
-                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
-                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
-                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
-                {BoreLEDGroup.GROUP1: 1.0, BoreLEDGroup.GROUP2: 1.0, BoreLEDGroup.GROUP3: 1.0 },
-                {BoreLEDGroup.GROUP1: 0.0, BoreLEDGroup.GROUP2: 0.0, BoreLEDGroup.GROUP3: 0.0 },                
+                RaspberryPiGPIO.LEDShowStep_AllOn, RaspberryPiGPIO.LEDShowStep_AllOff,
+                RaspberryPiGPIO.LEDShowStep_AllOn, RaspberryPiGPIO.LEDShowStep_AllOff,
+                RaspberryPiGPIO.LEDShowStep_AllOn, RaspberryPiGPIO.LEDShowStep_AllOff
                 ]
-        
-        
-        RaspberryPiGPIO.boreLEDGroup1.off()
-        RaspberryPiGPIO.boreLEDGroup2.off()
-        RaspberryPiGPIO.boreLEDGroup3.off()
-
+                
+        LEDShowStep(RaspberryPiGPIO.LEDShowStep_AllOff)
+    
         
     def setBoreLEDIlluminationOn(self,setON: bool) -> None:
         
@@ -250,7 +252,7 @@ class RaspberryPiGPIO():
                 # fancy show
                 
                 #IH240819 Trivial scheduled show
-                for step in self.LEDShowScenario_ScanFinished:
+                for step in self.LEDShowScenario_ScanStarting:
                      LEDShowStep(step)
                      sleep(0.3)
 
@@ -267,16 +269,20 @@ class RaspberryPiGPIO():
             else:
                 # fancy show
                 self.LEDShowScheduler.stop()
+
+                #IH240819 Trivial scheduled show
+                for step in self.LEDShowScenario_ScanFinished:
+                     LEDShowStep(step)
+                     sleep(0.15)
+
+                #IH240821 OBSOLETE
+                # self.LEDShowScheduler = TimerIterator(values=self.LEDShowScenario_ScanFinished,infinite_loop=False)
+                # self.LEDShowScheduler.setInterval(150)  # in milliseconds
+                # self.LEDShowScheduler.value_changed.connect(LEDShowStep)                
+                # self.LEDShowScheduler.start() 
+
+                LEDShowStep(RaspberryPiGPIO.LEDShowStep_AllOff)
                 
-                self.LEDShowScheduler = TimerIterator(values=self.LEDShowScenario_ScanFinished,infinite_loop=False)
-                self.LEDShowScheduler.setInterval(150)  # in milliseconds
-                self.LEDShowScheduler.value_changed.connect(LEDShowStep)                
-                self.LEDShowScheduler.start() 
-
-                RaspberryPiGPIO.boreLEDGroup1.off()
-                RaspberryPiGPIO.boreLEDGroup2.off()
-                RaspberryPiGPIO.boreLEDGroup3.off()
-
         if IsRaspberryPi5Emulated:
             debug_message(f"Bore LEDs are now {'ON' if setON else 'OFF'}")
 
