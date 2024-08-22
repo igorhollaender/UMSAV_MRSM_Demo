@@ -797,9 +797,8 @@ class MRSM_Presentation():
             self.saHTMLText1.setWidget(self.lHTMLText1)
             self.saHTMLText1.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self.saHTMLText1.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-            self.grid.addWidget(self.saHTMLText1,0,0,4,28)
-            #IH240822 continue here (add callback for moving scrollbars, - reseting idle timer)            
-
+            self.grid.addWidget(self.saHTMLText1,0,0,4,28)                                    
+            self.saHTMLText1.verticalScrollBar().sliderMoved.connect(self.reset_idle_timer)
             self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
             
             # self.infoWidgets += [self.lHTMLText1]
