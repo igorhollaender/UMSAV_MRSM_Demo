@@ -119,18 +119,14 @@ if IsQtMultimediaAvailable:
 from MRSM_Controller import MRSM_Controller
 from MRSM_ImageBase import ImageBase, Organ, ImagingPlane
 from MRSM_Stylesheet import MRSM_Stylesheet
+from MRSM_TextContent import Language, MRSM_Texts
 
-class Language(Enum):
-        ENGLISH         = 0
-        SLOVAK          = 1
-        GERMAN          = 2
+
 
 class PoorMansLocalizer():
     """
     Primitive localizer: translates the source English terms and phrases used in GUI
     to target language
-
-    TODO:  implement translation for longer text portions
     """    
     
     class MRSM_Dictionary():
@@ -138,102 +134,102 @@ class PoorMansLocalizer():
         ENGLISH to (targetLanguage) TRANSLATIONS
         """
 
-        #IH240812 for debugging only
-        LoremIpsumHTMLText = """
-                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
-                          Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+        # #IH240812 for debugging only
+        # LoremIpsumHTMLText = """
+        #                 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
+        #                   Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
 
-                        <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
-                          fringilla vel, aliquet nec, vulputate eget, arcu.</p>
+        #                 <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
+        #                   fringilla vel, aliquet nec, vulputate eget, arcu.</p>
 
-                        <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
-                          Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
-                          Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
-                          <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
-                          Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
-                          Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
-                          fringilla vel, aliquet nec, vulputate eget, arcu.
-                          In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
-                          Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
-                          Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
+        #                 <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
+        #                   Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
+        #                   Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
+        #                   <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
+        #                   Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+        #                   Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
+        #                   fringilla vel, aliquet nec, vulputate eget, arcu.
+        #                   In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
+        #                   Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
+        #                   Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
 
-                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
-                          Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+        #                 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
+        #                   Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
 
-                        <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
-                          fringilla vel, aliquet nec, vulputate eget, arcu.</p>
+        #                 <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
+        #                   fringilla vel, aliquet nec, vulputate eget, arcu.</p>
 
-                        <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
-                          Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
-                          Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
+        #                 <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
+        #                   Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
+        #                   Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
 
-                        """
-        d = [
-            {   'enSrcTerm': 'QUIT',
-                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'OPUSTIŤ'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'VERLASSEN'},
-            ]},
-            {   'enSrcTerm': 'STOP',
-                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'ZASTAVIŤ'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'STEHENBLEIBEN'},
-            ]},
-            {   'enSrcTerm': 'FINISH',
-                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SKONČIŤ'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'FERTIGMACHEN'},
-            ]},
-            {   'enSrcTerm': 'BACK',
-                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SPÄŤ'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'ZURÜCK'},
-            ]},
-            {   'enSrcTerm': 'INFO',
-                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'INFO'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'INFO'},
-            ]},
-            {   'enSrcTerm': '#101',
-                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'App starts in'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'App startet in'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Apka štartuje o'},
-            ]},
-            {   'enSrcTerm': '#102',
-                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'secs.'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Sekunden.'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'sek.'},
-            ]},
-             {   'enSrcTerm': '#103',
-                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Magnetic Resonance Imaging'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Kernspintomographie'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Magnetická rezonancia'},
-            ]},
-            {   'enSrcTerm': '#104',
-                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Institute of Measurement Science, SAS'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Institut für Messtechnik, SAW'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Ústav merania SAV'},
-            ]},
-            {   'enSrcTerm': '#105',
-                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Select organ for imaging...'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Organ für Untesuchung auswählen...'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Vyber orgán, ktorý chceš vyšetriť...'},
-            ]},
-            {   'enSrcTerm': '#106',
-                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'This is text1'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Das ist Text1'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': """                                   
-                        <p style="font-size: 40px"><b>O tomografii na báze magnetickej rezonancie</b></p>
-                        <div style="font-size:30px">             
-                        <p><i>Toto je nový odstavec (kurzívou)</i></p>
-                        <p>Nasleduje obrázok</p>
-                        <p><img src="resources/images/diverse/MRSM_fullview_240722.jpg" height="200">  
-                        <img src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="200"></p>                                                  
-                        """ + LoremIpsumHTMLText
-                        +"""
-                        </div>
-                        """
-                        #IH240812 TODO updated contents
-                        #IH240812 for HTML formatting in Qt, see https://doc.qt.io/qt-6/richtext-html-subset.html
-                        },
-            ]},
-        ]
-
+        #                 """
+        # d = [
+        #     {   'enSrcTerm': 'QUIT',
+        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'OPUSTIŤ'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'VERLASSEN'},
+        #     ]},
+        #     {   'enSrcTerm': 'STOP',
+        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'ZASTAVIŤ'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'STEHENBLEIBEN'},
+        #     ]},
+        #     {   'enSrcTerm': 'FINISH',
+        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SKONČIŤ'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'FERTIGMACHEN'},
+        #     ]},
+        #     {   'enSrcTerm': 'BACK',
+        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SPÄŤ'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'ZURÜCK'},
+        #     ]},
+        #     {   'enSrcTerm': 'INFO',
+        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'INFO'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'INFO'},
+        #     ]},
+        #     {   'enSrcTerm': '#101',
+        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'App starts in'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'App startet in'},
+        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Apka štartuje o'},
+        #     ]},
+        #     {   'enSrcTerm': '#102',
+        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'secs.'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Sekunden.'},
+        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'sek.'},
+        #     ]},
+        #      {   'enSrcTerm': '#103',
+        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Magnetic Resonance Imaging'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Kernspintomographie'},
+        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Magnetická rezonancia'},
+        #     ]},
+        #     {   'enSrcTerm': '#104',
+        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Institute of Measurement Science, SAS'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Institut für Messtechnik, SAW'},
+        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Ústav merania SAV'},
+        #     ]},
+        #     {   'enSrcTerm': '#105',
+        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Select organ for imaging...'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Organ für Untersuchung auswählen...'},
+        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Vyber orgán, ktorý chceš vyšetriť...'},
+        #     ]},
+        #     {   'enSrcTerm': '#106',
+        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'This is text1'},
+        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Das ist Text1'},
+        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': """                                   
+        #                 <p style="font-size: 40px"><b>O tomografii na báze magnetickej rezonancie</b></p>
+        #                 <div style="font-size:30px">             
+        #                 <p><i>Toto je nový odstavec (kurzívou)</i></p>
+        #                 <p>Nasleduje obrázok</p>
+        #                 <p><img src="resources/images/diverse/MRSM_fullview_240722.jpg" height="200">  
+        #                 <img src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="200"></p>                                                  
+        #                 """ + LoremIpsumHTMLText
+        #                 +"""
+        #                 </div>
+        #                 """
+        #                 #IH240812 TODO updated contents
+        #                 #IH240812 for HTML formatting in Qt, see https://doc.qt.io/qt-6/richtext-html-subset.html
+        #                 },
+        #     ]},
+        # ]
+        
         def __init__(self,targetLanguage: Language) -> None:
             """
             Current options for target language include:
@@ -254,7 +250,7 @@ class PoorMansLocalizer():
         def localizeShortString(self,sourceEnTerm: str):
             # if self.targetLanguage==Language.ENGLISH:
             #     return sourceEnTerm
-            l = list(map(lambda dictRecord: self.getTgtTerm(sourceEnTerm,dictRecord), self.d))
+            l = list(map(lambda dictRecord: self.getTgtTerm(sourceEnTerm,dictRecord), MRSM_Texts))
             # Get first non None value from List
             return next((elem for elem in l if elem is not None), sourceEnTerm)  #IH240719 if the term is not found in the dictionary, the english term is returned
 
