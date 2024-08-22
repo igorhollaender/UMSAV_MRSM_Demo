@@ -99,9 +99,185 @@ MRSM_Texts = [
                          {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Vyber orgán, ktorý chceš vyšetriť...'},
             ]},
             {   'enSrcTerm': '#106',
-                'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'This is text1'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Das ist Text1'},
-                         {'tgtLng':  Language.SLOVAK,  'tgtTerm': """                                   
+                'trsl': [
+                        #------------------------------------------------------------------------
+                        {'tgtLng':  Language.ENGLISH, 'tgtTerm': """
+                        <p style="font-size: 40px">
+                        <b>What is this all about?</b>
+                        </p>
+                          
+                        <div style="font-size:30px">
+                        
+                        <p>
+                        This is a model of a device called <b> magnetic resonance scanner</b> (often called <i>MR scanner</i>).
+                        It is a device that is used by doctors to visualize  organs inside the human body. We see the organs 
+                        as if we had cut the body, either lengthwise from the head to the legs or transversally.
+                        </p>
+                                                
+                        <div style="margin-top:100px; margin-bottom:100px;" >
+                        <table>
+                        <tr>
+                        <td><img  src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="250"></td>
+                        <td style="padding-left:40px">For example, in this image we can see what a human head looks like if we cut it into right and left halves.</td>
+                        </tr>
+                        </table>
+                        </div>
+                                                
+                        <p>
+                        During the examination, it is necessary to push the patient's body into a tunnel in a large drum-shaped enclosure. 
+                        The examination is completely painless, but during it the patient is exposed to various sounds, 
+                        like crackling or honking. 
+                        Our model works quickly, but in reality the whole procedure takes about twenty minutes.
+                        </p>
+                                                
+                        <div style="margin-top:100px; margin-bottom:100px;" >
+                        <p><b>If you are interested in more detail how it all works, continue reading</b></p>
+                                                
+                        <p>
+                        Magnetic resonance (more precisely <i>nuclear</i> magnetic resonance) is a physical phenomenon. 
+                        It manifests itself when matter is exposed to an external magnetic field. At that time, the nuclei of atoms 
+                        the matter is composed of, are aligned in the direction of the magnetic field (similar to children swings, which at rest
+                        hang vertically because the Earth's gravity). They can be deflected from such a state
+                        by a short pulse of another magnetic field (like when we poke a standing swing). The nuclei of atoms
+                        begin to move and try to return to their original state (the swing swings and gradually returns to its original position).
+                        In which rhythm (<i>frequency</i>) the swing swings depends, among other things, on whether a large or small child is sitting on it. 
+                        The atoms behave in a similar way. By observing the swinging, we can tell how big  (more correctly: <i>how heavy</i>) the child is, 
+                        without seeing the child directly. We will see it even better when children of the same weight on swings hold hands, because then
+                        after a while, they will all swing back and forth in the same way. And atoms behave similarly: they don't hold hands, 
+                        but they are interconnected because they are close to each other. And we can infer what properties they have (for example, whether they are atoms 
+                        forming bones or muscles) without interfering with the body.
+                        </p>
+                                                
+                                            
+                        <div style="margin-top:100px; margin-bottom:100px;" >
+                        <table>
+                        <tr>
+                        <td><p><img src="resources/images/diverse/MRSM_fullview_240722.jpg" height="250"></td>
+                        <td style="padding-left:40px">
+                        In a tomograph, we create magnetic fields using large and smaller electromagnets. The largest one
+                        is shaped like a big drum (that's the big white and yellow box, in fact it's about the size of a car). 
+                        It has a cylindrical hole (tunnel) in the middle, into which the patient on a movable bed
+                        is automatically pushed. Then various smaller magnets begin to turn on and off, and we measure how the atoms "swing".
+                        From a large number of such measurements, we then compile a picture in which each small dot (<i>pixel</i>) means
+                        a group of "swings", and the doctor can determine whether these swings (<i>tissues</i> in the human body) are healthy or suffer from some disease.
+                        </td>
+                        </tr>
+                        </table>
+                        </div>
+
+                                                    
+                        <div style="font-size:15px">
+                        <p style="margin-top:50px; ">
+                        This model was created by the scientists of the <b>Institute of Measurement Science of the Slovak Academy of Sciences in Bratislava</b>, 
+                        where they are engaged in research and construction of real MR tomographs and thus contribute 
+                        to improvement of health care in our country and in the world.
+                        </p> 
+                                                
+                                        
+                        <p>We got the images for this model from this source:</p>
+                        <p><i>https://www.magnetomworld.siemens-healthineers.com/clinical-corner/protocols/dicom-images/deep-resolve-phoenix-images</i></p>
+                                                    
+                                                
+                        <p>We obtained the audio recordings for this model from this source:</p>
+                        <p><i>https://www.youtube.com/watch?v=tHdIv0sUJRI#bottom-sheet</i></p>
+                                                
+                        <p>Thank you all.</p>
+                        </div>
+                        """                        
+                        },
+
+                        #------------------------------------------------------------------------
+                        {'tgtLng':  Language.GERMAN,  'tgtTerm': """
+                        <p style="font-size: 40px">
+                        <b>Worum geht es hier?</b>
+                        </p>
+                                                
+                        <div style="font-size:30px">
+                                                
+                        <p>
+                        Hierbei handelt es sich um ein Modell eines Geräts, das als <b>Kernspintomograph</b> bezeichnet wird und auf <b>Kernspinresonanz</b> basiert (oft auch <i>MR-Tomograph genannt</i>).
+                        Es ist ein Gerät, das von Ärzten verwendet wird, um Organe im menschlichen Körper abzubilden. Wir sehen die Organe so,
+                        als hätten wir den Körper durchgeschnitten, entweder länglich vom Kopf bis zu den Beinen oder quer.
+                        </p>
+                                                
+                        <div style="margin-top:100px; margin-bottom:100px;" >
+                        <table>
+                        <tr>
+                        <td><img  src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="250"></td>
+                        <td style="padding-left:40px">Zum Beispiel können wir in diesem Bild sehen, wie ein menschlicher Kopf aussehen würde, 
+                        wenn wir ihn in rechte und linke Hälften schneiden.</td>
+                        </tr>
+                        </table>
+                        </div>
+                                                
+                        <p>
+                        Während der Untersuchung ist es notwendig, den Körper des Patienten in einen Tunnel in einem großen trommelförmigen Schrank einzuführen. 
+                        Die Untersuchung ist völlig schmerzlos, aber der Patient hört während der Untersuchung verschiedene Geräusche, 
+                        die an Knistern oder Hupen erinnern. 
+                        Unser Modell funktioniert schnell, aber in Wirklichkeit dauert der ganze Vorgang etwa zwanzig Minuten.
+                        </p>
+                                                
+                        <div style="margin-top:100px; margin-bottom:100px;" >
+                        <p><b>Wenn Sie mehr darüber erfahren möchten, wie das alles funktioniert, lesen Sie weiter</b></p>
+                                                
+                        <p>
+                        Die Kernspintresonanz ist ein physikalisches Phänomen. 
+                        Sie manifestiert sich, wenn sich Materie in einem externen Magnetfeld befindet. Zu dieser Zeit werden die Atomkerne, 
+                        aus denen sich die Masse zusammensetzt, werden in Richtung des Magnetfeldes eingestellt (ähnlich wie bei Kinderschaukeln im Ruhezustand
+                        senkrecht nach unten hängen, weil die Schwerkraft der Erde auf sie einwirkt). Sie können aus einem solchen Zustand abgelenkt werden
+                        durch eine kurze Wirkung eines anderen Magnetfeldes (wie wenn wir eine stehende Schaukel anstoßen). Die Kerne der Atome
+                        Sie beginnen sich zu bewegen und versuchen, in ihren ursprünglichen Zustand zurückzukehren (die Schaukel schwingt und kehrt allmählich in ihre ursprüngliche Position zurück).
+                        In welchem Rhythmus (<i>Frequenz</i>) die Schaukel schwingt, hängt unter anderem davon ab, ob ein großes oder kleines Kind darauf sitzt. Ähnlich
+                        sogar in Atomen. Durch das Bemerken des Schaukelns können wir beurteilen, wie groß (genauer: <i>wie schwer</i>) das Kind ist, ohne
+                        damit wir das Kind direkt sehen können. Wir werden es noch besser sehen, wenn Kinder gleicher Größe auf Schaukeln Händchen halten, denn dann
+                        Nach einer Weile schwingen sie alle auf die gleiche Weise hin und her. Und Atome verhalten sich auf die gleiche Weise: Sie halten sich nicht an den Händen, 
+                        Aber sie sind miteinander verbunden, weil sie nahe beieinander liegen. Und wir können daraus ableiten, welche Eigenschaften sie haben (z.B. ob sie Atome sind 
+                        B. Knochen oder Muskeln bilden), ohne in den Körper einzugreifen.
+                        </p>
+                                                
+                                            
+                        <div style="margin-top:100px; margin-bottom:100px;" >
+                        <table>
+                        <tr>
+                        <td><p><img src="resources/images/diverse/MRSM_fullview_240722.jpg" height="250"></td>
+                        <td style="padding-left:40px">
+                        In einem Tomographen werden Magnetfelder mit großen und kleineren Elektromagneten hergestellt. Der größte Magnet
+                         hat die Form einer großen Trommel (das ist die große weiß-gelbe Schachtel, tatsächlich ist sie etwa so groß wie ein Auto). 
+                        Es hat in der Mitte ein zylindrisches Loch (Tunnel), in das der Patient auf einem beweglichen Bett
+                        automatisch eingeschoben wird. Dann beginnen sich verschiedene kleinere Magnete ein- und auszuschalten, und wir messen, 
+                        wie die Atomkerne "schwingen".
+                        Aus einer Vielzahl solcher Messungen stellen wir dann ein Bild zusammen, in dem jeder kleine Punkt (<i>Pixel</i>)
+                        eine Gruppe von "Schaukeln" darstellt, und der Arzt kann feststellen, 
+                         ob diese Schaukeln (<i>Gewebe</I> im menschlichen Körper) gesund sind oder an einer Krankheit leiden.
+                        </td>
+                        </tr>
+                        </table>
+                        </div>
+
+                                                    
+                        <div style="font-size:15px">
+                        <p style="margin-top:50px; ">
+                        Dieses Modell wurde von den Mitarbeitern des <b>Instituts für Messtechnik der Slowakischen Akademie der Wissenschaften in Bratislava</b>
+                        hergestellt , 
+                        In diesem Institut beschäftigen sie sich mit der Forschung und der Konstruktion von echten MR-Tomographen und damit zur 
+                        tragen sie zu Verbesserung der Gesundheitsversorgung in unserem Land und in der ganzen Welt.
+                        </p> 
+                                                
+                                        
+                        <p>Die Bilder für dieses Modell haben wir aus dieser Quelle:</p>
+                        <p><i>https://www.magnetomworld.siemens-healthineers.com/clinical-corner/protocols/dicom-images/deep-resolve-phoenix-images</i></p>
+                                                    
+                                                
+                        <p>Die Audioaufnahmen für dieses Modell haben wir aus dieser Quelle:</p>
+                        <p><i>https://www.youtube.com/watch?v=tHdIv0sUJRI#bottom-sheet</i></p>
+                                                
+                        <p>Vielen Dank an alle.</p>
+                        </div>                        
+                        """
+                        },
+                        
+                        #------------------------------------------------------------------------
+                        {'tgtLng':  Language.SLOVAK,  'tgtTerm': """                                   
                         <p style="font-size: 40px">
                         <b>O čom to je?</b>
                         </p>
@@ -184,8 +360,8 @@ MRSM_Texts = [
                         <p>Všetkým ďakujeme.</p>
                         </div>
                         """
-                        
-                        #IH240812 for HTML formatting in Qt, see https://doc.qt.io/qt-6/richtext-html-subset.html
+                        #------------------------------------------------------------------------                                                
                         },
+                        #IH240812 for HTML formatting in Qt, see https://doc.qt.io/qt-6/richtext-html-subset.html
             ]},
         ]
