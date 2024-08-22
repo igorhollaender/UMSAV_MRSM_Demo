@@ -132,102 +132,6 @@ class PoorMansLocalizer():
         """
         ENGLISH to (targetLanguage) TRANSLATIONS
         """
-
-        # #IH240812 for debugging only
-        # LoremIpsumHTMLText = """
-        #                 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
-        #                   Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-
-        #                 <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
-        #                   fringilla vel, aliquet nec, vulputate eget, arcu.</p>
-
-        #                 <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
-        #                   Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
-        #                   Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
-        #                   <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
-        #                   Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
-        #                   Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
-        #                   fringilla vel, aliquet nec, vulputate eget, arcu.
-        #                   In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
-        #                   Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
-        #                   Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
-
-        #                 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. 
-        #                   Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-
-        #                 <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, 
-        #                   fringilla vel, aliquet nec, vulputate eget, arcu.</p>
-
-        #                 <p>In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. 
-        #                   Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. 
-        #                   Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,</p>
-
-        #                 """
-        # d = [
-        #     {   'enSrcTerm': 'QUIT',
-        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'OPUSTIŤ'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'VERLASSEN'},
-        #     ]},
-        #     {   'enSrcTerm': 'STOP',
-        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'ZASTAVIŤ'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'STEHENBLEIBEN'},
-        #     ]},
-        #     {   'enSrcTerm': 'FINISH',
-        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SKONČIŤ'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'FERTIGMACHEN'},
-        #     ]},
-        #     {   'enSrcTerm': 'BACK',
-        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SPÄŤ'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'ZURÜCK'},
-        #     ]},
-        #     {   'enSrcTerm': 'INFO',
-        #         'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'INFO'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'INFO'},
-        #     ]},
-        #     {   'enSrcTerm': '#101',
-        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'App starts in'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'App startet in'},
-        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Apka štartuje o'},
-        #     ]},
-        #     {   'enSrcTerm': '#102',
-        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'secs.'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Sekunden.'},
-        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'sek.'},
-        #     ]},
-        #      {   'enSrcTerm': '#103',
-        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Magnetic Resonance Imaging'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Kernspintomographie'},
-        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Magnetická rezonancia'},
-        #     ]},
-        #     {   'enSrcTerm': '#104',
-        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Institute of Measurement Science, SAS'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Institut für Messtechnik, SAW'},
-        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Ústav merania SAV'},
-        #     ]},
-        #     {   'enSrcTerm': '#105',
-        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'Select organ for imaging...'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Organ für Untersuchung auswählen...'},
-        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': 'Vyber orgán, ktorý chceš vyšetriť...'},
-        #     ]},
-        #     {   'enSrcTerm': '#106',
-        #         'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'This is text1'},
-        #                  {'tgtLng':  Language.GERMAN,  'tgtTerm': 'Das ist Text1'},
-        #                  {'tgtLng':  Language.SLOVAK,  'tgtTerm': """                                   
-        #                 <p style="font-size: 40px"><b>O tomografii na báze magnetickej rezonancie</b></p>
-        #                 <div style="font-size:30px">             
-        #                 <p><i>Toto je nový odstavec (kurzívou)</i></p>
-        #                 <p>Nasleduje obrázok</p>
-        #                 <p><img src="resources/images/diverse/MRSM_fullview_240722.jpg" height="200">  
-        #                 <img src="resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg" height="200"></p>                                                  
-        #                 """ + LoremIpsumHTMLText
-        #                 +"""
-        #                 </div>
-        #                 """
-        #                 #IH240812 TODO updated contents
-        #                 #IH240812 for HTML formatting in Qt, see https://doc.qt.io/qt-6/richtext-html-subset.html
-        #                 },
-        #     ]},
-        # ]
         
         def __init__(self,targetLanguage: Language) -> None:
             """
@@ -380,18 +284,30 @@ class MRSM_Presentation():
                 self.setAcceptTouchEvents(True)
                 self.isMousePressed = False
                 self.showMainInstance = showMainInstance
-                self.brushActive = Qt.GlobalColor.green
-                self.penActive = Qt.GlobalColor.green
-                self.brushIdle = Qt.GlobalColor.yellow
+                self.brushActive            = Qt.GlobalColor.green
+                self.penActive              = Qt.GlobalColor.green
+                self.brushIdle              = Qt.GlobalColor.yellow
+                self.brushRunningShown      = Qt.GlobalColor.red
+                self.brushIdleShown         = Qt.GlobalColor.green
+                self.brushIdleNotShown      = Qt.GlobalColor.yellow
                 self.penIdle = Qt.GlobalColor.yellow
-                self.setActiveState(False)
+                # self.setActiveState(False)
+                self.setCurrentState(isScanningRunning=False,isCurrentlyShown=False)
 
             def boundingRect(self):
                 return self.rect
             
-            def setActiveState(self, active : bool = False):
+            #IH240822 OBSOLETE (use setCurrentState instead)
+            def setActiveState(self, active : bool = False):                
                 self.myBrush = self.brushActive if active else self.brushIdle    	        
                 self.myPen = self.penActive if active else self.penIdle
+
+            def setCurrentState(self, isScanningRunning: bool = False, isCurrentlyShown: bool = False):                             
+                self.myBrush = self.brushRunningShown   if      isScanningRunning   and     isCurrentlyShown else (                    
+                               self.brushIdleShown      if not  isScanningRunning   and     isCurrentlyShown else (
+                               self.brushIdleNotShown   if not  isScanningRunning   and not isCurrentlyShown else self.brushIdle))
+
+                self.myPen = self.penActive if isScanningRunning else self.penIdle
 
             def paint(self, painter, option, widget):
                 #IH240724 PROBLEM this does not work as expected
@@ -627,7 +543,8 @@ class MRSM_Presentation():
             self.setRollerShadesToInitialPosition()
             self.isSimulationShowRunning = False
             for o in self.organButton.keys(): 
-                self.organButton[o].setActiveState(False)
+                # self.organButton[o].setActiveState(False)
+                self.organButton[o].setCurrentState(isScanningRunning=False,isCurrentlyShown=False)
             self.imagePaneRightmost.update()
 
             if IsQtMultimediaAvailable:
@@ -658,8 +575,10 @@ class MRSM_Presentation():
             self.currentOrgan = organ
             
             for o in self.organButton.keys(): 
-                self.organButton[o].setActiveState(False)
+                # self.organButton[o].setActiveState(False)
+                self.organButton[o].setCurrentState(isScanningRunning=False,isCurrentlyShown=False)
             self.imagePaneRightmost.update()
+
 
             if organ !=organ.NONE:
                 self.setRollerShadesToInitialPosition()
@@ -681,17 +600,19 @@ class MRSM_Presentation():
                 
 
                 self.isSimulationShowRunning = True
-                self.parent.hardwareController.scanningSimulationShowStart(organ=self.currentOrgan,imagingPlane=ImagingPlane.ARBITRARY)
+                self.organButton[self.currentOrgan].setCurrentState(isScanningRunning=True,isCurrentlyShown=True)
+                self.imagePaneRightmost.update()
+                self.parent.hardwareController.scanningSimulationShowStart(organ=self.currentOrgan,imagingPlane=ImagingPlane.ARBITRARY)                
                 self.animation_all.start()
                 self.parent.idle_timer.stop()   #IH240812 avoid going idle during animation
-
-                self.organButton[self.currentOrgan].setActiveState(True)
+                                
 
 
         def on_animation_finished(self):
             debug_message('animation finished')
             self.isSimulationShowRunning = False
-            self.organButton[self.currentOrgan].setActiveState(False)
+            # self.organButton[self.currentOrgan].setActiveState(False)
+            self.organButton[self.currentOrgan].setCurrentState(isScanningRunning=False,isCurrentlyShown=True)
             self.parent.hardwareController.scanningSimulationShowStop()
             self.imagePaneRightmost.update()
             self.reset_idle_timer()

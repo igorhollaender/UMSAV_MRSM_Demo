@@ -54,7 +54,7 @@ LoremIpsumHTMLText = """
 
 MRSM_Texts = [
             {   'enSrcTerm': 'QUIT',
-                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'OPUSTIŤ'},
+                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'SKONČIŤ'},
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'VERLASSEN'},
             ]},
             {   'enSrcTerm': 'STOP',
