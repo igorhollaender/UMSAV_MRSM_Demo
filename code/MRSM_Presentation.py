@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240820
+#       Last update: IH240822
 #
 #
 """
@@ -102,7 +102,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QScrollArea,
-    QSizePolicy,
     QWidget        
 )                  
 
@@ -234,7 +233,8 @@ class PoorMansLocalizer():
             """
             Current options for target language include:
                 SLOVAK
-                GERMAN (not fully implemented)
+                ENGLISH
+                GERMAN
             """
             self.targetLanguage = targetLanguage
         
@@ -768,6 +768,7 @@ class MRSM_Presentation():
         """
         Info including briefing about MRI and acknowledgments for resources used
         """
+        IDLE_INACTIVITY_DURATION_SEC = 30
 
         def __init__(self,parent) -> None:
 
@@ -797,6 +798,7 @@ class MRSM_Presentation():
             self.saHTMLText1.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self.saHTMLText1.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.grid.addWidget(self.saHTMLText1,0,0,4,28)
+            #IH240822 continue here (add callback for moving scrollbars, - reseting idle timer)            
 
             self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
             
@@ -814,7 +816,7 @@ class MRSM_Presentation():
             for w in self.infoWidgets:                                
                 w.show()      
             self.parent.show()
-            self.reset_idle_timer()
+            self.reset_idle_timer()  
     
         def deactivate(self):
             for w in self.infoWidgets:
@@ -822,7 +824,7 @@ class MRSM_Presentation():
 
         def reset_idle_timer(self):
             self.parent.idle_timer.stop()
-            self.parent.idle_timer.start(self.parent.ShowIdle.IDLE_BREAK_DURATION_SEC*1000)
+            self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
     
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:

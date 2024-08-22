@@ -109,7 +109,7 @@ MRSM_Texts = [
                         <div style="font-size:30px">
                           
                         <p>
-                        Toto je model zariadenia, ktoré sa nazýva <b>tomograf na báze magnetickej rezonancie</b> (často sa používa skratka MRI).
+                        Toto je model zariadenia, ktoré sa nazýva <b>tomograf na báze magnetickej rezonancie</b> (často sa hovorí <i>MR tomograf</i>).
                         Je to zariadenie, ktoré slúži lekárom na zobrazovanie orgánov vo vnútri ľudského tela. Orgány vidíme tak, 
                         ako keby sme telo rozrezali, buď pozdĺžne od hlavy k nohám, alebo priečne.                        
                         </p>
@@ -141,7 +141,7 @@ MRSM_Texts = [
                         krátkym pôsobením iného magnetického poľa (ako keď do stojacej hojdačky šťuchneme). Jadrá atómov sa
                         začnú pohybovať a snažia sa vrátiť do pôvodného stavu (hojdačka sa rozhojdá a postupne sa vracia do pôvodnej polohy).
                         V akom rytme (<i>frekvencii</i>) sa hojdačka kýve, záleží okrem iného na tom, či na nej sedí veľké alebo malé dieťa. Podobne je to
-                        aj u atómov. Keď si budeme všímať hojdanie, môžeme usúdiť, aké je dieťa veľké (správnešie: <i>ťažké</i>), a to bez toho,
+                        aj u atómov. Keď si budeme všímať hojdanie, môžeme usúdiť, aké je dieťa veľké (správnejšie: <i>ťažké</i>), a to bez toho,
                         aby sme dieťa priamo videli. Ešte lepšie to uvidíme, keď sa rovnako veľké deti na hojdačkách pochytajú za ruky, pretože vtedy
                         sa po chvíli budú všetky hojdať rovnako dopredu-dozadu. A tak isto sa správajú aj atómy: nechytajú sa za ruky, 
                         ale sú vzájomne prepojené, pretože sú blízko seba. A my môžeme usúdiť, aké majú vlastnosti (napríklad či sú to atómy 
@@ -149,8 +149,6 @@ MRSM_Texts = [
                         </p>
                           
                     
-    
-
                         <div style="margin-top:100px; margin-bottom:100px;">
                         <table>  
                         <tr>                            
