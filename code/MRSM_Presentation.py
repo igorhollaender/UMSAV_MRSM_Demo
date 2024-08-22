@@ -712,6 +712,9 @@ class MRSM_Presentation():
             self.lHTMLText1.setWordWrap(True)
             self.lHTMLText1.setMinimumWidth(1000)
             self.lHTMLText1.setMaximumWidth(1000)
+
+            #IH240822 for debugging only
+            # self.lHTMLText1.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse) 
             
             # self.grid.addWidget(self.lHTMLText1,0,0,4,27)
             self.saHTMLText1 = QScrollArea()

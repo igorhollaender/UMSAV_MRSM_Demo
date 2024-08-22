@@ -6,6 +6,7 @@
     "configurations": [
 
 
+
     
         {
             "type": "debugpy",
@@ -23,9 +24,9 @@
                 [""
                 /* "--version" */  
                 /*,"--help" */
-                ,"-l=SK" 
-                /*  ,"-l=GE" */
-                /*,"-l=EN" */
+                ,"-l=SK"
+                /* ,"-l=GE" */
+                /* ,"-l=EN" */
                 /* , "--nonsense" */
                 ]
         }
