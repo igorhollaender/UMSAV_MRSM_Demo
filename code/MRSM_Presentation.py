@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240822
+#       Last update: IH240909
 #
 #
 """
@@ -211,7 +211,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 5  
+        INTRO_DURATION_SEC  = 1  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -309,6 +309,9 @@ class MRSM_Presentation():
 
                 self.myPen = self.penActive if isScanningRunning else self.penIdle
 
+                #IH240909 added
+                self.showMainInstance.bDescription.setVisible((not isScanningRunning) and isCurrentlyShown)
+
             def paint(self, painter, option, widget):
                 #IH240724 PROBLEM this does not work as expected
                 #if self.isMousePressed:
@@ -369,11 +372,16 @@ class MRSM_Presentation():
             self.grid.addWidget(self.bInfo,0,22,1,10)
             self.mainWidgets += [self.bInfo]
 
+            self.bDescription = self.parent.MRSM_PushButton(self.parent.lcls('WHAT UC'),self.parent.MRSM_Window)
+            self.bDescription.clicked.connect(self.parent.quit_main_start_description)
+            self.grid.addWidget(self.bDescription,1,22,1,10)
+            self.mainWidgets += [self.bDescription]
+
             #IH240717 for debugging only
             if HasToShowExitButton:
                 self.b1 = self.parent.MRSM_PushButton(self.parent.lcls('QUIT'),self.parent.MRSM_Window)
                 self.b1.clicked.connect(self.parent.quit_app)
-                self.grid.addWidget(self.b1,1,22,1,10)
+                self.grid.addWidget(self.b1,2,22,1,10)
                 self.mainWidgets += [self.b1]
             
             #IH240720 for debugging only
@@ -749,6 +757,61 @@ class MRSM_Presentation():
             self.parent.idle_timer.stop()
             self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
     
+    class ShowDescription():
+        """
+        Panel showing image description, typically: annotated image segmentation 
+        """
+        IDLE_INACTIVITY_DURATION_SEC = 30
+
+        def __init__(self,parent) -> None:
+
+            self.grid :   QGridLayout   = parent.grid
+            self.parent : QWidget       = parent
+            self.descriptionWidgets = []
+
+            self.bgLabel = QLabel("",self.parent.MRSM_Window)
+            self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
+            
+            #IH240729 This is necessary to prevent the image from voluntarily resizing
+            self.bgLabel.setMinimumHeight(300)            
+            self.bgLabel.setMaximumHeight(300)            
+            self.bgLabel.setMinimumWidth(1460)            
+            self.bgLabel.setMaximumWidth(1460)            
+
+            self.descriptionWidgets += [self.bgLabel]
+
+            self.lHTMLText1 = QLabel("THIS IS JUST A TEST TEXT")
+            self.lHTMLText1.setWordWrap(True)
+            self.lHTMLText1.setMinimumWidth(1000)
+            self.lHTMLText1.setMaximumWidth(1000)
+
+            self.grid.addWidget(self.lHTMLText1,0,0,4,28)
+            self.descriptionWidgets += [self.lHTMLText1]                                    
+            self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
+            
+
+            self.bResumeApp = parent.MRSM_PushButton(parent.lcls('BACK'),parent.MRSM_Window)
+            self.bResumeApp.clicked.connect(self.parent.quit_description_start_main)
+            self.grid.addWidget(self.bResumeApp,2,29,1,4)
+            self.descriptionWidgets += [self.bResumeApp]
+
+            self.deactivate()
+
+        def activate(self):            
+            for w in self.descriptionWidgets:                                
+                w.show()      
+            self.parent.show()
+            self.reset_idle_timer()  
+    
+        def deactivate(self):
+            for w in self.descriptionWidgets:
+                w.hide()
+
+        def reset_idle_timer(self):
+            self.parent.idle_timer.stop()
+            self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
+    
+
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:
             self.MRSM_Window.show()
@@ -798,6 +861,7 @@ class MRSM_Presentation():
         self.showMain = self.ShowMain(self)
         self.showIdle = self.ShowIdle(self)
         self.showInfo = self.ShowInfo(self)
+        self.showDescription = self.ShowDescription(self)
 
         self.actual_idle_break_sec = 0
 
@@ -809,6 +873,7 @@ class MRSM_Presentation():
     def on_idle_timeout(self):
             self.quit_main_start_idle()
             self.quit_info_start_idle()
+            self.quit_description_start_idle()
 
     def quit_intro_start_main(self):
         self.showIntro.deactivate()
@@ -833,6 +898,18 @@ class MRSM_Presentation():
     def quit_info_start_idle(self):    
         self.showInfo.deactivate()
         self.showIdle.activate()
+    
+    def quit_main_start_description(self):
+        self.showMain.deactivate()
+        self.showDescription.activate()
+
+    def quit_description_start_idle(self):    
+        self.showDescription.deactivate()
+        self.showIdle.activate()
+
+    def quit_description_start_main(self):    
+        self.showDescription.deactivate()
+        self.showMain.activate()
     
 
     def quit_app(self):
