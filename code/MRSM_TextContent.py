@@ -10,7 +10,7 @@
 #      M  R  S  M  _  T  e  x  t  C  o  n  t  e  n  t  .  p  y 
 #
 9
-#      Last update: IH240822
+#      Last update: IH240909
 #-------------------------------------------------------------------------------
 
 from enum import Enum
@@ -70,8 +70,12 @@ MRSM_Texts = [
                          {'tgtLng':  Language.GERMAN,  'tgtTerm': 'ZURÜCK'},
             ]},
             {   'enSrcTerm': 'INFO',
-                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'INFO'},
-                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'INFO'},
+                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'O MR'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'ÜBER MR'},
+            ]},
+            {   'enSrcTerm': 'WHAT UC',
+                'trsl': [{'tgtLng':  Language.SLOVAK,  'tgtTerm': 'ČO VIDÍŠ'},
+                         {'tgtLng':  Language.GERMAN,  'tgtTerm': 'WAS SIEHTS'},
             ]},
             {   'enSrcTerm': '#101',
                 'trsl': [{'tgtLng':  Language.ENGLISH, 'tgtTerm': 'App starts in'},
