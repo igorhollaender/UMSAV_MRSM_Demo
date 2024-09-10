@@ -837,9 +837,10 @@ class MRSM_Presentation():
             polygon = self.imageScene.addPolygon(QPolygonF([QPointF(10,10),QPointF(10,280),QPointF(280,280),QPointF(280,10),]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
             self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
             self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
+            self.imageScene.
 
             #IH240910    C O N T I N U E   H E R E 
-            
+
 
             self.bSagittal = parent.MRSM_PushButton("SAG",parent.MRSM_Window)
             self.bSagittal.setObjectName("bSagittal")  # this is for stylesheet reference 
