@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240909
+#       Last update: IH240910
 #
 #
 """
@@ -76,8 +76,10 @@ from MRSM_Utilities import error_message, debug_message
 
 
 from PyQt6.QtGui import (
+    QColor,
     QFont,
-    QPixmap
+    QPixmap,
+    QPolygonF,
 )
 from enum import Enum
 from functools import partial
@@ -86,6 +88,7 @@ from typing import Any
 from PyQt6.QtCore import (    
     Qt,
     QPoint,
+    QPointF,
     QPropertyAnimation,
     QRectF,
     QSequentialAnimationGroup,
@@ -797,14 +800,46 @@ class MRSM_Presentation():
 
             self.descriptionWidgets += [self.bgLabel]
 
-            self.lHTMLText1 = QLabel()
-            self.lHTMLText1.setWordWrap(True)
-            self.lHTMLText1.setMinimumWidth(1000)
-            self.lHTMLText1.setMaximumWidth(1000)
+            # self.lHTMLText1 = QLabel()
+            # self.lHTMLText1.setWordWrap(True)
+            # self.lHTMLText1.setMinimumWidth(1000)
+            # self.lHTMLText1.setMaximumWidth(1000)
 
-            self.grid.addWidget(self.lHTMLText1,0,0,4,28)
-            self.descriptionWidgets += [self.lHTMLText1]                                    
-            self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
+            #  self.grid.addWidget(self.lHTMLText1,0,0,4,28)
+            #  self.descriptionWidgets += [self.lHTMLText1]                                    
+            # self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
+
+            # self.imagePane = QLabel("",self.parent.MRSM_Window)
+            # self.grid.addWidget(self.imagePane,0,12,4,4)
+            # self.descriptionWidgets += [self.imagePane]
+
+            # self.imagePane.setMinimumHeight(300)            
+            # self.imagePane.setMaximumHeight(300)            
+            # self.imagePane.setMinimumWidth(1460)            
+            # self.imagePane.setMaximumWidth(1460)
+
+            # #IH240910 for debugging only
+            # self.imagePane.setPixmap(QPixmap())
+            
+            
+            # IH240910 for debugging only
+            pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.BODY,ImagingPlane.CORONAL)
+            self.imageScene = QGraphicsScene(self.parent.MRSM_Window)
+            if pm is not None:                
+                self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
+            self.imagePane = QGraphicsView(self.imageScene)
+            self.grid.addWidget(self.imagePane,0,0,8,28)
+            # (0,0,8,28) is ok but left, mid and right panels are glued together
+            self.descriptionWidgets += [self.imagePane]
+            self.imagePane.setObjectName("imagePane")
+
+            
+            polygon = self.imageScene.addPolygon(QPolygonF([QPointF(10,10),QPointF(10,280),QPointF(280,280),QPointF(280,10),]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
+            self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
+            self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
+
+            #IH240910    C O N T I N U E   H E R E 
+            
 
             self.bSagittal = parent.MRSM_PushButton("SAG",parent.MRSM_Window)
             self.bSagittal.setObjectName("bSagittal")  # this is for stylesheet reference 
@@ -838,13 +873,13 @@ class MRSM_Presentation():
             match imagingPlane:
                 case ImagingPlane.SAGITTAL:
                     self.setActiveRadioButton(self.bSagittal)
-                    self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
+                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
                 case ImagingPlane.CORONAL:
                     self.setActiveRadioButton(self.bCoronal)
-                    self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in COR")
+                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in COR")
                 case ImagingPlane.TRANSVERSAL:
                     self.setActiveRadioButton(self.bTransversal)
-                    self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
+                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
         
         def setActiveRadioButton(self,activeButton):
             """
@@ -941,7 +976,9 @@ class MRSM_Presentation():
         self.idle_timer = QTimer()
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
-        self.showIntro.activate()
+        # IH240910 for debugging only
+        # self.showIntro.activate()
+        self.showDescription.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()

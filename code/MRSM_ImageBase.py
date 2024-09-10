@@ -10,7 +10,7 @@
 #      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
-#      Last update: IH240813
+#      Last update: IH240910
 #-------------------------------------------------------------------------------
 
 from enum import Enum
@@ -49,7 +49,24 @@ class ImageBase():
              'imagingPlane' : ImagingPlane.SAGITTAL, 
                 'JPGFileRelativePath': "resources/images/Free-Max/Head/2a_Head_t1_tse_dark-fl_sag_p4_DRB.jpg",
                 'pixmapOriginal':   None,  # to be populated later
-                'pixmapScaled':    None   # to be populated later
+                'pixmapScaled':    None,   # to be populated later
+                'annotation':   {
+                    'segmentation': 
+                        [   
+                            {
+                            'descriptionHTML': "",
+                            'calloutPolygons':[[],[]],
+                            'regionPolygons':[[],[]],
+                            'style': {'brush': None, 'pen': None, } 
+                            },
+                            {
+                            'descriptionHTML': "",
+                            'calloutPolygons':[[],[]],
+                            'regionRolygons':[[],[]],
+                            'style': {'brush': None, 'pen': None, }
+                            },
+                        ],
+                    },
             },  
             {'organ':  Organ.HEAD, 
              'imagingPlane' : ImagingPlane.CORONAL,
@@ -130,4 +147,10 @@ class ImageBase():
         for im in self.MRimages:
             if im['organ']==organ and im['imagingPlane']==imagingPlane:
                  return im['pixmapScaled'] 
+        return None
+    
+    def getAnnotation(self,organ: Organ, imagingPlane: ImagingPlane):
+        for im in self.MRimages:
+            if im['organ']==organ and im['imagingPlane']==imagingPlane:
+                 return im['annotation'] 
         return None
