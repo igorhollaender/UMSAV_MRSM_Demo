@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240910
+#       Last update: IH240911
 #
 #
 """
@@ -837,7 +837,7 @@ class MRSM_Presentation():
             polygon = self.imageScene.addPolygon(QPolygonF([QPointF(10,10),QPointF(10,280),QPointF(280,280),QPointF(280,10),]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
             self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
             self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
-            self.imageScene.
+            # self.imageScene.
 
             #IH240910    C O N T I N U E   H E R E 
 
@@ -978,8 +978,8 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # IH240910 for debugging only
-        # self.showIntro.activate()
-        self.showDescription.activate()
+        self.showIntro.activate()
+        # self.showDescription.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
