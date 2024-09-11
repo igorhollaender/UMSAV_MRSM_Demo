@@ -13,6 +13,9 @@
 #      Last update: IH240911
 #-------------------------------------------------------------------------------
 
+
+import xml.etree.ElementTree as ET
+
 from enum import Enum
 
 from PyQt6.QtCore import (
