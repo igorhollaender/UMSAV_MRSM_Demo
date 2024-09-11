@@ -64,11 +64,14 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 #-------------------------------------------------------------------------------
 
 
-from MRSM_Globals import IsWaveShareDisplayEmulated
-from MRSM_Globals import IsRaspberryPi5Emulated
-from MRSM_Globals import IsQtMultimediaAvailable
-from MRSM_Globals import HasToShowExitButton
-from MRSM_Globals import HasToShowGoIdleButton
+from MRSM_Globals import (
+    IsWaveShareDisplayEmulated,
+    IsRaspberryPi5Emulated,
+    IsQtMultimediaAvailable,
+    HasToShowExitButton,
+    HasToShowGoIdleButton,
+    HasToIncludeSegmentationPanel,
+)
 
 from MRSM_Globals import __version__
 
@@ -374,10 +377,14 @@ class MRSM_Presentation():
             self.grid.addWidget(self.bInfo,0,22,1,10)
             self.mainWidgets += [self.bInfo]
 
+            
             self.bDescription = self.parent.MRSM_PushButton(self.parent.lcls('WHAT UC'),self.parent.MRSM_Window)
             self.bDescription.clicked.connect(self.parent.quit_main_start_description)
-            self.grid.addWidget(self.bDescription,1,22,1,10)
-            self.mainWidgets += [self.bDescription]
+            if HasToIncludeSegmentationPanel:            
+                self.grid.addWidget(self.bDescription,1,22,1,10)
+                self.mainWidgets += [self.bDescription]
+            else:
+                self.bDescription.hide()
 
             #IH240717 for debugging only
             if HasToShowExitButton:
@@ -600,7 +607,7 @@ class MRSM_Presentation():
             for o in self.organButton.keys(): 
                 # self.organButton[o].setActiveState(False)
                 self.organButton[o].setCurrentState(isScanningRunning=False,isCurrentlyShown=False)
-            self.imagePaneRightmost.update()
+            self.imagePaneRightmost.update()            
             self.bDescription.setEnabled(False)
 
             if organ !=organ.NONE:

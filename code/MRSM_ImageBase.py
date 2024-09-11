@@ -14,8 +14,6 @@
 #-------------------------------------------------------------------------------
 
 
-import xml.etree.ElementTree as ET
-
 from enum import Enum
 
 from PyQt6.QtCore import (
@@ -157,3 +155,4 @@ class ImageBase():
             if im['organ']==organ and im['imagingPlane']==imagingPlane:
                  return im['annotation'] 
         return None
+    
