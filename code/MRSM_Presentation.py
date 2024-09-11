@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240909
+#       Last update: IH240910
 #
 #
 """
@@ -76,15 +76,19 @@ from MRSM_Utilities import error_message, debug_message
 
 
 from PyQt6.QtGui import (
+    QColor,
     QFont,
-    QPixmap
+    QPixmap,
+    QPolygonF,
 )
 from enum import Enum
+from functools import partial
 from typing import Any
 
 from PyQt6.QtCore import (    
     Qt,
     QPoint,
+    QPointF,
     QPropertyAnimation,
     QRectF,
     QSequentialAnimationGroup,
@@ -309,9 +313,7 @@ class MRSM_Presentation():
 
                 self.myPen = self.penActive if isScanningRunning else self.penIdle
 
-                #IH240909 added
-                self.showMainInstance.bDescription.setVisible((not isScanningRunning) and isCurrentlyShown)
-
+              
             def paint(self, painter, option, widget):
                 #IH240724 PROBLEM this does not work as expected
                 #if self.isMousePressed:
@@ -537,23 +539,36 @@ class MRSM_Presentation():
             # debug_message(self.imagePaneMid.geometry())
             # debug_message(self.imagePaneRight.geometry())
 
+            self.lRollerShadePaneLeft.show()
             self.lRollerShadePaneLeft.setGeometry(self.imagePaneLeft.geometry())
             self.lRollerShadePaneLeft.y = self.imagePaneLeft.geometry().y()-20
+            self.lRollerShadePaneMid.show()
             self.lRollerShadePaneMid.setGeometry(self.imagePaneMid.geometry())
             self.lRollerShadePaneMid.y = self.imagePaneMid.geometry().y()-20
+            self.lRollerShadePaneRight.show()
             self.lRollerShadePaneRight.setGeometry(self.imagePaneRight.geometry())
             self.lRollerShadePaneRight.y = self.imagePaneRight.geometry().y()-20
             
         def activate(self) -> None:
-            for panel in self.mainWidgets:
-                panel.show()
-            
+            self.reactivate()
             self.setRollerShadesToInitialPosition()
             self.isSimulationShowRunning = False
             for o in self.organButton.keys(): 
-                # self.organButton[o].setActiveState(False)
                 self.organButton[o].setCurrentState(isScanningRunning=False,isCurrentlyShown=False)
             self.imagePaneRightmost.update()
+            self.bDescription.setEnabled(False)
+
+        def reactivate(self) -> None:
+            """
+            reactivation with state before deactivation restored
+            """
+            for panel in self.mainWidgets:
+                panel.show()
+
+            #IH240909 HACK the shade panes should actually be in 'open' state 
+            self.lRollerShadePaneLeft.hide()
+            self.lRollerShadePaneMid.hide()
+            self.lRollerShadePaneRight.hide()        
 
             if IsQtMultimediaAvailable:
                 self.video_widget.show()
@@ -586,11 +601,11 @@ class MRSM_Presentation():
                 # self.organButton[o].setActiveState(False)
                 self.organButton[o].setCurrentState(isScanningRunning=False,isCurrentlyShown=False)
             self.imagePaneRightmost.update()
-
+            self.bDescription.setEnabled(False)
 
             if organ !=organ.NONE:
                 self.setRollerShadesToInitialPosition()
-
+                
                 # clean all pixmaps
                 self.imagePaneLeft.setPixmap(QPixmap())
                 self.imagePaneMid.setPixmap(QPixmap())
@@ -613,6 +628,7 @@ class MRSM_Presentation():
                 self.parent.hardwareController.scanningSimulationShowStart(organ=self.currentOrgan,imagingPlane=ImagingPlane.ARBITRARY)                
                 self.animation_all.start()
                 self.parent.idle_timer.stop()   #IH240812 avoid going idle during animation
+
                                 
 
 
@@ -623,6 +639,10 @@ class MRSM_Presentation():
             self.organButton[self.currentOrgan].setCurrentState(isScanningRunning=False,isCurrentlyShown=True)
             self.parent.hardwareController.scanningSimulationShowStop()
             self.imagePaneRightmost.update()
+
+            #IH240909 added
+            self.bDescription.setEnabled(True)
+                
             self.reset_idle_timer()
             
         #IH240724 OBSOLETE
@@ -780,27 +800,116 @@ class MRSM_Presentation():
 
             self.descriptionWidgets += [self.bgLabel]
 
-            self.lHTMLText1 = QLabel("THIS IS JUST A TEST TEXT")
-            self.lHTMLText1.setWordWrap(True)
-            self.lHTMLText1.setMinimumWidth(1000)
-            self.lHTMLText1.setMaximumWidth(1000)
+            # self.lHTMLText1 = QLabel()
+            # self.lHTMLText1.setWordWrap(True)
+            # self.lHTMLText1.setMinimumWidth(1000)
+            # self.lHTMLText1.setMaximumWidth(1000)
 
-            self.grid.addWidget(self.lHTMLText1,0,0,4,28)
-            self.descriptionWidgets += [self.lHTMLText1]                                    
-            self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
+            #  self.grid.addWidget(self.lHTMLText1,0,0,4,28)
+            #  self.descriptionWidgets += [self.lHTMLText1]                                    
+            # self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
+
+            # self.imagePane = QLabel("",self.parent.MRSM_Window)
+            # self.grid.addWidget(self.imagePane,0,12,4,4)
+            # self.descriptionWidgets += [self.imagePane]
+
+            # self.imagePane.setMinimumHeight(300)            
+            # self.imagePane.setMaximumHeight(300)            
+            # self.imagePane.setMinimumWidth(1460)            
+            # self.imagePane.setMaximumWidth(1460)
+
+            # #IH240910 for debugging only
+            # self.imagePane.setPixmap(QPixmap())
             
+            
+            # IH240910 for debugging only
+            pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.BODY,ImagingPlane.CORONAL)
+            self.imageScene = QGraphicsScene(self.parent.MRSM_Window)
+            if pm is not None:                
+                self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
+            self.imagePane = QGraphicsView(self.imageScene)
+            self.grid.addWidget(self.imagePane,0,0,8,28)
+            # (0,0,8,28) is ok but left, mid and right panels are glued together
+            self.descriptionWidgets += [self.imagePane]
+            self.imagePane.setObjectName("imagePane")
+
+            
+            polygon = self.imageScene.addPolygon(QPolygonF([QPointF(10,10),QPointF(10,280),QPointF(280,280),QPointF(280,10),]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
+            self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
+            self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
+            self.imageScene.
+
+            #IH240910    C O N T I N U E   H E R E 
+
+
+            self.bSagittal = parent.MRSM_PushButton("SAG",parent.MRSM_Window)
+            self.bSagittal.setObjectName("bSagittal")  # this is for stylesheet reference 
+            self.bSagittal.clicked.connect(partial(self.showAnnotationForImage,
+                                                   ImagingPlane.SAGITTAL))
+            self.grid.addWidget(self.bSagittal,0,29,1,4)
+            self.descriptionWidgets += [self.bSagittal]
+
+            self.bCoronal = parent.MRSM_PushButton("COR",parent.MRSM_Window)
+            self.bCoronal.setObjectName("bCoronal")
+            self.bCoronal.clicked.connect(partial(self.showAnnotationForImage, 
+                                                  ImagingPlane.CORONAL))
+            self.grid.addWidget(self.bCoronal,1,29,1,4)
+            self.descriptionWidgets += [self.bCoronal]
+
+            self.bTransversal = parent.MRSM_PushButton("TRV",parent.MRSM_Window)
+            self.bTransversal.setObjectName("bTransversal")
+            self.bTransversal.clicked.connect(partial(self.showAnnotationForImage,
+                                                      ImagingPlane.TRANSVERSAL))
+            self.grid.addWidget(self.bTransversal,2,29,1,4)
+            self.descriptionWidgets += [self.bTransversal]
 
             self.bResumeApp = parent.MRSM_PushButton(parent.lcls('BACK'),parent.MRSM_Window)
             self.bResumeApp.clicked.connect(self.parent.quit_description_start_main)
-            self.grid.addWidget(self.bResumeApp,2,29,1,4)
+            self.grid.addWidget(self.bResumeApp,4,29,1,4)
             self.descriptionWidgets += [self.bResumeApp]
 
             self.deactivate()
+
+        def showAnnotationForImage(self,imagingPlane: ImagingPlane):
+            match imagingPlane:
+                case ImagingPlane.SAGITTAL:
+                    self.setActiveRadioButton(self.bSagittal)
+                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
+                case ImagingPlane.CORONAL:
+                    self.setActiveRadioButton(self.bCoronal)
+                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in COR")
+                case ImagingPlane.TRANSVERSAL:
+                    self.setActiveRadioButton(self.bTransversal)
+                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
+        
+        def setActiveRadioButton(self,activeButton):
+            """
+            The bSagital, bCoronal, and bTransversal button work as a RadioButton group
+            This methods set the active one.
+            """
+
+            #IH240909 PROBLEM here: properties cannot probably be manipulated without restoring the widget
+            # so this does not work
+            #for b in [self.bSagittal, self.bCoronal, self.bTransversal]:
+            #    b.setProperty("activeRadioButton",None)
+            #    b.setProperty("activeRadioButton",True)
+            #activeButton.setProperty("activeRadioButton",None)    
+            #activeButton.setProperty("activeRadioButton",True)
+            # self.bSagittal.setProperty("activeRadioButton",True)  #IH240909 for debugging only
+
+            #IH240909 HACK we simulate RadioButton behaviour by enabled/disabled mechanism
+            # see also MRSM_Stylesheet.py
+            for b in [self.bSagittal, self.bCoronal, self.bTransversal]:
+                b.setEnabled(True)
+            activeButton.setEnabled(False)  # the active button is disabled, all others are enabled
+            
+            
 
         def activate(self):            
             for w in self.descriptionWidgets:                                
                 w.show()      
             self.parent.show()
+            self.showAnnotationForImage(imagingPlane=ImagingPlane.SAGITTAL)
             self.reset_idle_timer()  
     
         def deactivate(self):
@@ -868,7 +977,9 @@ class MRSM_Presentation():
         self.idle_timer = QTimer()
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
-        self.showIntro.activate()
+        # IH240910 for debugging only
+        # self.showIntro.activate()
+        self.showDescription.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
@@ -909,7 +1020,7 @@ class MRSM_Presentation():
 
     def quit_description_start_main(self):    
         self.showDescription.deactivate()
-        self.showMain.activate()
+        self.showMain.reactivate()  #IH240909 was 'activate' before
     
 
     def quit_app(self):

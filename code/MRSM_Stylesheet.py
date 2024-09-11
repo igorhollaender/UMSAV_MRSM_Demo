@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH240821
+#      Last update: IH240909
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -38,6 +38,28 @@ QPushButton
     max-width:  100px;
     min-height:  50px;
 }
+
+QPushButton:disabled
+{ 
+    background-color: DarkGoldenRod;
+}
+
+QPushButton#bSagittal:enabled,
+QPushButton#bCoronal:enabled,
+QPushButton#bTransversal:enabled
+{ 
+    background-color: yellow;
+}
+
+QPushButton#bSagittal:disabled,
+QPushButton#bCoronal:disabled,
+QPushButton#bTransversal:disabled
+{ 
+    color: yellow;
+    font-weight: bold;
+    background-color: green;
+}
+
 
 QLabel#lCountdown, 
 QLabel#lVersion  
