@@ -10,7 +10,7 @@
 #      M  R  S  M  _  T  e  x  t  C  o  n  t  e  n  t  .  p  y 
 #
 9
-#      Last update: IH240909
+#      Last update: IH240912
 #-------------------------------------------------------------------------------
 
 from enum import Enum

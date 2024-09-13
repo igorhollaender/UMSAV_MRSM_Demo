@@ -218,7 +218,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 1  
+        INTRO_DURATION_SEC  = 5  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -878,17 +878,30 @@ class MRSM_Presentation():
             self.deactivate()
 
         def showAnnotationForImage(self,imagingPlane: ImagingPlane):
-            match imagingPlane:
-                case ImagingPlane.SAGITTAL:
+            #IH240912 match requires python 3.10, so we used 'IFs' instead
+            # match imagingPlane:
+            #     case ImagingPlane.SAGITTAL:
+            #         self.setActiveRadioButton(self.bSagittal)
+            #         # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
+            #     case ImagingPlane.CORONAL:
+            #         self.setActiveRadioButton(self.bCoronal)
+            #         # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in COR")
+            #     case ImagingPlane.TRANSVERSAL:
+            #         self.setActiveRadioButton(self.bTransversal)
+            #         # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
+
+            #IH240912 match requires python 3.10, so we used 'IFs' instead
+            if imagingPlane == ImagingPlane.SAGITTAL:
                     self.setActiveRadioButton(self.bSagittal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
-                case ImagingPlane.CORONAL:
+            if imagingPlane == ImagingPlane.CORONAL:
                     self.setActiveRadioButton(self.bCoronal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in COR")
-                case ImagingPlane.TRANSVERSAL:
+            if imagingPlane == ImagingPlane.TRANSVERSAL:
                     self.setActiveRadioButton(self.bTransversal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
-        
+
+            
         def setActiveRadioButton(self,activeButton):
             """
             The bSagital, bCoronal, and bTransversal button work as a RadioButton group
@@ -977,7 +990,8 @@ class MRSM_Presentation():
         self.showMain = self.ShowMain(self)
         self.showIdle = self.ShowIdle(self)
         self.showInfo = self.ShowInfo(self)
-        self.showDescription = self.ShowDescription(self)
+        if HasToIncludeSegmentationPanel:
+            self.showDescription = self.ShowDescription(self)
 
         self.actual_idle_break_sec = 0
 
@@ -985,8 +999,8 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # IH240910 for debugging only
-        self.showIntro.activate()
-        # self.showDescription.activate()
+        # self.showIntro.activate()
+        self.showDescription.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()

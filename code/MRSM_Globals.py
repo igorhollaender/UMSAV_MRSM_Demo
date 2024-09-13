@@ -10,12 +10,11 @@
 #      M  R  S  M  _  G l o b a l s  .  p  y 
 #
 #
-#      Last update: IH240911
+#      Last update: IH240913
 #-------------------------------------------------------------------------------
-import time
 
 
-__version__                 = "MRSM_Demo IH240911a"
+__version__                 = "MRSM_Demo IH240913a"
 
 IsWaveShareDisplayEmulated  = True   # set to False for real application
 IsRaspberryPi5Emulated      = True  # set to False for real application
@@ -25,7 +24,7 @@ IsQtMultimediaAvailable     = False  # IH240722 I had problems
 HasToShowExitButton         = True    # set to False for real application
 HasToShowGoIdleButton       = False   # set to False for real application
 
-HasToIncludeSegmentationPanel  = False   # set to False to run the stable version (Segmentation is experimental feature)
+HasToIncludeSegmentationPanel  = True   # set to False to run the stable version (Segmentation is experimental feature)
 
 VerboseLevel                = 2     # 0 is complete muted, 1 is standard, 2 is for debugging
 

@@ -10,7 +10,7 @@
 #      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
-#      Last update: IH240911
+#      Last update: IH240913
 #-------------------------------------------------------------------------------
 
 
@@ -23,6 +23,8 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import (
     QPixmap
 )
+
+from MRSM_SegmentationFactory import SegmentationFactory
 
 class Organ(Enum):
         NONE        =   0
@@ -143,6 +145,9 @@ class ImageBase():
               im['pixmapScaled'] = im['pixmapOriginal'].scaled(
                     self.pixmapStandardSize,self.pixmapStandardSize,
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+
+
+        self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg")
                     
     def getScaledPixmap(self,organ: Organ,imagingPlane : ImagingPlane):
         for im in self.MRimages:
@@ -155,4 +160,3 @@ class ImageBase():
             if im['organ']==organ and im['imagingPlane']==imagingPlane:
                  return im['annotation'] 
         return None
-    
