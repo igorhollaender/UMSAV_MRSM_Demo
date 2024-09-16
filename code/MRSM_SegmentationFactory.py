@@ -83,9 +83,14 @@ class SegmentationFactory:
                         self.segmentDict[id]['boundingBox']['height']=rectElement.get('height')
 
                     assert('boundingBox' in self.segmentDict[id],"No respective bounding box found") # IH240916 we must have one bounding box
+                    assert(float(self.segmentDict[id]['boundingBox']['width'])>0,"Bounding box rectangle has zero width")
+                    assert(float(self.segmentDict[id]['boundingBox']['height'])>0,"Bounding box rectangle has zero height")
+
                     if 'QPolygons' not in self.segmentDict[id]:
                         self.segmentDict[id]['QPolygons'] = {}
-                    self.segmentDict[id]['QPolygons'][self.segmentDict[id]['subsegment']] =SegmentationFactory.inkscapePathToQPolygon(
+                    if self.segmentDict[id]['subsegment'] not in self.segmentDict[id]['QPolygons']:
+                        self.segmentDict[id]['QPolygons'][self.segmentDict[id]['subsegment']] = {}
+                    self.segmentDict[id]['QPolygons'][self.segmentDict[id]['subsegment']]=SegmentationFactory.inkscapePathToQPolygon(
                                             self.segmentDict[id]['segmentSVGPath'],self.segmentDict[id]['boundingBox'])
                     
 
@@ -93,7 +98,7 @@ class SegmentationFactory:
 
     def getSegmentQPolygons(self,organ, imagingPlane):
         """
-        returns dictionary of QPolygon's for given organ and imagingPlane (key is subsegemnt name of 'None', value is QPolygon)
+        returns dictionary of QPolygon's for given organ and imagingPlane (key is subsegment name of 'None', value is QPolygon)
         return None is segmentation is not available
         """
         for segmentId in self.segmentDict.keys():
@@ -102,6 +107,9 @@ class SegmentationFactory:
         return None
  
     def inkscapePathToQPolygon(inkscapePath: str, inkscapeBBRect):
+        """
+        returns QPolygonF object with normalized coordinates (0,0) is upper left corner, (1,1) is lower right corner
+        """
         reDecimalNumber = "(-?\d*\.?\d*)"
         debug_message(inkscapePath)
         debug_message(inkscapeBBRect)
@@ -110,9 +118,8 @@ class SegmentationFactory:
         polygon = QPolygonF()
         for pointCoords in re.finditer(f"{reDecimalNumber},{reDecimalNumber}",inkscapePath):
             (coordXstr,coordYstr) = pointCoords.group().split(",")  
-            coordX = float(coordXstr)-float(inkscapeBBRect['x'])
-            coordY = float(coordYstr)-float(inkscapeBBRect['y'])
-            #IH240916 we do not treat the scaling of the image, assuming both image and segment having size 50x50
+            coordX = (float(coordXstr)-float(inkscapeBBRect['x']))/float(inkscapeBBRect['width'])
+            coordY = (float(coordYstr)-float(inkscapeBBRect['y']))/float(inkscapeBBRect['height'])
             debug_message(f" X: {coordX}  Y: {coordY}")
             polygon += QPointF(coordX,coordY)
         return polygon 

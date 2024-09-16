@@ -83,6 +83,7 @@ from PyQt6.QtGui import (
     QFont,
     QPixmap,
     QPolygonF,
+    QTransform,
 )
 from enum import Enum
 from functools import partial
@@ -832,6 +833,8 @@ class MRSM_Presentation():
             
             # IH240910 for debugging only
             pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.SAGITTAL)
+            self.parent.showMain.currentOrgan = Organ.HEAD
+
             self.imageScene = QGraphicsScene(self.parent.MRSM_Window)
             if pm is not None:                
                 self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
@@ -841,9 +844,7 @@ class MRSM_Presentation():
             self.descriptionWidgets += [self.imagePane]
             self.imagePane.setObjectName("imagePane")
 
-            
-            # self.imageScene.
-
+   
             #IH240910    C O N T I N U E   H E R E 
 
 
@@ -873,6 +874,10 @@ class MRSM_Presentation():
             self.grid.addWidget(self.bResumeApp,4,29,1,4)
             self.descriptionWidgets += [self.bResumeApp]
 
+            self.showAnnotationForImage(ImagingPlane.SAGITTAL) 
+            #IH240916 TODO change this to CORONAL for production,
+            # as SAGITTAL is missing in some organ sets
+
             self.deactivate()
 
         def showAnnotationForImage(self,imagingPlane: ImagingPlane):
@@ -899,16 +904,19 @@ class MRSM_Presentation():
                     self.setActiveRadioButton(self.bTransversal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
             
-            for item in self.annotationItems:
-                item.hide()
             self.annotationItems = []
             segments = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygons(
                 self.parent.showMain.currentOrgan, 
                 imagingPlane)
             if segments is not None:
-                for subSegment in segments:
-                    self.imageScene.addPolygon(segments[subSegment],brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
-                    self.annotationItems += [segments[subSegment]]
+                trsf = QTransform()
+                trsf.scale(self.imagePixmapOnScene.boundingRect().width(),self.imagePixmapOnScene.boundingRect().height())
+
+                for segment in segments:
+                    for subSegment in segments[segment]:
+                        #IH240916 TODO adapt style
+                        p = self.imageScene.addPolygon(trsf.map(segments[segment][subSegment]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
+                        self.annotationItems += [p]
             #IH240916 for debugging only
             r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
             r2 = self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
@@ -941,8 +949,8 @@ class MRSM_Presentation():
         def activate(self):            
             for w in self.descriptionWidgets:                                
                 w.show()     
-            for i in self.annotationItems:                                
-                i.show()
+            #for i in self.annotationItems:                                
+            #    self.imageScene.addItem(i)
             self.parent.show()
             self.showAnnotationForImage(imagingPlane=ImagingPlane.SAGITTAL)
             self.reset_idle_timer()  
@@ -950,8 +958,8 @@ class MRSM_Presentation():
         def deactivate(self):
             for w in self.descriptionWidgets:
                 w.hide() 
-            for i in self.annotationItems:                                
-                i.hide()
+            #for i in self.annotationItems:                                
+            #    self.imageScene.removeItem(i)
 
         def reset_idle_timer(self):
             self.parent.idle_timer.stop()
