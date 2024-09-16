@@ -808,32 +808,10 @@ class MRSM_Presentation():
             self.bgLabel.setMaximumWidth(1460)            
 
             self.descriptionWidgets += [self.bgLabel]
-
-            # self.lHTMLText1 = QLabel()
-            # self.lHTMLText1.setWordWrap(True)
-            # self.lHTMLText1.setMinimumWidth(1000)
-            # self.lHTMLText1.setMaximumWidth(1000)
-
-            #  self.grid.addWidget(self.lHTMLText1,0,0,4,28)
-            #  self.descriptionWidgets += [self.lHTMLText1]                                    
-            # self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
-
-            # self.imagePane = QLabel("",self.parent.MRSM_Window)
-            # self.grid.addWidget(self.imagePane,0,12,4,4)
-            # self.descriptionWidgets += [self.imagePane]
-
-            # self.imagePane.setMinimumHeight(300)            
-            # self.imagePane.setMaximumHeight(300)            
-            # self.imagePane.setMinimumWidth(1460)            
-            # self.imagePane.setMaximumWidth(1460)
-
-            # #IH240910 for debugging only
-            # self.imagePane.setPixmap(QPixmap())
             
-            
-            # IH240910 for debugging only
+            # IH240910 for initialization only
             pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.SAGITTAL)
-            self.parent.showMain.currentOrgan = Organ.HEAD
+            self.parent.showMain.currentOrgan = Organ.BODY
 
             self.imageScene = QGraphicsScene(self.parent.MRSM_Window)
             if pm is not None:                
@@ -843,10 +821,6 @@ class MRSM_Presentation():
             # (0,0,8,28) is ok but left, mid and right panels are glued together
             self.descriptionWidgets += [self.imagePane]
             self.imagePane.setObjectName("imagePane")
-
-   
-            #IH240910    C O N T I N U E   H E R E 
-
 
             self.bSagittal = parent.MRSM_PushButton("SAG",parent.MRSM_Window)
             self.bSagittal.setObjectName("bSagittal")  # this is for stylesheet reference 
@@ -874,26 +848,15 @@ class MRSM_Presentation():
             self.grid.addWidget(self.bResumeApp,4,29,1,4)
             self.descriptionWidgets += [self.bResumeApp]
 
-            self.showAnnotationForImage(ImagingPlane.SAGITTAL) 
-            #IH240916 TODO change this to CORONAL for production,
+            self.showAnnotationForImage(ImagingPlane.TRANSVERSAL) 
+            #IH240916 TODO change this to TRANSVERSAL for production,
             # as SAGITTAL is missing in some organ sets
 
             self.deactivate()
 
-        def showAnnotationForImage(self,imagingPlane: ImagingPlane):
-            #IH240912 match requires python 3.10, so we used 'IFs' instead
-            # match imagingPlane:
-            #     case ImagingPlane.SAGITTAL:
-            #         self.setActiveRadioButton(self.bSagittal)
-            #         # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
-            #     case ImagingPlane.CORONAL:
-            #         self.setActiveRadioButton(self.bCoronal)
-            #         # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in COR")
-            #     case ImagingPlane.TRANSVERSAL:
-            #         self.setActiveRadioButton(self.bTransversal)
-            #         # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
 
-            #IH240912 match requires python 3.10, so we used 'IFs' instead
+        def showAnnotationForImage(self,imagingPlane: ImagingPlane):
+        
             if imagingPlane == ImagingPlane.SAGITTAL:
                     self.setActiveRadioButton(self.bSagittal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
@@ -904,19 +867,25 @@ class MRSM_Presentation():
                     self.setActiveRadioButton(self.bTransversal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
             
+            pm = self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,imagingPlane)
+            if pm is not None:                
+                self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
+            self.imagePane = QGraphicsView(self.imageScene)
+        
             self.annotationItems = []
             segments = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygons(
                 self.parent.showMain.currentOrgan, 
                 imagingPlane)
-            if segments is not None:
+            if len(segments)>0:
                 trsf = QTransform()
                 trsf.scale(self.imagePixmapOnScene.boundingRect().width(),self.imagePixmapOnScene.boundingRect().height())
 
                 for segment in segments:
-                    for subSegment in segments[segment]:
                         #IH240916 TODO adapt style
-                        p = self.imageScene.addPolygon(trsf.map(segments[segment][subSegment]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
-                        self.annotationItems += [p]
+                        # c o n t i n u e.  h e r e
+                        for subsegmentKey in segment[xxx]:
+                            p = self.imageScene.addPolygon(trsf.map(segment[self.parent.showMain.currentOrgan][subsegmentKey]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
+                            self.annotationItems += [p]
             #IH240916 for debugging only
             r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
             r2 = self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))

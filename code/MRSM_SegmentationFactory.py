@@ -88,9 +88,11 @@ class SegmentationFactory:
 
                     if 'QPolygons' not in self.segmentDict[id]:
                         self.segmentDict[id]['QPolygons'] = {}
-                    if self.segmentDict[id]['subsegment'] not in self.segmentDict[id]['QPolygons']:
-                        self.segmentDict[id]['QPolygons'][self.segmentDict[id]['subsegment']] = {}
-                    self.segmentDict[id]['QPolygons'][self.segmentDict[id]['subsegment']]=SegmentationFactory.inkscapePathToQPolygon(
+                    if self.segmentDict[id]['segment'] not in self.segmentDict[id]['QPolygons']:
+                        self.segmentDict[id]['QPolygons'][self.segmentDict[id]['segment']] = {}
+                    if self.segmentDict[id]['subsegment'] not in self.segmentDict[id]['QPolygons'][self.segmentDict[id]['segment']]:
+                        self.segmentDict[id]['QPolygons'][self.segmentDict[id]['segment']] = {}
+                    self.segmentDict[id]['QPolygons'][self.segmentDict[id]['segment']][self.segmentDict[id]['subsegment']]=SegmentationFactory.inkscapePathToQPolygon(
                                             self.segmentDict[id]['segmentSVGPath'],self.segmentDict[id]['boundingBox'])
                     
 
@@ -98,13 +100,13 @@ class SegmentationFactory:
 
     def getSegmentQPolygons(self,organ, imagingPlane):
         """
-        returns dictionary of QPolygon's for given organ and imagingPlane (key is subsegment name of 'None', value is QPolygon)
-        return None is segmentation is not available
+        returns list of QPolygon's for given organ and imagingPlane (key is subsegment name of 'None', value is QPolygon)
         """
+        qPolygons = []
         for segmentId in self.segmentDict.keys():
             if f"_{organ.name}_" in segmentId and f"_{imagingPlane.name}_" in segmentId:
-                return self.segmentDict[segmentId]['QPolygons']
-        return None
+                qPolygons += [self.segmentDict[segmentId]['QPolygons']]
+        return qPolygons
  
     def inkscapePathToQPolygon(inkscapePath: str, inkscapeBBRect):
         """
