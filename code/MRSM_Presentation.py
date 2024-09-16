@@ -795,6 +795,7 @@ class MRSM_Presentation():
             self.grid :   QGridLayout   = parent.grid
             self.parent : QWidget       = parent
             self.descriptionWidgets = []
+            self.annotationItems = []
 
             self.bgLabel = QLabel("",self.parent.MRSM_Window)
             self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
@@ -830,7 +831,7 @@ class MRSM_Presentation():
             
             
             # IH240910 for debugging only
-            pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.BODY,ImagingPlane.CORONAL)
+            pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.SAGITTAL)
             self.imageScene = QGraphicsScene(self.parent.MRSM_Window)
             if pm is not None:                
                 self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
@@ -841,9 +842,6 @@ class MRSM_Presentation():
             self.imagePane.setObjectName("imagePane")
 
             
-            polygon = self.imageScene.addPolygon(QPolygonF([QPointF(10,10),QPointF(10,280),QPointF(280,280),QPointF(280,10),]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
-            self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
-            self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
             # self.imageScene.
 
             #IH240910    C O N T I N U E   H E R E 
@@ -900,6 +898,21 @@ class MRSM_Presentation():
             if imagingPlane == ImagingPlane.TRANSVERSAL:
                     self.setActiveRadioButton(self.bTransversal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
+            
+            for item in self.annotationItems:
+                item.hide()
+            self.annotationItems = []
+            segments = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygons(
+                self.parent.showMain.currentOrgan, 
+                imagingPlane)
+            if segments is not None:
+                for subSegment in segments:
+                    self.imageScene.addPolygon(segments[subSegment],brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
+                    self.annotationItems += [segments[subSegment]]
+            #IH240916 for debugging only
+            r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
+            r2 = self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
+            self.annotationItems += [r1,r2]
 
             
         def setActiveRadioButton(self,activeButton):
@@ -927,14 +940,18 @@ class MRSM_Presentation():
 
         def activate(self):            
             for w in self.descriptionWidgets:                                
-                w.show()      
+                w.show()     
+            for i in self.annotationItems:                                
+                i.show()
             self.parent.show()
             self.showAnnotationForImage(imagingPlane=ImagingPlane.SAGITTAL)
             self.reset_idle_timer()  
     
         def deactivate(self):
             for w in self.descriptionWidgets:
-                w.hide()
+                w.hide() 
+            for i in self.annotationItems:                                
+                i.hide()
 
         def reset_idle_timer(self):
             self.parent.idle_timer.stop()

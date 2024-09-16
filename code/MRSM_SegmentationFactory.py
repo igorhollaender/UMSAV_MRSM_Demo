@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  e  g  m  e  n  t  a  t  i  o  n   F  a  c  t  o  r  y  .  p  y 
 #
 #
-#      Last update: IH240913
+#      Last update: IH240916
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
@@ -26,6 +26,13 @@
 
 import xml.etree.ElementTree as ET
 import re
+
+from PyQt6.QtGui import (
+    QPolygonF,
+)
+from PyQt6.QtCore import (    
+    QPointF,
+)
 
 from MRSM_Utilities import debug_message
 
@@ -62,22 +69,53 @@ class SegmentationFactory:
                     self.segmentDict[id]['segment']= m.group('segment')
                     if m.group('subsegment')!= "":
                         self.segmentDict[id]['subsegment']= m.group('subsegment')[1:] #IH240913 first character is a '_'                
+                    else:
+                        self.segmentDict[id]['subsegment']=None
+                    # find the respective bounding box
+                    for rectElement in self.segmentationWorkbenchTree.findall(".//svg:rect",inkscapeNamespaces):
+                        BBid = rectElement.get('id')
+                        if BBid != f"BB_{self.segmentDict[id]['organ']}_{self.segmentDict[id]['imagingPlane']}":
+                            continue
+                        self.segmentDict[id]['boundingBox']={}
+                        self.segmentDict[id]['boundingBox']['x']=rectElement.get('x')
+                        self.segmentDict[id]['boundingBox']['y']=rectElement.get('y')
+                        self.segmentDict[id]['boundingBox']['width']=rectElement.get('width')
+                        self.segmentDict[id]['boundingBox']['height']=rectElement.get('height')
 
-            #  IH240913   c o n t i n u e.  h e r e    
-            
+                    assert('boundingBox' in self.segmentDict[id],"No respective bounding box found") # IH240916 we must have one bounding box
+                    if 'QPolygons' not in self.segmentDict[id]:
+                        self.segmentDict[id]['QPolygons'] = {}
+                    self.segmentDict[id]['QPolygons'][self.segmentDict[id]['subsegment']] =SegmentationFactory.inkscapePathToQPolygon(
+                                            self.segmentDict[id]['segmentSVGPath'],self.segmentDict[id]['boundingBox'])
+                    
+
         self.UnitTest()
 
     def getSegmentQPolygons(self,organ, imagingPlane):
         """
-        Returns list of QPolygon's for given organ and imagingPlane
+        returns dictionary of QPolygon's for given organ and imagingPlane (key is subsegemnt name of 'None', value is QPolygon)
+        return None is segmentation is not available
         """
-        for segmentId in self.segmentDict.keys:
+        for segmentId in self.segmentDict.keys():
             if f"_{organ.name}_" in segmentId and f"_{imagingPlane.name}_" in segmentId:
-                pass
-        return []
- 
-    def inkscapePathToQPolygon(inkscapePath: str, inkscapeBBRect: str):
+                return self.segmentDict[segmentId]['QPolygons']
         return None
+ 
+    def inkscapePathToQPolygon(inkscapePath: str, inkscapeBBRect):
+        reDecimalNumber = "(-?\d*\.?\d*)"
+        debug_message(inkscapePath)
+        debug_message(inkscapeBBRect)
+        debug_message(f" BBX: {inkscapeBBRect['x']}  BBY: {inkscapeBBRect['y']}")
+
+        polygon = QPolygonF()
+        for pointCoords in re.finditer(f"{reDecimalNumber},{reDecimalNumber}",inkscapePath):
+            (coordXstr,coordYstr) = pointCoords.group().split(",")  
+            coordX = float(coordXstr)-float(inkscapeBBRect['x'])
+            coordY = float(coordYstr)-float(inkscapeBBRect['y'])
+            #IH240916 we do not treat the scaling of the image, assuming both image and segment having size 50x50
+            debug_message(f" X: {coordX}  Y: {coordY}")
+            polygon += QPointF(coordX,coordY)
+        return polygon 
         
     def UnitTest(self):
         debug_message(self.segmentDict)

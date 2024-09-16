@@ -54,6 +54,7 @@ class ImageBase():
                 'pixmapOriginal':   None,  # to be populated later
                 'pixmapScaled':    None,   # to be populated later
                 'annotation':   {
+                     # IH240916 this is just an example template, the populating is done programmatically
                     'segmentation': 
                         [   
                             {
@@ -146,8 +147,10 @@ class ImageBase():
                     self.pixmapStandardSize,self.pixmapStandardSize,
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
 
+        # populating the segmentation data
 
         self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg")
+
                     
     def getScaledPixmap(self,organ: Organ,imagingPlane : ImagingPlane):
         for im in self.MRimages:
