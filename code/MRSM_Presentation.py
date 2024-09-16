@@ -883,8 +883,9 @@ class MRSM_Presentation():
                 for segment in segments:
                         #IH240916 TODO adapt style
                         # c o n t i n u e.  h e r e
-                        for subsegmentKey in segment[xxx]:
-                            p = self.imageScene.addPolygon(trsf.map(segment[self.parent.showMain.currentOrgan][subsegmentKey]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
+                        segmentPure = segment[list(segment)[0]] #IH240916 HACK this is the only key
+                        for subsegmentKey in segmentPure:
+                            p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
                             self.annotationItems += [p]
             #IH240916 for debugging only
             r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
