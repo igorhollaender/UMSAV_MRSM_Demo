@@ -219,7 +219,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 5  
+        INTRO_DURATION_SEC  = 1  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -425,14 +425,18 @@ class MRSM_Presentation():
                 self.imagePaneRightmost.setStyleSheet("background-color: green")
             if QGraphicsSceneAsPixmapContainer:
                 self.patientScene  = QGraphicsScene(self.parent.MRSM_Window)                                  
-                self.pixmapPatientScaled = self.pixmapPatient.scaled(700,220,
+                self.pixmapPatientScaled = self.pixmapPatient.scaled(700,220,  #IH240917 700,220 was OK
                     aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
                 self.patientPixmapOnScene = self.patientScene.addPixmap(self.pixmapPatientScaled)                 
                  
                 f = QFont()
                 f.setPointSize(15)
-                f.setBold(True)
-                self.patientScene.addText(parent.lcls("#105")).setFont(f)
+                f.setBold(True)                
+                self.patientScene.addText(parent.lcls("#105"),font=f).setPos(10,-50)
+
+                #IH240917 HACK covering a unpleasant bar under the patient image with a rectangle
+                self.patientScene.addRect(0,223,472,27,brush=Qt.GlobalColor.darkCyan,pen=Qt.GlobalColor.transparent)
+                
              
                 # organ graphics buttons
                 #  
@@ -817,8 +821,8 @@ class MRSM_Presentation():
             if pm is not None:                
                 self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
             self.imagePane = QGraphicsView(self.imageScene)
-            self.grid.addWidget(self.imagePane,0,0,8,28)
-            # (0,0,8,28) is ok but left, mid and right panels are glued together
+            self.grid.addWidget(self.imagePane,0,0,4,28)
+            # IH240917  (0,0,4,28) is the best so far tested on RPI
             self.descriptionWidgets += [self.imagePane]
             self.imagePane.setObjectName("imagePane")
 
@@ -845,7 +849,7 @@ class MRSM_Presentation():
 
             self.bResumeApp = parent.MRSM_PushButton(parent.lcls('BACK'),parent.MRSM_Window)
             self.bResumeApp.clicked.connect(self.parent.quit_description_start_main)
-            self.grid.addWidget(self.bResumeApp,4,29,1,4)
+            self.grid.addWidget(self.bResumeApp,3,29,1,4)
             self.descriptionWidgets += [self.bResumeApp]
 
             self.showAnnotationForImage(ImagingPlane.TRANSVERSAL) 
