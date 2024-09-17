@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240911
+#       Last update: IH240917
 #
 #
 """
@@ -994,8 +994,8 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # IH240910 for debugging only
-        # self.showIntro.activate()
-        self.showDescription.activate()
+        self.showIntro.activate()
+        # self.showDescription.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
