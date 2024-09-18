@@ -10,7 +10,7 @@
 #      M  R  S  M  _  T  e  x  t  C  o  n  t  e  n  t  .  p  y 
 #
 9
-#      Last update: IH240912
+#      Last update: IH240918
 #-------------------------------------------------------------------------------
 
 from enum import Enum
@@ -19,6 +19,11 @@ class Language(Enum):
         ENGLISH         = 0
         SLOVAK          = 1
         GERMAN          = 2
+
+class LanguageAbbrev(Enum):
+        EN          = Language.ENGLISH
+        SK          = Language.SLOVAK
+        DE          = Language.GERMAN
 
 #IH240812 for debugging only
 LoremIpsumHTMLText = """

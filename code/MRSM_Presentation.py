@@ -800,7 +800,7 @@ class MRSM_Presentation():
             self.grid :   QGridLayout   = parent.grid
             self.parent : QWidget       = parent
             self.descriptionWidgets = []
-            self.annotationItems = []
+            self.segmentAndAnnotationItems = []
 
             self.bgLabel = QLabel("",self.parent.MRSM_Window)
             self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
@@ -874,10 +874,13 @@ class MRSM_Presentation():
             pm = self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,imagingPlane)
             if pm is not None:                
                 self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
+            
+            for i in self.segmentAndAnnotationItems:                                
+                self.imageScene.removeItem(i)
+            self.segmentAndAnnotationItems = []
             self.imagePane = QGraphicsView(self.imageScene)
         
-            self.annotationItems = []
-            segments = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygons(
+            segments,annotations = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
                 self.parent.showMain.currentOrgan, 
                 imagingPlane)
             if len(segments)>0:
@@ -886,15 +889,28 @@ class MRSM_Presentation():
 
                 for segment in segments:
                         #IH240916 TODO adapt style
-                        # c o n t i n u e.  h e r e
                         segmentPure = segment[list(segment)[0]] #IH240916 HACK this is the only key
+
                         for subsegmentKey in segmentPure:
                             p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
-                            self.annotationItems += [p]
+                        self.segmentAndAnnotationItems += [p]
+                
+                #IH240918 for debugging only
+                y = 50
+                for annotation in annotations:
+                        #IH240916 TODO adapt style
+                        annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key
+                        
+                        for subsegmentKey in annotationPure:
+                            t = self.imageScene.addText(annotationPure[subsegmentKey])
+                            t.setPos (300,y)
+                            y += 50  #IH240918 for debugging only
+                            self.segmentAndAnnotationItems += [t]
+                        
             #IH240916 for debugging only
-            r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
-            r2 = self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
-            self.annotationItems += [r1,r2]
+            # r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
+            # r2 = self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
+            # self.segmentAndAnnotationItems += [r1,r2]
 
             
         def setActiveRadioButton(self,activeButton):

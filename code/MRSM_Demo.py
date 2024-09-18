@@ -79,6 +79,8 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #   IH240722 Problem with installing PyQt6/QtMultimedia on RPI
 #   Try using PySide6 as a replacement for PyQt6
 
+#   IH240918 language setting is not workign for Segmentation : implementation problem (cannot access language var variable)
+
 
 # BUGs
 #
@@ -100,12 +102,14 @@ import sys
 
 from MRSM_Controller import MRSM_Controller
 from MRSM_Presentation import MRSM_Presentation
-from MRSM_Presentation import Language
+from MRSM_TextContent import Language, LanguageAbbrev
 
-from MRSM_Globals import IsWaveShareDisplayEmulated
-from MRSM_Globals import IsRaspberryPi5Emulated
-from MRSM_Globals import VerboseLevel
-from MRSM_Globals import __version__
+from MRSM_Globals import (
+        IsWaveShareDisplayEmulated,
+        IsRaspberryPi5Emulated,
+        VerboseLevel,
+        __version__
+        )
 
 from MRSM_Utilities import error_message, debug_message
 
@@ -123,7 +127,9 @@ class MSRM_Demo_QApplication(QApplication):
         parser.addVersionOption()
         self.setApplicationVersion(__version__)
 
-        language_dict = {'EN':Language.ENGLISH, 'SK':Language.SLOVAK, 'GE':Language.GERMAN}        
+        # IH240918
+        # language_dict = {Lan:Language.ENGLISH, 'SK':Language.SLOVAK, 'GE':Language.GERMAN}   
+        language_dict = {langAbbrev.name :  langAbbrev.value  for langAbbrev in LanguageAbbrev}     
         language_option = QCommandLineOption(
             "l",
             f"Use the specified GUI language, one of: {list(language_dict.keys())}",
@@ -138,7 +144,7 @@ class MSRM_Demo_QApplication(QApplication):
         if self.app_language is None:
             error_message(f'Invalid language: {parser.value(language_option)}. Using EN instead.')
             self.app_language = Language.ENGLISH
-
+        
 
 def finalizeApp():
     MRSM_controller.finalize()
