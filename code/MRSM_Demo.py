@@ -79,7 +79,8 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #   IH240722 Problem with installing PyQt6/QtMultimedia on RPI
 #   Try using PySide6 as a replacement for PyQt6
 
-#   IH240918 language setting is not workign for Segmentation : implementation problem (cannot access language var variable)
+#   IH240920 FIXED
+#       IH240918 language setting is not working for Segmentation : implementation problem (cannot access language var variable)
 
 
 # BUGs

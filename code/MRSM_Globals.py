@@ -10,11 +10,11 @@
 #      M  R  S  M  _  G l o b a l s  .  p  y 
 #
 #
-#      Last update: IH240918
+#      Last update: IH240920
 #-------------------------------------------------------------------------------
 
 
-__version__                 = "MRSM_Demo IH240918a"
+__version__                 = "MRSM_Demo IH240920a"
 
 IsWaveShareDisplayEmulated  = True   # set to False for real application
 IsRaspberryPi5Emulated      = True  # set to False for real application

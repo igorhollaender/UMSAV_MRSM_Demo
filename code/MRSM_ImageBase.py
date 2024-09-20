@@ -10,7 +10,7 @@
 #      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
-#      Last update: IH240913
+#      Last update: IH240920
 #-------------------------------------------------------------------------------
 
 
@@ -23,6 +23,8 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import (
     QPixmap
 )
+
+from MRSM_TextContent import LanguageAbbrev
 
 from MRSM_SegmentationFactory import SegmentationFactory
 
@@ -43,9 +45,10 @@ class ImagingPlane(Enum):
 
 class ImageBase():
     
-    def __init__(self,pixmapStandardSize=290) -> None:
+    def __init__(self,pixmapStandardSize=290,language_abbrev=LanguageAbbrev.EN) -> None:
 
         self.pixmapStandardSize = pixmapStandardSize
+        self.language_abbrev = language_abbrev
 
         self.MRimages= [
             {'organ':  Organ.HEAD, 
@@ -149,7 +152,7 @@ class ImageBase():
 
         # populating the segmentation data
 
-        self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg")
+        self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg",language_abbrev=self.language_abbrev)
 
                     
     def getScaledPixmap(self,organ: Organ,imagingPlane : ImagingPlane):

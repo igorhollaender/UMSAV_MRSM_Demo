@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240917
+#       Last update: IH240920
 #
 #
 """
@@ -126,7 +126,7 @@ if IsQtMultimediaAvailable:
 from MRSM_Controller import MRSM_Controller
 from MRSM_ImageBase import ImageBase, Organ, ImagingPlane
 from MRSM_Stylesheet import MRSM_Stylesheet
-from MRSM_TextContent import Language, MRSM_Texts
+from MRSM_TextContent import Language, LanguageAbbrev, MRSM_Texts
 
 
 
@@ -861,6 +861,8 @@ class MRSM_Presentation():
 
         def showAnnotationForImage(self,imagingPlane: ImagingPlane):
         
+            #IH240920 TODO if an image is not available for the given imaging plane, set the respective button to Disabled
+                
             if imagingPlane == ImagingPlane.SAGITTAL:
                     self.setActiveRadioButton(self.bSagittal)
                     # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
@@ -995,7 +997,7 @@ class MRSM_Presentation():
         # see https://doc.qt.io/qtforpython-6/overviews/stylesheet-examples.html
         # self.MRSM_Window.setStyleSheet("QPushButton { background-color: yellow }")
         self.MRSM_Window.setStyleSheet(MRSM_Stylesheet())
-        self.MRSM_ImageBase = ImageBase(pixmapStandardSize=290)
+        self.MRSM_ImageBase = ImageBase(pixmapStandardSize=290,language_abbrev=LanguageAbbrev(language))
 
         #IH240723 the standard grid layout is ...(TODO)
         self.grid = QGridLayout()

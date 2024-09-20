@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  e  g  m  e  n  t  a  t  i  o  n   F  a  c  t  o  r  y  .  p  y 
 #
 #
-#      Last update: IH240918
+#      Last update: IH240920
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
@@ -52,11 +52,12 @@ from MRSM_TextContent import LanguageAbbrev
 
 class SegmentationFactory:
 
-    def __init__(self,SVGsegmentationWorkbenchFilename) -> None:
+    def __init__(self,SVGsegmentationWorkbenchFilename,language_abbrev=LanguageAbbrev.EN) -> None:
 
         self.SVGsegmentationWorkbenchFilename = SVGsegmentationWorkbenchFilename
         self.segmentationWorkbenchTree = ET.parse(self.SVGsegmentationWorkbenchFilename)
         self.segmentationWorkbenchTreeRoot = self.segmentationWorkbenchTree.getroot()
+        self.language_abbrev = language_abbrev
         
         #IH240912 for debugging only
 
@@ -105,24 +106,18 @@ class SegmentationFactory:
                         ANNOid = textElement.get('id')
                         m = re.search('^ANNOTATION_(?P<language>[A-Z][A-Z])_(?P<organ>[A-Z]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z]+)(?P<subsegment>([_A-Z]+)*)',ANNOid)
 
-
-                        #IH240918 PROBLEM here, we have to access the application language
-
-                        #IH240918 for debugging only
-                        app_language_abbrev = LanguageAbbrev.SK
-
                         if m is not None and (
                             m.group('organ') == self.segmentDict[id]['organ'] and
                             m.group('imagingPlane') == self.segmentDict[id]['imagingPlane'] and
                             m.group('segment') == self.segmentDict[id]['segment'] and
                             (m.group('subsegment')[1:] == self.segmentDict[id]['subsegment'] if  self.segmentDict[id]['subsegment']is not None else True ) and
-                            LanguageAbbrev[m.group('language')] == app_language_abbrev ):  
+                            LanguageAbbrev[m.group('language')] == self.language_abbrev ):  
 
                             tspanElement = textElement.find("./svg:tspan",inkscapeNamespaces)
                             if tspanElement is not None:
                                 thisAnnotation=tspanElement.text
 
-                    assert thisAnnotation is not None, f"No annotation found for {id},  language {app_language_abbrev}"  
+                    assert thisAnnotation is not None, f"No annotation found for {id},  language {self.language_abbrev}"  
 
                     #IH240918 TODO simplify the data structure: QPolygons should only be one single QPolygon, not dict of dicts 
                     if 'QPolygons' not in self.segmentDict[id]:
