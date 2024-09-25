@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240920
+#       Last update: IH240925
 #
 #
 """
@@ -861,18 +861,32 @@ class MRSM_Presentation():
 
         def showAnnotationForImage(self,imagingPlane: ImagingPlane):
         
-            #IH240920 TODO if an image is not available for the given imaging plane, set the respective button to Disabled
-                
-            if imagingPlane == ImagingPlane.SAGITTAL:
-                    self.setActiveRadioButton(self.bSagittal)
-                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in SAG")
-            if imagingPlane == ImagingPlane.CORONAL:
-                    self.setActiveRadioButton(self.bCoronal)
-                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in COR")
-            if imagingPlane == ImagingPlane.TRANSVERSAL:
-                    self.setActiveRadioButton(self.bTransversal)
-                    # self.lHTMLText1.setText(f"Now showing {self.parent.showMain.currentOrgan} in TRV")
+            availableImagingPlanes = {ImagingPlane.SAGITTAL,ImagingPlane.CORONAL,ImagingPlane.TRANSVERSAL}
+            #IH240920 if an image is not available for the given imaging plane, hide respective button
+            self.bSagittal.show()
+            if self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.SAGITTAL) is None:
+                self.bSagittal.hide()
+                availableImagingPlanes.remove(ImagingPlane.SAGITTAL)
+            self.bCoronal.show()
+            if self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.CORONAL) is None:
+                self.bCoronal.hide()
+                availableImagingPlanes.remove(ImagingPlane.CORONAL)
+            self.bTransversal.show()
+            if self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.TRANSVERSAL) is None:
+                self.bTransversal.hide()
+                availableImagingPlanes.remove(ImagingPlane.TRANSVERSAL)
             
+            assert len(availableImagingPlanes)>0, "No suitable imaging plane found"
+            
+            if not imagingPlane in availableImagingPlanes:
+                imagingPlane = availableImagingPlanes.pop()  # HACK random selection
+            if imagingPlane == ImagingPlane.SAGITTAL:
+                self.setActiveRadioButton(self.bSagittal)
+            if imagingPlane == ImagingPlane.CORONAL:
+                self.setActiveRadioButton(self.bCoronal)
+            if imagingPlane == ImagingPlane.TRANSVERSAL:
+                self.setActiveRadioButton(self.bTransversal)
+
             pm = self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,imagingPlane)
             if pm is not None:                
                 self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
