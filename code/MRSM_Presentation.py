@@ -104,7 +104,9 @@ from PyQt6.QtWidgets import (
     QApplication,
     QGraphicsEllipseItem,
     QGraphicsItem,
+    QGraphicsRectItem,
     QGraphicsScene,
+    QGraphicsTextItem,
     QGraphicsView,
     QGridLayout,
     QLabel,
@@ -795,6 +797,27 @@ class MRSM_Presentation():
         """
         IDLE_INACTIVITY_DURATION_SEC = 30
 
+
+        class LabelPositioner():
+            #IH240925 TODO
+            def __init__(self,listOfRefPointAndLabelTuples) -> None:
+                """
+                typical 2nd argument is 
+                    list(zip(segmentRefPoints,segmentLabels)
+                """
+                self.listOfRefPointAndLabelTuples = listOfRefPointAndLabelTuples
+
+            def getNextGraphicsItemList(self):
+
+                # IH240924   C O N T I N U E    H E R E 
+
+                
+                #IH240925 for debugging only
+                r =[]
+                if len(self.listOfRefPointAndLabelTuples)>0:
+                    r += [[QGraphicsTextItem(self.listOfRefPointAndLabelTuples[0][1]),QGraphicsRectItem(100,300,300,30)]]
+                return
+
         def __init__(self,parent) -> None:
 
             self.grid :   QGridLayout   = parent.grid
@@ -877,7 +900,7 @@ class MRSM_Presentation():
                 availableImagingPlanes.remove(ImagingPlane.TRANSVERSAL)
             
             assert len(availableImagingPlanes)>0, "No suitable imaging plane found"
-            
+
             if not imagingPlane in availableImagingPlanes:
                 imagingPlane = availableImagingPlanes.pop()  # HACK random selection
             if imagingPlane == ImagingPlane.SAGITTAL:
@@ -899,6 +922,8 @@ class MRSM_Presentation():
             segments,annotations = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
                 self.parent.showMain.currentOrgan, 
                 imagingPlane)
+            segmentRefPoints = []
+            segmentLabels = []
             if len(segments)>0:
                 trsf = QTransform()
                 trsf.scale(self.imagePixmapOnScene.boundingRect().width(),self.imagePixmapOnScene.boundingRect().height())
@@ -910,19 +935,34 @@ class MRSM_Presentation():
                         for subsegmentKey in segmentPure:
                             p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
                         self.segmentAndAnnotationItems += [p]
+                        segmentRefPoints += [self.parent.MRSM_ImageBase.segmentationFactory.getSegmentReferencePoint(p)]
                 
+                for annotation in annotations:
+                        annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key        
+                        for subsegmentKey in annotationPure:
+                            segmentLabels += [annotationPure[subsegmentKey]]
+
                 #IH240918 for debugging only
                 y = 50
                 for annotation in annotations:
                         #IH240916 TODO adapt style
                         annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key
-                        
                         for subsegmentKey in annotationPure:
                             t = self.imageScene.addText(annotationPure[subsegmentKey])
                             t.setPos (300,y)
                             y += 50  #IH240918 for debugging only
                             self.segmentAndAnnotationItems += [t]
-                        
+                
+            labelPositioner = MRSM_Presentation.ShowDescription.LabelPositioner(list(zip(segmentRefPoints,segmentLabels)))
+
+
+            if labelPositioner.getNextGraphicsItemList() is not None:
+                for graphicsItemList in labelPositioner.getNextGraphicsItemList():
+                    for gItem in graphicsItemList:
+                        self.imageScene.addItem(gItem)
+                        self.segmentAndAnnotationItems += [gItem]
+
+
             #IH240916 for debugging only
             # r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
             # r2 = self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
