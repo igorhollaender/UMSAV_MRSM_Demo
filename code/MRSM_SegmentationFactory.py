@@ -185,4 +185,7 @@ class SegmentationFactory:
     def UnitTest(self):
         debug_message(self.segmentDict)
 
-
+    @staticmethod
+    def getSegmentReferencePoint(QPolygonF):
+        #IH240925 TODO
+        return QPointF(0,0) #IH240925 for debugging only
