@@ -77,7 +77,7 @@ class SegmentationFactory:
                 self.segmentDict[id]['segmentSVGPath']=pathElement.get('d')
                 m = re.search('^SEGMENT_(?P<organ>[A-Z]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z]+)(?P<subsegment>([_A-Z]+)*)',id)
                 if m is not None:
-                    debug_message(f"   O: {m.group('organ')}   P: {m.group('imagingPlane')}  S: {m.group('segment')}  SS: {m.group('subsegment')}" )
+                    # debug_message(f"   O: {m.group('organ')}   P: {m.group('imagingPlane')}  S: {m.group('segment')}  SS: {m.group('subsegment')}" )
                     self.segmentDict[id]['organ']= m.group('organ')
                     self.segmentDict[id]['imagingPlane']= m.group('imagingPlane')
                     self.segmentDict[id]['segment']= m.group('segment')
@@ -169,16 +169,16 @@ class SegmentationFactory:
         returns QPolygonF object with normalized coordinates (0,0) is upper left corner, (1,1) is lower right corner
         """
         reDecimalNumber = r"(-?\d*\.?\d*)"  #IH240918 Python 3.12 issues a SyntaxWarning here:  invalid escape sequence '\d'; that's why the leading 'r'
-        debug_message(inkscapePath)
-        debug_message(inkscapeBBRect)
-        debug_message(f" BBX: {inkscapeBBRect['x']}  BBY: {inkscapeBBRect['y']}")
+        # debug_message(inkscapePath)
+        # debug_message(inkscapeBBRect)
+        # debug_message(f" BBX: {inkscapeBBRect['x']}  BBY: {inkscapeBBRect['y']}")
 
         polygon = QPolygonF()
         for pointCoords in re.finditer(f"{reDecimalNumber},{reDecimalNumber}",inkscapePath):
             (coordXstr,coordYstr) = pointCoords.group().split(",")  
             coordX = (float(coordXstr)-float(inkscapeBBRect['x']))/float(inkscapeBBRect['width'])
             coordY = (float(coordYstr)-float(inkscapeBBRect['y']))/float(inkscapeBBRect['height'])
-            debug_message(f" X: {coordX}  Y: {coordY}")
+            # debug_message(f" X: {coordX}  Y: {coordY}")
             polygon += QPointF(coordX,coordY)
         return polygon 
         

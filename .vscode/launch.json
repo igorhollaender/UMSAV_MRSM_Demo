@@ -25,10 +25,40 @@
                 /* "--version" */  
                 /*,"--help" */
                 /* ,"-l=SK"  */
-                /* ,"-l=DE" */
-                ,"-l=EN" 
+                ,"-l=DE"
+                /* ,"-l=EN" */
                 /* , "--nonsense" */
                 ]
-        }
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "MRSM_Demo SK",
+            "program": "code/MRSM_Demo.py",
+            "args":
+                [""                
+                ,"-l=SK"                
+                ]
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "MRSM_Demo EN",
+            "program": "code/MRSM_Demo.py",
+            "args":
+                [""                
+                ,"-l=EN"                
+                ]
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "MRSM_Demo DE",
+            "program": "code/MRSM_Demo.py",
+            "args":
+                [""                
+                ,"-l=DE"                
+                ]
+        },
     ]
 }

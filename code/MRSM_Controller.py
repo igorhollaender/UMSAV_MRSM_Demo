@@ -294,7 +294,7 @@ class RaspberryPiGPIO():
 @pyqtSlot(dict)
 def LEDShowStep(d: dict):        
         if IsRaspberryPi5Emulated:
-            print(f'G1> {d[BoreLEDGroup.GROUP1]}, G2> {d[BoreLEDGroup.GROUP2]}, G3> {d[BoreLEDGroup.GROUP3]}')
+            print(f'G1> {d[BoreLEDGroup.GROUP1]}, G2> {d[BoreLEDGroup.GROUP2]}, G3> {d[BoreLEDGroup.GROUP3]}')            
         else:
             # IH240819 simple implementation (on/off only)            
             RaspberryPiGPIO.boreLEDGroup1.on() if d[BoreLEDGroup.GROUP1]>0.5 else RaspberryPiGPIO.boreLEDGroup1.off()
