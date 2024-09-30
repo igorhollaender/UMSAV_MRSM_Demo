@@ -823,7 +823,7 @@ class MRSM_Presentation():
                 r =[]
                 if len(self.listOfRefPointAndLabelTuples)>0:
                     r += [[QGraphicsTextItem(self.listOfRefPointAndLabelTuples[0][1]),QGraphicsRectItem(100,300,300,30)]]
-                return
+                return r
 
         def __init__(self,parent) -> None:
 
@@ -950,15 +950,15 @@ class MRSM_Presentation():
                             segmentLabels += [annotationPure[subsegmentKey]]
 
                 #IH240918 for debugging only
-                y = 50
-                for annotation in annotations:
-                        #IH240916 TODO adapt style
-                        annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key
-                        for subsegmentKey in annotationPure:
-                            t = self.imageScene.addText(annotationPure[subsegmentKey])
-                            t.setPos (300,y)
-                            y += 50  #IH240918 for debugging only
-                            self.segmentAndAnnotationItems += [t]
+                # y = 50
+                # for annotation in annotations:
+                #         #IH240916 TODO adapt style
+                #         annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key
+                #         for subsegmentKey in annotationPure:
+                #             t = self.imageScene.addText(annotationPure[subsegmentKey])
+                #             t.setPos (300,y)
+                #             y += 50  #IH240918 for debugging only
+                #             self.segmentAndAnnotationItems += [t]
                 
             labelPositioner = MRSM_Presentation.ShowDescription.LabelPositioner(list(zip(segmentRefPoints,segmentLabels)))
 
@@ -968,6 +968,12 @@ class MRSM_Presentation():
                     for gItem in graphicsItemList:
                         self.imageScene.addItem(gItem)
                         self.segmentAndAnnotationItems += [gItem]
+                        if isinstance(gItem,QGraphicsRectItem):                            
+                            debug_message(f"RECT:  {gItem.rect().x()},{gItem.rect().y()},{gItem.rect().width()},{gItem.rect().height()}")
+                        elif isinstance(gItem,QGraphicsTextItem):                            
+                            debug_message(f"TEXT:  {gItem.document().toPlainText()}")
+                        else:
+                            debug_message("UNKNOWN")
 
 
             #IH240916 for debugging only
