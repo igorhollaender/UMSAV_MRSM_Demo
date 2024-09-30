@@ -83,9 +83,18 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #       IH240918 language setting is not working for Segmentation : implementation problem (cannot access language var variable)
 
 
-# BUGs
+# BUGs/TODOs
 #
-#   IH2407151 XXX
+#   IH240930 FIXED
+#       Organ button reaction time (color change) is too long
+#
+#   IH240930 FIXED
+#       Extend time to read MR info to at least 2 min, 
+# 
+#   IH240930 FIXED (was actually fixed before)
+#       Let slider movement restart idle timer
+#
+#
 #
 #-------------------------------------------------------------------------------
 

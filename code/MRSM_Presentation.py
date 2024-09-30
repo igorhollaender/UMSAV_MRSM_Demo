@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240925
+#       Last update: IH240930
 #
 #
 """
@@ -112,7 +112,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QScrollArea,
-    QWidget        
+    QWidget,            
 )                  
 
 if IsQtMultimediaAvailable:    
@@ -221,7 +221,7 @@ class MRSM_Presentation():
         """
         
         # IH240722 TODO: set this to 5 secs for real app
-        INTRO_DURATION_SEC  = 1  
+        INTRO_DURATION_SEC  = 5  
         INTRO_MESSAGE_UPDATE_INTERVAL_SEC  = 1
 
         def __init__(self,parent) -> None:
@@ -318,6 +318,7 @@ class MRSM_Presentation():
                                self.brushIdleNotShown   if not  isScanningRunning   and not isCurrentlyShown else self.brushIdle))
 
                 self.myPen = self.penActive if isScanningRunning else self.penIdle
+                # self.update() #IH240930 I added this, but it does not seem to have significant effect for button response
 
               
             def paint(self, painter, option, widget):
@@ -334,9 +335,12 @@ class MRSM_Presentation():
                 painter.drawEllipse(self.rect)
 
             def mousePressEvent(self, event):                
-                self.isMousePressed = True
-                # debug_message(f"selected organ: {self.data(1)}")
-                self.ScanOrgan(self.data(1))
+                self.isMousePressed = True                
+                # self.scene().views().pop().viewport().repaint() #IH240930 I added this, but it does not seem 
+                                                                  # to have significant effect for button response
+                                                                  # see https://stackoverflow.com/questions/19897696/qt-force-qgraphicsitem-to-update#:~:text=According%20to%20Qt%20Documentation,%20%22%20void%20QGraphicsItem::update
+                # debug_message(f"selected organ: {self.data(1)}")                
+                self.ScanOrgan(self.data(1))                  
                 self.update()
                 super().mousePressEvent(event)
             
@@ -613,7 +617,7 @@ class MRSM_Presentation():
             
             for o in self.organButton.keys(): 
                 # self.organButton[o].setActiveState(False)
-                self.organButton[o].setCurrentState(isScanningRunning=False,isCurrentlyShown=False)
+                self.organButton[o].setCurrentState(isScanningRunning=False,isCurrentlyShown=False)                           
             self.imagePaneRightmost.update()            
             self.bDescription.setEnabled(False)
 
@@ -639,6 +643,9 @@ class MRSM_Presentation():
                 self.isSimulationShowRunning = True
                 self.organButton[self.currentOrgan].setCurrentState(isScanningRunning=True,isCurrentlyShown=True)
                 self.imagePaneRightmost.update()
+                
+                QApplication.processEvents() #IH240930 this is to prevent long waiting before updating the OrganButton style
+
                 self.parent.hardwareController.scanningSimulationShowStart(organ=self.currentOrgan,imagingPlane=ImagingPlane.ARBITRARY)                
                 self.animation_all.start()
                 self.parent.idle_timer.stop()   #IH240812 avoid going idle during animation
@@ -731,7 +738,7 @@ class MRSM_Presentation():
         """
         Info including briefing about MRI and acknowledgments for resources used
         """
-        IDLE_INACTIVITY_DURATION_SEC = 30
+        IDLE_INACTIVITY_DURATION_SEC = 2*60  #IH240930 was 30 before, but this was too short for reading
 
         def __init__(self,parent) -> None:
 
