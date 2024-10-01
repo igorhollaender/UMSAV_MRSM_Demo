@@ -94,7 +94,7 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #   IH240930 FIXED (was actually fixed before)
 #       Let slider movement restart idle timer
 #
-#
+#   IH241001    in the idle page, the 'g' in the Magneticka rezonancia is cut off on the bottom
 #
 #-------------------------------------------------------------------------------
 

@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH240930
+#       Last update: IH241001
 #
 #
 """
@@ -91,6 +91,7 @@ from typing import Any
 
 from PyQt6.QtCore import (    
     Qt,
+    QLineF,
     QPoint,
     QPointF,
     QPropertyAnimation,
@@ -814,16 +815,26 @@ class MRSM_Presentation():
                 """
                 self.listOfRefPointAndLabelTuples = listOfRefPointAndLabelTuples
 
-            def getNextGraphicsItemList(self):
-
-                # IH240924   C O N T I N U E    H E R E 
-
+            def getGraphicsTupleList(self):
+                #IH241001 for debugging only
+                graphicsTuple =[]
+                rectY = 20
+                for pointAndLabelTuple in self.listOfRefPointAndLabelTuples:
                 
-                #IH240925 for debugging only
-                r =[]
-                if len(self.listOfRefPointAndLabelTuples)>0:
-                    r += [[QGraphicsTextItem(self.listOfRefPointAndLabelTuples[0][1]),QGraphicsRectItem(100,300,300,30)]]
-                return r
+                    # the tuple has the following structure:
+                    #   (P1:QpointF, T:QGraphicsTextItem, P2:QPointF,R:QGraphicsRectItem)
+                    # where
+                    #   P1  is the reference point of the segment
+                    #   T   is the label text
+                    #   P2  is the position of the label text
+                    #   R   is the label rectangle    
+                
+                    graphicsTuple += [(QPointF(pointAndLabelTuple[0]),
+                                       QGraphicsTextItem(pointAndLabelTuple[1]),
+                                       QPointF(410,rectY-5),
+                                       QGraphicsRectItem(400,rectY,300,15))]
+                    rectY += 20
+                return graphicsTuple
 
         def __init__(self,parent) -> None:
 
@@ -948,39 +959,20 @@ class MRSM_Presentation():
                         annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key        
                         for subsegmentKey in annotationPure:
                             segmentLabels += [annotationPure[subsegmentKey]]
-
-                #IH240918 for debugging only
-                # y = 50
-                # for annotation in annotations:
-                #         #IH240916 TODO adapt style
-                #         annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key
-                #         for subsegmentKey in annotationPure:
-                #             t = self.imageScene.addText(annotationPure[subsegmentKey])
-                #             t.setPos (300,y)
-                #             y += 50  #IH240918 for debugging only
-                #             self.segmentAndAnnotationItems += [t]
                 
             labelPositioner = MRSM_Presentation.ShowDescription.LabelPositioner(list(zip(segmentRefPoints,segmentLabels)))
 
+            for gTuple in labelPositioner.getGraphicsTupleList():
 
-            if labelPositioner.getNextGraphicsItemList() is not None:
-                for graphicsItemList in labelPositioner.getNextGraphicsItemList():
-                    for gItem in graphicsItemList:
-                        self.imageScene.addItem(gItem)
-                        self.segmentAndAnnotationItems += [gItem]
-                        if isinstance(gItem,QGraphicsRectItem):                            
-                            debug_message(f"RECT:  {gItem.rect().x()},{gItem.rect().y()},{gItem.rect().width()},{gItem.rect().height()}")
-                        elif isinstance(gItem,QGraphicsTextItem):                            
-                            debug_message(f"TEXT:  {gItem.document().toPlainText()}")
-                        else:
-                            debug_message("UNKNOWN")
+                label = self.imageScene.addText(gTuple[1].document().toPlainText())
+                label.setPos(gTuple[2])
+                self.segmentAndAnnotationItems += [label]
 
+                rect = self.imageScene.addItem(gTuple[3])
+                self.segmentAndAnnotationItems += [rect]
 
-            #IH240916 for debugging only
-            # r1 = self.imageScene.addRect(600,200,100,20,brush=QColor(255,0,0,255))
-            # r2 = self.imageScene.addLine(20,20,700,210,pen=QColor(255,0,0,255))
-            # self.segmentAndAnnotationItems += [r1,r2]
-
+                line = self.imageScene.addLine(QLineF(gTuple[0],gTuple[2]))
+                self.segmentAndAnnotationItems += [line]
             
         def setActiveRadioButton(self,activeButton):
             """
@@ -1083,8 +1075,8 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # IH240910 for debugging only
-        self.showIntro.activate()
-        # self.showDescription.activate()
+        # self.showIntro.activate()
+        self.showDescription.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
