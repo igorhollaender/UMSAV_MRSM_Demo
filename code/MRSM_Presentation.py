@@ -55,14 +55,21 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 # TODOs
 #-------------------------------------------------------------------------------
 #
-#   IH240813    moving scroll bar in INFO window has to reset the idle timer
-
+#       IH240813  DONE (?)
+#         moving scroll bar in INFO window has to reset the idle timer
+#   IH241001
+#           the SAG,COR,TRV button on showDescription : use pictograms instead of alphabetic labels
+#
 # BUGs
 #
 #   IH2407151 XXX
 #
 #-------------------------------------------------------------------------------
 
+
+from enum import Enum
+from functools import partial
+from typing import Any
 
 from MRSM_Globals import (
     IsWaveShareDisplayEmulated,
@@ -74,9 +81,7 @@ from MRSM_Globals import (
 )
 
 from MRSM_Globals import __version__
-
 from MRSM_Utilities import error_message, debug_message
-
 
 from PyQt6.QtGui import (
     QColor,
@@ -85,9 +90,6 @@ from PyQt6.QtGui import (
     QPolygonF,
     QTransform,
 )
-from enum import Enum
-from functools import partial
-from typing import Any
 
 from PyQt6.QtCore import (    
     Qt,
@@ -811,30 +813,27 @@ class MRSM_Presentation():
             def __init__(self,listOfRefPointAndLabelTuples) -> None:
                 """
                 typical 2nd argument is 
-                    list(zip(segmentRefPoints,segmentLabels)
+                    list(zip(segmentRefPoints,segmentLabels,segmentColors)
                 """
                 self.listOfRefPointAndLabelTuples = listOfRefPointAndLabelTuples
 
             def getGraphicsTupleList(self):
                 #IH241001 for debugging only
-                graphicsTuple =[]
+                graphicsTupleList =[]
                 rectY = 20
                 for pointAndLabelTuple in self.listOfRefPointAndLabelTuples:
-                
-                    # the tuple has the following structure:
-                    #   (P1:QpointF, T:QGraphicsTextItem, P2:QPointF,R:QGraphicsRectItem)
-                    # where
-                    #   P1  is the reference point of the segment
-                    #   T   is the label text
-                    #   P2  is the position of the label text
-                    #   R   is the label rectangle    
-                
-                    graphicsTuple += [(QPointF(pointAndLabelTuple[0]),
-                                       QGraphicsTextItem(pointAndLabelTuple[1]),
-                                       QPointF(410,rectY-5),
-                                       QGraphicsRectItem(400,rectY,300,15))]
+                 
+                    P1 = QPointF(pointAndLabelTuple[0])             # reference point of the segment
+                    T  = QGraphicsTextItem(pointAndLabelTuple[1])   # label text
+                    P2 = QPointF(410,rectY-5)                       # position of the label text
+                    R  = QGraphicsRectItem(400,rectY,300,15)        # label rectangle
+                    
+                    R.setBrush(pointAndLabelTuple[2])               # this is the segment color, for universal use
+
+                    graphicsTupleList += [(P1,T,P2,R)]
+
                     rectY += 20
-                return graphicsTuple
+                return graphicsTupleList
 
         def __init__(self,parent) -> None:
 
@@ -932,7 +931,8 @@ class MRSM_Presentation():
             if pm is not None:                
                 self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
             
-            for i in self.segmentAndAnnotationItems:                                
+            for i in self.segmentAndAnnotationItems:    
+                assert i is not None, "graphics item to remove is NONE"
                 self.imageScene.removeItem(i)
             self.segmentAndAnnotationItems = []
             self.imagePane = QGraphicsView(self.imageScene)
@@ -942,42 +942,59 @@ class MRSM_Presentation():
                 imagingPlane)
             segmentRefPoints = []
             segmentLabels = []
+            segmentColors = []
             if len(segments)>0:
                 trsf = QTransform()
                 trsf.scale(self.imagePixmapOnScene.boundingRect().width(),self.imagePixmapOnScene.boundingRect().height())
 
                 for segment in segments:
-                        #IH240916 TODO adapt style
+                        
+                        #IH240916 TODO extract style (just color) from SegmentationWorkbench
+                        thisSegmentColor = QColor(100,90,0,50) #IH241001 for debugging only
+                        # 100 is transparency, 0 is total transparent
+                        
                         segmentPure = segment[list(segment)[0]] #IH240916 HACK this is the only key
 
                         for subsegmentKey in segmentPure:
-                            p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=QColor(255,0,0,100)) # 100 is transparency, 0 is total transparent
+                            p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=thisSegmentColor) 
                         self.segmentAndAnnotationItems += [p]
                         segmentRefPoints += [self.parent.MRSM_ImageBase.segmentationFactory.getSegmentReferencePoint(p)]
+
+                        segmentColors += [thisSegmentColor]
+
                 
                 for annotation in annotations:
                         annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key        
                         for subsegmentKey in annotationPure:
                             segmentLabels += [annotationPure[subsegmentKey]]
                 
-            labelPositioner = MRSM_Presentation.ShowDescription.LabelPositioner(list(zip(segmentRefPoints,segmentLabels)))
+            labelPositioner = MRSM_Presentation.ShowDescription.LabelPositioner(list(zip(segmentRefPoints,segmentLabels,segmentColors)))
 
             for gTuple in labelPositioner.getGraphicsTupleList():
 
-                label = self.imageScene.addText(gTuple[1].document().toPlainText())
+                textItem:QGraphicsTextItem = gTuple[1]
+                label = self.imageScene.addText(textItem.document().toPlainText())
                 label.setPos(gTuple[2])
                 self.segmentAndAnnotationItems += [label]
 
-                rect = self.imageScene.addItem(gTuple[3])
+                rectItem:QGraphicsRectItem = gTuple[3]
+                rect = self.imageScene.addRect(rectItem.rect())
                 self.segmentAndAnnotationItems += [rect]
-
+                
                 line = self.imageScene.addLine(QLineF(gTuple[0],gTuple[2]))
                 self.segmentAndAnnotationItems += [line]
+
+                #IH241001 HACK  apply style of rect to line
+                c = gTuple[3].brush().color()
+                rect.setBrush(c)
+                line.setPen(c)
+
+                # debug_message(f"TEXT -> {gTuple[1].document().toPlainText()}")
             
         def setActiveRadioButton(self,activeButton):
             """
-            The bSagital, bCoronal, and bTransversal button work as a RadioButton group
-            This methods set the active one.
+            The bSagital, bCoronal, and bTransversal buttons work as a RadioButton group
+            This method sets the active one.
             """
 
             #IH240909 PROBLEM here: properties cannot probably be manipulated without restoring the widget
@@ -1074,7 +1091,7 @@ class MRSM_Presentation():
         self.idle_timer = QTimer()
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
-        # IH240910 for debugging only
+        # IH241001 for debugging only
         # self.showIntro.activate()
         self.showDescription.activate()
 
