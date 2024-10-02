@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH241001
+#       Last update: IH241002
 #
 #
 """
@@ -828,7 +828,7 @@ class MRSM_Presentation():
                     P2 = QPointF(410,rectY-5)                       # position of the label text
                     R  = QGraphicsRectItem(400,rectY,300,15)        # label rectangle
                     
-                    R.setBrush(pointAndLabelTuple[2])               # this is the segment color, for universal use
+                    R.setBrush(QColor(pointAndLabelTuple[2]))               # this is the segment color, for universal use
 
                     graphicsTupleList += [(P1,T,P2,R)]
 
@@ -937,9 +937,10 @@ class MRSM_Presentation():
             self.segmentAndAnnotationItems = []
             self.imagePane = QGraphicsView(self.imageScene)
         
-            segments,annotations = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
-                self.parent.showMain.currentOrgan, 
+            segments,annotations,fillColors = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
+              self.parent.showMain.currentOrgan, 
                 imagingPlane)
+            
             segmentRefPoints = []
             segmentLabels = []
             segmentColors = []
@@ -948,21 +949,20 @@ class MRSM_Presentation():
                 trsf.scale(self.imagePixmapOnScene.boundingRect().width(),self.imagePixmapOnScene.boundingRect().height())
 
                 for segment in segments:
-                        
-                        #IH240916 TODO extract style (just color) from SegmentationWorkbench
-                        thisSegmentColor = QColor(100,90,0,50) #IH241001 for debugging only
-                        # 100 is transparency, 0 is total transparent
-                        
                         segmentPure = segment[list(segment)[0]] #IH240916 HACK this is the only key
-
                         for subsegmentKey in segmentPure:
-                            p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=thisSegmentColor) 
+                            # p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=thisSegmentColor) 
+                            p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey])) 
+                            #IH241002 TODO apply respective fillColor to brush to this polygon 
                         self.segmentAndAnnotationItems += [p]
                         segmentRefPoints += [self.parent.MRSM_ImageBase.segmentationFactory.getSegmentReferencePoint(p)]
 
-                        segmentColors += [thisSegmentColor]
 
-                
+                for fillColor in fillColors:
+                        fillColorPure = fillColor[list(fillColor)[0]] #IH240916 HACK this is the only key
+                        for subsegmentKey in fillColorPure:                                       
+                            segmentColors += [fillColorPure[subsegmentKey]]
+                        
                 for annotation in annotations:
                         annotationPure = annotation[list(annotation)[0]] #IH240916 HACK this is the only key        
                         for subsegmentKey in annotationPure:
@@ -972,15 +972,15 @@ class MRSM_Presentation():
 
             for gTuple in labelPositioner.getGraphicsTupleList():
 
+                rectItem:QGraphicsRectItem = gTuple[3]
+                rect = self.imageScene.addRect(rectItem.rect())
+                self.segmentAndAnnotationItems += [rect]
+
                 textItem:QGraphicsTextItem = gTuple[1]
                 label = self.imageScene.addText(textItem.document().toPlainText())
                 label.setPos(gTuple[2])
                 self.segmentAndAnnotationItems += [label]
 
-                rectItem:QGraphicsRectItem = gTuple[3]
-                rect = self.imageScene.addRect(rectItem.rect())
-                self.segmentAndAnnotationItems += [rect]
-                
                 line = self.imageScene.addLine(QLineF(gTuple[0],gTuple[2]))
                 self.segmentAndAnnotationItems += [line]
 
@@ -1092,8 +1092,8 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # IH241001 for debugging only
-        # self.showIntro.activate()
-        self.showDescription.activate()
+        self.showIntro.activate()
+        # self.showDescription.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()

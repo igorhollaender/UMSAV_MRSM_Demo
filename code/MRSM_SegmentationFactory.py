@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  e  g  m  e  n  t  a  t  i  o  n   F  a  c  t  o  r  y  .  p  y 
 #
 #
-#      Last update: IH240920
+#      Last update: IH241002
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
@@ -96,9 +96,20 @@ class SegmentationFactory:
                         self.segmentDict[id]['boundingBox']['width']=rectElement.get('width')
                         self.segmentDict[id]['boundingBox']['height']=rectElement.get('height')
 
-                    assert 'boundingBox' in self.segmentDict[id],"No respective bounding box found" # IH240916 we must have one bounding box
+                    assert 'boundingBox' in self.segmentDict[id],f"No respective bounding box found for {id}" # IH240916 we must have one bounding box
                     assert float(self.segmentDict[id]['boundingBox']['width'])>0,"Bounding box rectangle has zero width"
                     assert float(self.segmentDict[id]['boundingBox']['height'])>0,"Bounding box rectangle has zero height"
+
+                    # IH241002
+                    # get the respective style (currently: only fill color implemented)
+                    thisStyle = pathElement.get('style')
+                    m = re.search('fill:(?P<fillColorHex>#[a-f0-9]{6});',thisStyle)
+                    thisFillColorHex = m.group('fillColorHex')
+                    
+                    assert m is not None, f"No fill parameter found in the style attribute for {id}"
+                    
+                    # debug_message(m.group('fillColorHex'))
+                    thisFillColorHex = m.group('fillColorHex')
 
                     # find the respective annotation
                     thisAnnotation = None
@@ -137,6 +148,13 @@ class SegmentationFactory:
                         self.segmentDict[id]['annotation'][self.segmentDict[id]['segment']] = {}
                     self.segmentDict[id]['annotation'][self.segmentDict[id]['segment']][self.segmentDict[id]['subsegment']]=thisAnnotation
                     
+                    if 'fillColorHex' not in self.segmentDict[id]:
+                        self.segmentDict[id]['fillColorHex'] = {}
+                    if self.segmentDict[id]['segment'] not in self.segmentDict[id]['fillColorHex']:
+                        self.segmentDict[id]['fillColorHex'][self.segmentDict[id]['segment']] = {}
+                    if self.segmentDict[id]['subsegment'] not in self.segmentDict[id]['fillColorHex'][self.segmentDict[id]['segment']]:
+                        self.segmentDict[id]['fillColorHex'][self.segmentDict[id]['segment']] = {}
+                    self.segmentDict[id]['fillColorHex'][self.segmentDict[id]['segment']][self.segmentDict[id]['subsegment']]=thisFillColorHex
 
         self.UnitTest()
 
@@ -144,14 +162,17 @@ class SegmentationFactory:
         """
         returns list of QPolygon's for given organ and imagingPlane (key is subsegment name of 'None', value is QPolygon)
         and list of corresponding annotations
+        and list of corresponding fill colors
         """
         qPolygons = []
         annotations = []
+        fillColors = []
         for segmentId in self.segmentDict.keys():
             if f"_{organ.name}_" in segmentId and f"_{imagingPlane.name}_" in segmentId:
                 qPolygons += [self.segmentDict[segmentId]['QPolygons']]
                 annotations += [self.segmentDict[segmentId]['annotation']]
-        return qPolygons, annotations
+                fillColors += [self.segmentDict[segmentId]['fillColorHex']]
+        return qPolygons, annotations, fillColors
     
     
 
