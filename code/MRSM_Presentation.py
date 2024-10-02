@@ -86,6 +86,7 @@ from MRSM_Utilities import error_message, debug_message
 from PyQt6.QtGui import (
     QColor,
     QFont,
+    QPen,
     QPixmap,
     QPolygonF,
     QTransform,
@@ -806,10 +807,12 @@ class MRSM_Presentation():
         Panel showing image description, typically: annotated image segmentation 
         """
         IDLE_INACTIVITY_DURATION_SEC = 30
-
-
+        SEGMENT_OPACITY = 130  # from 0 to 255
+            
         class LabelPositioner():
-            #IH240925 TODO
+
+            LINEWIDTH = 3 # width of the line connecting segment and label rectangle
+
             def __init__(self,listOfRefPointAndLabelTuples) -> None:
                 """
                 typical 2nd argument is 
@@ -825,14 +828,14 @@ class MRSM_Presentation():
                  
                     P1 = QPointF(pointAndLabelTuple[0])             # reference point of the segment
                     T  = QGraphicsTextItem(pointAndLabelTuple[1])   # label text
-                    P2 = QPointF(410,rectY-5)                       # position of the label text
-                    R  = QGraphicsRectItem(400,rectY,300,15)        # label rectangle
+                    P2 = QPointF(410,rectY)                       # position of the label text
+                    R  = QGraphicsRectItem(400,rectY,300,25)        # label rectangle
                     
                     R.setBrush(QColor(pointAndLabelTuple[2]))               # this is the segment color, for universal use
 
                     graphicsTupleList += [(P1,T,P2,R)]
 
-                    rectY += 20
+                    rectY += 30
                 return graphicsTupleList
 
         def __init__(self,parent) -> None:
@@ -930,7 +933,7 @@ class MRSM_Presentation():
             pm = self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,imagingPlane)
             if pm is not None:                
                 self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
-            
+                
             for i in self.segmentAndAnnotationItems:    
                 assert i is not None, "graphics item to remove is NONE"
                 self.imageScene.removeItem(i)
@@ -955,7 +958,10 @@ class MRSM_Presentation():
                         segmentPure = segment[list(segment)[0]] #IH240916 HACK this is the only key
                         fillColorPure = fillColor[list(fillColor)[0]] #IH240916 HACK this is the only key
                         for subsegmentKey in segmentPure:
-                             p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=QColor(fillColorPure[subsegmentKey])) 
+                             fillColorWithOpacity = QColor(fillColorPure[subsegmentKey])
+                             fillColorWithOpacity.setAlpha(self.SEGMENT_OPACITY) 
+                             p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=fillColorWithOpacity) 
+                             p.setZValue(1)
                         self.segmentAndAnnotationItems += [p]
                         segmentRefPoints += [self.parent.MRSM_ImageBase.segmentationFactory.getSegmentReferencePoint(p)]
 
@@ -973,6 +979,9 @@ class MRSM_Presentation():
 
             for gTuple in labelPositioner.getGraphicsTupleList():
 
+                lineItem = self.imageScene.addLine(QLineF(gTuple[0],QPointF(gTuple[2])+QPointF(3,13))) #IH241002 HEURISTIC
+                self.segmentAndAnnotationItems += [lineItem]
+
                 rectItem:QGraphicsRectItem = gTuple[3]
                 rect = self.imageScene.addRect(rectItem.rect())
                 self.segmentAndAnnotationItems += [rect]
@@ -982,13 +991,16 @@ class MRSM_Presentation():
                 label.setPos(gTuple[2])
                 self.segmentAndAnnotationItems += [label]
 
-                line = self.imageScene.addLine(QLineF(gTuple[0],gTuple[2]))
-                self.segmentAndAnnotationItems += [line]
 
                 #IH241001 HACK  apply style of rect to line
                 c = gTuple[3].brush().color()
                 rect.setBrush(c)
-                line.setPen(c)
+                lineItem.setPen(QPen(c,self.LabelPositioner.LINEWIDTH)) 
+
+                #IH241002 layer adjustment for nice output. (pixmap is 0, segment polygons are 1)
+                lineItem.setZValue(2)
+                rectItem.setZValue(3)
+                textItem.setZValue(4)
 
                 # debug_message(f"TEXT -> {gTuple[1].document().toPlainText()}")
             
@@ -1012,8 +1024,6 @@ class MRSM_Presentation():
             for b in [self.bSagittal, self.bCoronal, self.bTransversal]:
                 b.setEnabled(True)
             activeButton.setEnabled(False)  # the active button is disabled, all others are enabled
-            
-            
 
         def activate(self):            
             for w in self.descriptionWidgets:                                

@@ -45,6 +45,9 @@ from PyQt6.QtGui import (
 from PyQt6.QtCore import (    
     QPointF,
 )
+from PyQt6.QtWidgets import (
+    QGraphicsPolygonItem,
+)
 
 from MRSM_Utilities import debug_message
 from MRSM_TextContent import LanguageAbbrev
@@ -207,6 +210,14 @@ class SegmentationFactory:
         debug_message(self.segmentDict)
 
     @staticmethod
-    def getSegmentReferencePoint(QPolygonF):
-        #IH240925 TODO
-        return QPointF(0,0) #IH240925 for debugging only
+    def getSegmentReferencePoint(qPolyItem:QGraphicsPolygonItem):
+        """
+        Current implementation: the ref point is the one of the polygon's points, one with max X coord
+        """
+        #IH241002 TODO improve visual quality of this (the lines are currently crossing each other)
+        pointWithMaxXCoord = QPointF(-float('inf'),0)
+        for qPnt in qPolyItem.polygon():
+            if qPnt.x()>pointWithMaxXCoord.x():
+                pointWithMaxXCoord = QPointF(qPnt) #IH241002 we have to create a copy of the loop variable
+        return pointWithMaxXCoord
+        
