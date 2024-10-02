@@ -948,15 +948,16 @@ class MRSM_Presentation():
                 trsf = QTransform()
                 trsf.scale(self.imagePixmapOnScene.boundingRect().width(),self.imagePixmapOnScene.boundingRect().height())
 
+
+                fillColorsIter = iter(fillColors)   #IH241002 TODO this is UGLY; needs full code/data restructuring
                 for segment in segments:
+                        fillColor = next(fillColorsIter)
                         segmentPure = segment[list(segment)[0]] #IH240916 HACK this is the only key
+                        fillColorPure = fillColor[list(fillColor)[0]] #IH240916 HACK this is the only key
                         for subsegmentKey in segmentPure:
-                            # p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=thisSegmentColor) 
-                            p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey])) 
-                            #IH241002 TODO apply respective fillColor to brush to this polygon 
+                             p = self.imageScene.addPolygon(trsf.map(segmentPure[subsegmentKey]),brush=QColor(fillColorPure[subsegmentKey])) 
                         self.segmentAndAnnotationItems += [p]
                         segmentRefPoints += [self.parent.MRSM_ImageBase.segmentationFactory.getSegmentReferencePoint(p)]
-
 
                 for fillColor in fillColors:
                         fillColorPure = fillColor[list(fillColor)[0]] #IH240916 HACK this is the only key
