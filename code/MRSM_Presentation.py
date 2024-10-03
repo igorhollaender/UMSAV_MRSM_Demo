@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH241002
+#       Last update: IH241003
 #
 #
 """
@@ -68,7 +68,7 @@ Demo application to run on the Raspberry Pi MRSM controller:  Display presentati
 
 
 from enum import Enum
-from functools import partial
+from functools import partial, cmp_to_key
 from typing import Any
 
 from MRSM_Globals import (
@@ -391,7 +391,7 @@ class MRSM_Presentation():
             
             self.bDescription = self.parent.MRSM_PushButton(self.parent.lcls('WHAT UC'),self.parent.MRSM_Window)
             self.bDescription.clicked.connect(self.parent.quit_main_start_description)
-            if HasToIncludeSegmentationPanel:            
+            if HasToIncludeSegmentationPanel:   
                 self.grid.addWidget(self.bDescription,1,22,1,10)
                 self.mainWidgets += [self.bDescription]
             else:
@@ -655,8 +655,6 @@ class MRSM_Presentation():
                 self.parent.idle_timer.stop()   #IH240812 avoid going idle during animation
 
                                 
-
-
         def on_animation_finished(self):
             debug_message('animation finished')
             self.isSimulationShowRunning = False
@@ -665,8 +663,18 @@ class MRSM_Presentation():
             self.parent.hardwareController.scanningSimulationShowStop()
             self.imagePaneRightmost.update()
 
-            #IH240909 added
-            self.bDescription.setEnabled(True)
+            #IH241003 added: bDescription button is not enabled if there is nothing to show
+            segmentsForSagPlane,_,_ = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
+                    self.parent.showMain.currentOrgan, 
+                    ImagingPlane.SAGITTAL)
+            segmentsForCorPlane,_,_ = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
+                    self.parent.showMain.currentOrgan, 
+                    ImagingPlane.CORONAL)
+            segmentsForTrvPlane,_,_ = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
+                    self.parent.showMain.currentOrgan, 
+                    ImagingPlane.TRANSVERSAL)
+            if len(segmentsForSagPlane)>0 or len(segmentsForCorPlane)>0 or len(segmentsForTrvPlane)>0: 
+                self.bDescription.setEnabled(True)
                 
             self.reset_idle_timer()
             
@@ -812,6 +820,7 @@ class MRSM_Presentation():
         class LabelPositioner():
 
             LINEWIDTH = 3 # width of the line connecting segment and label rectangle
+            TARGETDOTRADIUS = 3 # radius of the circle shown in the reference point of the segment
 
             def __init__(self,listOfRefPointAndLabelTuples) -> None:
                 """
@@ -821,14 +830,19 @@ class MRSM_Presentation():
                 self.listOfRefPointAndLabelTuples = listOfRefPointAndLabelTuples
 
             def getGraphicsTupleList(self):
-                #IH241001 for debugging only
+                
+                #IH241003 reordering labels: from ref point with min y coord to max y coord
+                # (this is to avoid most of the line crossings)
+                listOfRefPointAndLabelTuples_Reordered = sorted(self.listOfRefPointAndLabelTuples,
+                                    key=cmp_to_key(lambda tuple1,tuple2: tuple1[0].y()-tuple2[0].y()))
+                                    
                 graphicsTupleList =[]
                 rectY = 20
-                for pointAndLabelTuple in self.listOfRefPointAndLabelTuples:
+                for pointAndLabelTuple in listOfRefPointAndLabelTuples_Reordered:
                  
                     P1 = QPointF(pointAndLabelTuple[0])             # reference point of the segment
                     T  = QGraphicsTextItem(pointAndLabelTuple[1])   # label text
-                    P2 = QPointF(410,rectY)                       # position of the label text
+                    P2 = QPointF(410,rectY)                         # position of the label text
                     R  = QGraphicsRectItem(400,rectY,300,25)        # label rectangle
                     
                     R.setBrush(QColor(pointAndLabelTuple[2]))               # this is the segment color, for universal use
@@ -906,16 +920,38 @@ class MRSM_Presentation():
         
             availableImagingPlanes = {ImagingPlane.SAGITTAL,ImagingPlane.CORONAL,ImagingPlane.TRANSVERSAL}
             #IH240920 if an image is not available for the given imaging plane, hide respective button
+            #IH241003 added: also hide the button if there is no segmentation available
+            
             self.bSagittal.show()
-            if self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.SAGITTAL) is None:
+            segmentsForSagPlane,_,_ = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
+                    self.parent.showMain.currentOrgan, 
+                    ImagingPlane.SAGITTAL)
+            if (self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.SAGITTAL) is None
+                or 
+                len(segmentsForSagPlane)==0
+                ):
                 self.bSagittal.hide()
                 availableImagingPlanes.remove(ImagingPlane.SAGITTAL)
+            
             self.bCoronal.show()
-            if self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.CORONAL) is None:
+            segmentsForCorPlane,_,_ = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
+                    self.parent.showMain.currentOrgan, 
+                    ImagingPlane.CORONAL)
+            if (self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.CORONAL) is None
+                or
+                len(segmentsForCorPlane)==0
+                ):
                 self.bCoronal.hide()
                 availableImagingPlanes.remove(ImagingPlane.CORONAL)
+            
             self.bTransversal.show()
-            if self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.TRANSVERSAL) is None:
+            segmentsForTrvPlane,_,_ = self.parent.MRSM_ImageBase.segmentationFactory.getSegmentQPolygonsAndAnnotations(
+                    self.parent.showMain.currentOrgan, 
+                    ImagingPlane.TRANSVERSAL)
+            if (self.parent.MRSM_ImageBase.getScaledPixmap(self.parent.showMain.currentOrgan,ImagingPlane.TRANSVERSAL) is None
+                or
+                len(segmentsForTrvPlane)==0
+                ):
                 self.bTransversal.hide()
                 availableImagingPlanes.remove(ImagingPlane.TRANSVERSAL)
             
@@ -991,14 +1027,21 @@ class MRSM_Presentation():
                 label.setPos(gTuple[2])
                 self.segmentAndAnnotationItems += [label]
 
+                #IH241003 added
+                targetDot = self.imageScene.addEllipse(QRectF(
+                        QPointF(gTuple[0])+QPointF(-self.LabelPositioner.TARGETDOTRADIUS,-self.LabelPositioner.TARGETDOTRADIUS),
+                        QPointF(gTuple[0])+QPointF(+self.LabelPositioner.TARGETDOTRADIUS,+self.LabelPositioner.TARGETDOTRADIUS) ))
+                self.segmentAndAnnotationItems += [targetDot]
 
                 #IH241001 HACK  apply style of rect to line
                 c = gTuple[3].brush().color()
                 rect.setBrush(c)
+                targetDot.setBrush(c)
                 lineItem.setPen(QPen(c,self.LabelPositioner.LINEWIDTH)) 
 
                 #IH241002 layer adjustment for nice output. (pixmap is 0, segment polygons are 1)
                 lineItem.setZValue(2)
+                targetDot.setZValue(2)
                 rectItem.setZValue(3)
                 textItem.setZValue(4)
 
