@@ -55,13 +55,18 @@ from MRSM_TextContent import LanguageAbbrev
 
 class SegmentationFactory:
 
-    #IH241007 TODO implement using multiple segmentation workbenches 
+    def __init__(self,SVGsegmentationWorkbenchFilenameList,language_abbrev=LanguageAbbrev.EN) -> None:
 
-    def __init__(self,SVGsegmentationWorkbenchFilename,language_abbrev=LanguageAbbrev.EN) -> None:
+        inkscapeNamespaces = {
+            'inkscape': 'http://www.inkscape.org/namespaces/inkscape',
+            'svg':"http://www.w3.org/2000/svg"
+            }
+      
+        self.segmentationWorkbenchTree = ET.Element('myRootElement')
+        for SVGsegmentationWorkbenchFilename in SVGsegmentationWorkbenchFilenameList:
+            self.segmentationWorkbenchTree.append(ET.parse(SVGsegmentationWorkbenchFilename).getroot())
 
-        self.SVGsegmentationWorkbenchFilename = SVGsegmentationWorkbenchFilename
-        self.segmentationWorkbenchTree = ET.parse(self.SVGsegmentationWorkbenchFilename)
-        self.segmentationWorkbenchTreeRoot = self.segmentationWorkbenchTree.getroot()
+        
         self.language_abbrev = language_abbrev
         
         #IH240912 for debugging only
@@ -69,11 +74,7 @@ class SegmentationFactory:
         # IH240912 for supported XPath subset, see
         # https://docs.python.org/2/library/xml.etree.elementtree.html#xpath-support
         # for example:  debug_message(self.segmentationWorkbenchTree.findall(".//*[contains(@id,'SEGMENT_')]")) # this is not supported
-
-        inkscapeNamespaces = {
-            'inkscape': 'http://www.inkscape.org/namespaces/inkscape',
-            'svg':"http://www.w3.org/2000/svg"
-                      }
+        
         self.segmentDict = {}
         for pathElement in   self.segmentationWorkbenchTree.findall(".//svg:path",inkscapeNamespaces):
             id = pathElement.get('id')
