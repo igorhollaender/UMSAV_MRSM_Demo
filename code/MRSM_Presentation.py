@@ -876,12 +876,14 @@ class MRSM_Presentation():
             self.descriptionWidgets += [self.bgLabel]
             
             # IH240910 for initialization only
-            pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.SAGITTAL)
-            self.parent.showMain.currentOrgan = Organ.BODY
+            # IH241007 OBSOLETE
+            # pm = self.parent.MRSM_ImageBase.getScaledPixmap(Organ.HEAD,ImagingPlane.SAGITTAL)
+            # self.parent.showMain.currentOrgan = Organ.BODY
+            
 
             self.imageScene = QGraphicsScene(self.parent.MRSM_Window)
-            if pm is not None:                
-                self.imagePixmapOnScene = self.imageScene.addPixmap(pm)
+            # if pm is not None:                
+            self.imagePixmapOnScene = self.imageScene.addPixmap(QPixmap())
             self.imagePane = QGraphicsView(self.imageScene)
             self.grid.addWidget(self.imagePane,0,0,4,28)
             # IH240917  (0,0,4,28) is the best so far tested on RPI
