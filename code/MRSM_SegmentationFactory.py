@@ -55,6 +55,8 @@ from MRSM_TextContent import LanguageAbbrev
 
 class SegmentationFactory:
 
+    #IH241007 TODO implement using multiple segmentation workbenches 
+
     def __init__(self,SVGsegmentationWorkbenchFilename,language_abbrev=LanguageAbbrev.EN) -> None:
 
         self.SVGsegmentationWorkbenchFilename = SVGsegmentationWorkbenchFilename
@@ -118,7 +120,7 @@ class SegmentationFactory:
                     thisAnnotation = None
                     for textElement in   self.segmentationWorkbenchTree.findall(".//svg:text",inkscapeNamespaces):
                         ANNOid = textElement.get('id')
-                        m = re.search('^ANNOTATION_(?P<language>[A-Z][A-Z])_(?P<organ>[A-Z0-9]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z0-9]+)(?P<subsegment>([_A-Z]+)*)',ANNOid)
+                        m = re.search('^ANNOTATION_(?P<language>[A-Z][A-Z])_(?P<organ>[A-Z0-9]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z0-9]+)(?P<subsegment>([_A-Z0-9]+)*)',ANNOid)
 
                         if m is not None and (
                             m.group('organ') == self.segmentDict[id]['organ'] and

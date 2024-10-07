@@ -165,10 +165,10 @@ class ImageBase():
 
         # populating the segmentation data
 
-        # self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg",language_abbrev=self.language_abbrev)
+        self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg",language_abbrev=self.language_abbrev)
         
         #IH241007 for debugging only
-        self.segmentationFactory = SegmentationFactory("resources/images/Krafcik/Segmentation/Segmentation Workbench AK.svg",language_abbrev=self.language_abbrev)
+        # self.segmentationFactory = SegmentationFactory("resources/images/Krafcik/Segmentation/Segmentation Workbench AK.svg",language_abbrev=self.language_abbrev)
 
                     
     def getScaledPixmap(self,organ: Organ,imagingPlane : ImagingPlane):
