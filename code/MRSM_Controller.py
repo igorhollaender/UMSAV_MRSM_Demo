@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH240821
+#      Last update: IH241007
 #
 #
 """
@@ -98,6 +98,8 @@ class SoundSample(Enum):
         HANDMRISOUND            = 4
         WHOLESPINEMRISOUND      = 5
 
+        KNEE2MRISOUND           = 6 #IH241007 added
+
 class BoreLEDGroup(Enum):
         GROUP1                  =   1
         GROUP2                  =   2
@@ -118,6 +120,8 @@ class MRSM_Controller():
             Organ.HEAD:         SoundSample.HEADMRISOUND,
             Organ.HAND:         SoundSample.HANDMRISOUND,
             Organ.WHOLESPINE:   SoundSample.WHOLESPINEMRISOUND,
+
+            Organ.KNEE2:        SoundSample.KNEE2MRISOUND,
 
             Organ.NONE:         SoundSample.NONE,
         }
@@ -155,6 +159,7 @@ class AudioPlayer():
              SoundSample.BODYMRISOUND:   (6*60.0 + 25.0) , # 6:25,  IH240812 just for debugging, TODO implement properly
              SoundSample.WHOLESPINEMRISOUND:   (7*60.0 + 20.0) , # 7:20,  IH240812 just for debugging, TODO implement properly
 
+             SoundSample.KNEE2MRISOUND:   (5*60.0 +  0.0) ,  #IH241007 added
              SoundSample.NONE:           0
         }
     

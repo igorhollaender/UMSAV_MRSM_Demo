@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH241003
+#       Last update: IH241007
 #
 #
 """
@@ -469,6 +469,11 @@ class MRSM_Presentation():
                 self.organButton[Organ.BODY].setData(1,Organ.BODY)
                 self.patientScene.addItem(self.organButton[Organ.BODY])
 
+                #IH241007 added
+                self.organButton[Organ.KNEE2] = self.OrganButton(143,135,40,40,self)
+                self.organButton[Organ.KNEE2].setData(1,Organ.KNEE2)
+                self.patientScene.addItem(self.organButton[Organ.KNEE2])
+
                 self.imagePaneRightmost = QGraphicsView(self.patientScene)
 
 
@@ -909,7 +914,8 @@ class MRSM_Presentation():
             self.grid.addWidget(self.bResumeApp,3,29,1,4)
             self.descriptionWidgets += [self.bResumeApp]
 
-            self.showAnnotationForImage(ImagingPlane.TRANSVERSAL) 
+            #I241007 OBSOLETE
+            #self.showAnnotationForImage(ImagingPlane.TRANSVERSAL) 
             #IH240916 TODO change this to TRANSVERSAL for production,
             # as SAGITTAL is missing in some organ sets
 

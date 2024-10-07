@@ -78,7 +78,7 @@ class SegmentationFactory:
             if id.startswith("SEGMENT_"):
                 self.segmentDict[id] = {}
                 self.segmentDict[id]['segmentSVGPath']=pathElement.get('d')
-                m = re.search('^SEGMENT_(?P<organ>[A-Z]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z]+)(?P<subsegment>([_A-Z]+)*)',id)
+                m = re.search('^SEGMENT_(?P<organ>[A-Z0-9]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z0-9]+)(?P<subsegment>([_A-Z0-9]+)*)',id)
                 if m is not None:
                     # debug_message(f"   O: {m.group('organ')}   P: {m.group('imagingPlane')}  S: {m.group('segment')}  SS: {m.group('subsegment')}" )
                     self.segmentDict[id]['organ']= m.group('organ')
@@ -118,7 +118,7 @@ class SegmentationFactory:
                     thisAnnotation = None
                     for textElement in   self.segmentationWorkbenchTree.findall(".//svg:text",inkscapeNamespaces):
                         ANNOid = textElement.get('id')
-                        m = re.search('^ANNOTATION_(?P<language>[A-Z][A-Z])_(?P<organ>[A-Z]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z]+)(?P<subsegment>([_A-Z]+)*)',ANNOid)
+                        m = re.search('^ANNOTATION_(?P<language>[A-Z][A-Z])_(?P<organ>[A-Z0-9]+)_(?P<imagingPlane>[A-Z]+)_(?P<segment>[A-Z0-9]+)(?P<subsegment>([_A-Z]+)*)',ANNOid)
 
                         if m is not None and (
                             m.group('organ') == self.segmentDict[id]['organ'] and

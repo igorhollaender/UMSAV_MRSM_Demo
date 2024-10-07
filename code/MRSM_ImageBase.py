@@ -10,7 +10,7 @@
 #      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
-#      Last update: IH240925
+#      Last update: IH241007
 #-------------------------------------------------------------------------------
 
 
@@ -36,6 +36,8 @@ class Organ(Enum):
         HAND        =   4
         WHOLESPINE  =   5
 
+        KNEE2       =   6   #IH241007 CNn-segmented knee supplied by Andrej K
+
 class ImagingPlane(Enum):
         ARBITRARY   =   0
         SAGITTAL    =   1
@@ -58,6 +60,9 @@ class ImageBase():
                 'pixmapScaled':    None,   # to be populated later
                 'annotation':   {
                      # IH240916 this is just an example template, the populating is done programmatically
+
+                     # IH241007 this is OBSOLETE
+
                     'segmentation': 
                         [   
                             {
@@ -141,6 +146,14 @@ class ImageBase():
                 'pixmapOriginal':   None,  
                 'pixmapScaled':    None   
             },
+
+            {'organ':  Organ.KNEE2, 
+             #IH241007 CNN-segmented knee supplied by Andrej K
+             'imagingPlane' : ImagingPlane.SAGITTAL, 
+                'JPGFileRelativePath': "resources/images/Krafcik/Knee/knee_sagital.png",
+                'pixmapOriginal':   None,  
+                'pixmapScaled':    None   
+            },  
         ]
 
         for im in self.MRimages:
@@ -152,7 +165,10 @@ class ImageBase():
 
         # populating the segmentation data
 
-        self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg",language_abbrev=self.language_abbrev)
+        # self.segmentationFactory = SegmentationFactory("resources/images/Free-Max/Segmentation/Segmentation Workbench.svg",language_abbrev=self.language_abbrev)
+        
+        #IH241007 for debugging only
+        self.segmentationFactory = SegmentationFactory("resources/images/Krafcik/Segmentation/Segmentation Workbench AK.svg",language_abbrev=self.language_abbrev)
 
                     
     def getScaledPixmap(self,organ: Organ,imagingPlane : ImagingPlane):
