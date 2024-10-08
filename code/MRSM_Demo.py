@@ -70,7 +70,17 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #      /etc/xdg/lxsession/LXDE-pi/autostart
 #  also see (for manual setup)
 #      https://raspberry-projects.com/pi/pi-operating-systems/raspbian/auto-running-programs-gui#
-
+#
+#
+#
+#   Important>
+#
+#       Before running the app on RPI, you have to
+#           export DISPLAY=:1.0
+#
+#       NOTE> Sometimes, it needs 'export DISPLAY=:0.0', do not know why, 
+#       maybe due to simultaneous execution of remote desktop
+#
 # TODOs
 #-------------------------------------------------------------------------------
 
