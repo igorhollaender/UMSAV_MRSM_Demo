@@ -222,6 +222,8 @@ class MRSM_Presentation():
         The app starts with this scenario. If the user does not click 'QUIT'
         within the INTRO_DURATION timeslot, the app continues with ShowMain, otherwise
         it exits to OS. 
+
+        IH241106 the Quit button is replaced by SERVICE
         """
         
         # IH240722 TODO: set this to 5 secs for real app
@@ -251,10 +253,16 @@ class MRSM_Presentation():
             self.lCountdown.setObjectName("lCountdown")  
             self.introWidgets += [self.lCountdown]
 
-            self.bQuitApp = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
-            self.bQuitApp.clicked.connect(self.parent.quit_app)
-            self.grid.addWidget(self.bQuitApp,4,28,1,4)
-            self.introWidgets += [self.bQuitApp]
+            #IH241106 Quit replaced by Service
+            # self.bQuitApp = parent.MRSM_PushButton(parent.lcls('QUIT'),parent.MRSM_Window)
+            # self.bQuitApp.clicked.connect(self.parent.quit_app)
+            # self.grid.addWidget(self.bQuitApp,4,28,1,4)
+            # self.introWidgets += [self.bQuitApp]
+
+            self.bRunService = parent.MRSM_PushButton(parent.lcls('SERVICE'),parent.MRSM_Window)
+            self.bRunService.clicked.connect(self.parent.quit_intro_start_service)
+            self.grid.addWidget(self.bRunService,4,28,1,4)
+            self.introWidgets += [self.bRunService]
 
 
             self.timer = QTimer()
@@ -1095,7 +1103,63 @@ class MRSM_Presentation():
             self.parent.idle_timer.stop()
             self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
     
+    class ShowService():
+        """
+        Special service and maintenance tasks
+        """
+        IDLE_INACTIVITY_DURATION_SEC = 1e5 # IH241106 disable idle timer  (should be sys.maxint) 
 
+        def __init__(self,parent) -> None:
+
+            self.grid :   QGridLayout   = parent.grid
+            self.parent : QWidget       = parent
+            self.serviceWidgets = []
+
+            self.bgLabel = QLabel("",self.parent.MRSM_Window)
+            self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
+            
+            #IH240729 This is necessary to prevent the image from voluntarily resizing
+            self.bgLabel.setMinimumHeight(300)            
+            self.bgLabel.setMaximumHeight(300)            
+            self.bgLabel.setMinimumWidth(1460)            
+            self.bgLabel.setMaximumWidth(1460)            
+
+            self.serviceWidgets += [self.bgLabel]
+
+            self.lHTMLText1 = QLabel(parent.lcls("#106"))
+            self.lHTMLText1.setWordWrap(True)
+            self.lHTMLText1.setMinimumWidth(1000)
+            self.lHTMLText1.setMaximumWidth(1000)
+
+            
+            # self.grid.addWidget(self.lHTMLText1,0,0,4,27)
+            self.saHTMLText1 = QScrollArea()
+            self.saHTMLText1.setWidget(self.lHTMLText1)
+            self.saHTMLText1.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            self.saHTMLText1.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+            self.grid.addWidget(self.saHTMLText1,0,0,4,28)                                    
+            self.saHTMLText1.verticalScrollBar().sliderMoved.connect(self.reset_idle_timer)
+            self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
+            
+            # self.infoWidgets += [self.lHTMLText1]
+            self.serviceWidgets += [self.saHTMLText1]
+
+            self.deactivate()
+
+        def activate(self):            
+            for w in self.serviceWidgets:                                
+                w.show()      
+            self.parent.show()
+            self.reset_idle_timer()  
+    
+        def deactivate(self):
+            for w in self.serviceWidgets:
+                w.hide()
+
+        def reset_idle_timer(self):
+            self.parent.idle_timer.stop()
+            self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
+    
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:
             self.MRSM_Window.show()
@@ -1147,14 +1211,15 @@ class MRSM_Presentation():
         self.showInfo = self.ShowInfo(self)
         if HasToIncludeSegmentationPanel:
             self.showDescription = self.ShowDescription(self)
+        self.showService = self.ShowService(self)
 
         self.actual_idle_break_sec = 0
 
         self.idle_timer = QTimer()
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
-        # IH241001 for debugging only
         self.showIntro.activate()
+        # IH241001 for debugging only
         # self.showDescription.activate()
 
     def on_idle_timeout(self):
@@ -1198,6 +1263,9 @@ class MRSM_Presentation():
         self.showDescription.deactivate()
         self.showMain.reactivate()  #IH240909 was 'activate' before
     
+    def quit_intro_start_service(self):
+        self.showIntro.deactivate()
+        self.showService.activate() 
 
     def quit_app(self):
         """

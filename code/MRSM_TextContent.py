@@ -10,7 +10,7 @@
 #      M  R  S  M  _  T  e  x  t  C  o  n  t  e  n  t  .  p  y 
 #
 9
-#      Last update: IH240918
+#      Last update: IH241106
 #-------------------------------------------------------------------------------
 
 from enum import Enum
@@ -149,8 +149,8 @@ MRSM_Texts = [
                         hang vertically because the Earth's gravity). They can be deflected from such a state
                         by a short pulse of another magnetic field (like when we poke a standing swing). The nuclei of atoms
                         begin to move and try to return to their original state (the swing swings and gradually returns to its original position).
-                        In which rhythm (<i>frequency</i>) the swing swings depends, among other things, on whether a large or small child is sitting on it. 
-                        The atoms behave in a similar way. By observing the swinging, we can tell how big  (more correctly: <i>how heavy</i>) the child is, 
+                        In which rhythm (<i>frequency</i>) the swing swings depends, among other things, on whether the child is sitting or standing on it. 
+                        The atoms behave in a similar way. By observing the swinging, we can tell in which posture the child is, 
                         without seeing the child directly. We will see it even better when children of the same weight on swings hold hands, because then
                         after a while, they will all swing back and forth in the same way. And atoms behave similarly: they don't hold hands, 
                         but they are interconnected because they are close to each other. And we can infer what properties they have (for example, whether they are atoms 
@@ -236,8 +236,8 @@ MRSM_Texts = [
                         senkrecht nach unten hängen, weil die Schwerkraft der Erde auf sie einwirkt). Sie können aus einem solchen Zustand abgelenkt werden
                         durch eine kurze Wirkung eines anderen Magnetfeldes (wie wenn wir eine stehende Schaukel anstoßen). Die Kerne der Atome
                         Sie beginnen sich zu bewegen und versuchen, in ihren ursprünglichen Zustand zurückzukehren (die Schaukel schwingt und kehrt allmählich in ihre ursprüngliche Position zurück).
-                        In welchem Rhythmus (<i>Frequenz</i>) die Schaukel schwingt, hängt unter anderem davon ab, ob ein großes oder kleines Kind darauf sitzt. Ähnlich
-                        sogar in Atomen. Durch das Bemerken des Schaukelns können wir beurteilen, wie groß (genauer: <i>wie schwer</i>) das Kind ist, ohne
+                        In welchem Rhythmus (<i>Frequenz</i>) die Schaukel schwingt, hängt unter anderem davon ab, ob das Kind darauf sitzt or steht. Ähnlich
+                        sogar in Atomen. Durch das Bemerken des Schaukelns können wir beurteilen, in welcher Position das Kind ist, ohne
                         damit wir das Kind direkt sehen können. Wir werden es noch besser sehen, wenn Kinder gleicher Größe auf Schaukeln Händchen halten, denn dann
                         Nach einer Weile schwingen sie alle auf die gleiche Weise hin und her. Und Atome verhalten sich auf die gleiche Weise: Sie halten sich nicht an den Händen, 
                         Aber sie sind miteinander verbunden, weil sie nahe beieinander liegen. Und wir können daraus ableiten, welche Eigenschaften sie haben (z.B. ob sie Atome sind 
