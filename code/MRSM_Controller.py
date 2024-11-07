@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241007
+#      Last update: IH241107
 #
 #
 """
@@ -52,6 +52,8 @@ Controller of the Raspberry Pi hardware
 #    For gpiozero documentation, see
 #       https://gpiozero.readthedocs.io/en/stable/index.html
 #
+#   For smbus2 documentation, see
+#       https://pypi.org/project/smbus2/
 #
 
 
@@ -66,6 +68,7 @@ Controller of the Raspberry Pi hardware
 
 from enum import Enum
 from time import sleep
+from math import sin,cos,pi,radians
 
 from MRSM_Globals import IsRaspberryPi5Emulated
 from MRSM_Utilities import error_message, debug_message
@@ -77,11 +80,14 @@ from PyQt6.QtCore import (
     Qt
 )
     
-
 from gpiozero import (
     Device,
     LEDBoard, 
 )
+
+#IH241107  use pip install smbus2
+from smbus2 import SMBus
+
 
 if IsRaspberryPi5Emulated:
     from gpiozero.pins.mock import MockFactory
@@ -129,6 +135,10 @@ class MRSM_Controller():
         # Raspberry Pi GPIO
 
         self.rpiGPIO = RaspberryPiGPIO()
+
+        # Magnetometer
+
+        self.magnetometer = MRSM_Magnetometer()
        
       
     def finalize(self):
@@ -144,7 +154,6 @@ class MRSM_Controller():
         self.audioPlayer.stop()
         self.rpiGPIO.setBoreLEDIlluminationOn(False)
         self.rpiGPIO.setMainMagnetCoilOn(False)    
-
 
 class AudioPlayer():
 
@@ -307,4 +316,123 @@ def LEDShowStep(d: dict):
             RaspberryPiGPIO.boreLEDGroup3.on() if d[BoreLEDGroup.GROUP3]>0.5 else RaspberryPiGPIO.boreLEDGroup3.off()
 
   
+class MRSM_Magnetometer():
 
+    Geometry_Radius1_mm    =   22.50
+    Geometry_Radius2_mm    =   15.00
+    Geometry_Radius3_mm    =   4.50
+
+    ChipOffset_mm          =   1.0  # distance from reference plane (containing reference point) to sensor active point
+
+    def __init__(self) -> None:
+          
+        self.MgMGeometry = {
+             
+                #   for sensor geometry, see 
+                #       resources/images/diverse/ChipHolder Geometry.pdf
+                #
+
+                # 'sensorPositionName':
+                #   position OF THE REFERENCE POINT is primarily given in polar coordinates (Radius,Angle)
+                #   origin is in the center of the scanner bore
+                #   'Orientation' gives angle of the sensor in degrees, 0 is pointing up, clockwise
+
+                #   'Radius'    in millimeters
+                #   'Angle'     in degrees, 0 is pointing up, clockwise
+                #   'Angle'     in degrees, 0 is pointing up, clockwise
+                #   'X','Y'     are carthesian coordinates OF THE SENSOR ACTIVE POINT, will be computed 
+                
+                '1':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
+                         'Angle': 0*60.0, 'Orientation': 0*60.0,
+                         'X':None, 'Y':None },
+                '2':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
+                         'Angle': 1*60.0, 'Orientation': 1*60.0,
+                         'X':None, 'Y':None },
+                '3':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
+                         'Angle': 2*60.0, 'Orientation': 2*60.0,
+                         'X':None, 'Y':None },
+                '4':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
+                         'Angle': 3*60.0, 'Orientation': 3*60.0,
+                         'X':None, 'Y':None },
+                '5':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
+                         'Angle': 4*60.0, 'Orientation': 4*60.0,
+                         'X':None, 'Y':None },
+                '6':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
+                         'Angle': 5*60.0, 'Orientation': 5*60.0,
+                         'X':None, 'Y':None },
+
+                '7':    {'Radius': MRSM_Magnetometer.Geometry_Radius2_mm, 
+                         'Angle': 0*60.0+30.0, 'Orientation': 0*60.0-60.0,
+                         'X':None, 'Y':None },
+                '8':    {'Radius': MRSM_Magnetometer.Geometry_Radius2_mm, 
+                         'Angle': 1*60.0+30.0, 'Orientation': 1*60.0-60.0,
+                         'X':None, 'Y':None },
+                '9':    {'Radius': MRSM_Magnetometer.Geometry_Radius2_mm, 
+                         'Angle': 2*60.0+30.0, 'Orientation': 2*60.0-60.0,
+                         'X':None, 'Y':None },
+                'A':    {'Radius': MRSM_Magnetometer.Geometry_Radius2_mm, 
+                         'Angle': 3*60.0+30.0, 'Orientation': 3*60.0-60.0,
+                         'X':None, 'Y':None },
+                'B':    {'Radius': MRSM_Magnetometer.Geometry_Radius2_mm, 
+                         'Angle': 4*60.0+30.0, 'Orientation': 4*60.0-60.0,
+                         'X':None, 'Y':None },
+                'C':    {'Radius': MRSM_Magnetometer.Geometry_Radius2_mm, 
+                         'Angle': 5*60.0+30.0, 'Orientation': 5*60.0-60.0,
+                         'X':None, 'Y':None },
+
+                'D':    {'Radius': MRSM_Magnetometer.Geometry_Radius3_mm, 
+                         'Angle': 0.0, 'Orientation': 0.0,
+                         'X':None, 'Y':None },
+                'E':    {'Radius': MRSM_Magnetometer.Geometry_Radius3_mm, 
+                         'Angle': 180.0, 'Orientation': 180.0,
+                         'X':None, 'Y':None },
+
+                'F':    {'Radius': 2.36, 
+                         'Angle': 0.0, 'Orientation': 0.0,
+                         'X':None, 'Y':None },
+        }
+
+        self.MgMsensorI2CAddress = {
+                '1':    96,      # AD1 = 0.00 ,  AD0 =  0.00       * Vcc
+                '2':    97,      # AD1 = 0.00 ,  AD0 =  0.33       * Vcc
+                '3':    98,      # AD1 = 0.00 ,  AD0 =  0.67       * Vcc
+                '4':    99,      # AD1 = 0.00 ,  AD0 =  1.00       * Vcc
+
+                '5':   100,      # AD1 = 0.33 ,  AD0 =  0.00       * Vcc
+                '6':   101,      # AD1 = 0.33 ,  AD0 =  0.33       * Vcc
+                '7':   102,      # AD1 = 0.33 ,  AD0 =  0.67       * Vcc
+                '8':   103,      # AD1 = 0.33 ,  AD0 =  1.00       * Vcc
+
+                '9':   104,      # AD1 = 0.67 ,  AD0 =  0.00       * Vcc
+                'A':   105,      # AD1 = 0.67 ,  AD0 =  0.33       * Vcc
+                'B':   106,      # AD1 = 0.67 ,  AD0 =  0.67       * Vcc
+                'C':   107,      # AD1 = 0.67 ,  AD0 =  1.00       * Vcc
+
+                'D':   108,      # AD1 = 1.00 ,  AD0 =  0.00       * Vcc
+                'E':   109,      # AD1 = 1.00 ,  AD0 =  0.33       * Vcc
+                'F':   110,      # AD1 = 1.00 ,  AD0 =  0.67       * Vcc
+        }
+
+        self.availableSensors = set(['1','2'])
+
+        # calculate X,Y coordinates of THE SENSOR ACTIVE POINT 
+        #  X points to the right, Y points up, origin is in the center
+        for sensorPos in self.MgMGeometry:
+            self.MgMGeometry[sensorPos]['X'] = (
+                self.MgMGeometry[sensorPos]['Radius']*sin(radians(self.MgMGeometry[sensorPos]['Angle']))+
+                MRSM_Magnetometer.ChipOffset_mm*sin(radians(self.MgMGeometry[sensorPos]['Orientation'])))
+            self.MgMGeometry[sensorPos]['Y'] = (
+                self.MgMGeometry[sensorPos]['Radius']*cos(radians(self.MgMGeometry[sensorPos]['Angle']))+
+                MRSM_Magnetometer.ChipOffset_mm*cos(radians(self.MgMGeometry[sensorPos]['Orientation'])))
+        
+            # debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
+    
+    class MgMAxis(Enum):
+         X  =   1
+         Y  =   2
+         Z  =   3
+    
+    def getReading(sensorPos,axis: MgMAxis):
+        # IH241107  c o n t i n u e   h e r e 
+        pass
+    

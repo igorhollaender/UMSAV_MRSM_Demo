@@ -162,7 +162,7 @@ class SegmentationFactory:
                         self.segmentDict[id]['fillColorHex'][self.segmentDict[id]['segment']] = {}
                     self.segmentDict[id]['fillColorHex'][self.segmentDict[id]['segment']][self.segmentDict[id]['subsegment']]=thisFillColorHex
 
-        self.UnitTest()
+        # self.UnitTest()
 
     def getSegmentQPolygonsAndAnnotations(self,organ, imagingPlane):
         """
