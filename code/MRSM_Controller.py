@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241107
+#      Last update: IH241108
 #
 #
 """
@@ -67,10 +67,11 @@ Controller of the Raspberry Pi hardware
 #-------------------------------------------------------------------------------
 
 from enum import Enum
-from time import sleep
+from time import sleep, time
 from math import sin,cos,pi,radians
+from random import random, uniform
 
-from MRSM_Globals import IsRaspberryPi5Emulated
+from MRSM_Globals import IsRaspberryPi5Emulated, IsMagneticSensorEmulated
 from MRSM_Utilities import error_message, debug_message
 from MRSM_Utilities import (
     TimerIterator,
@@ -85,9 +86,9 @@ from gpiozero import (
     LEDBoard, 
 )
 
-#IH241107  use pip install smbus2
-from smbus2 import SMBus
-
+#IH241107  use "pip install smbus2" if not installed
+if not IsMagneticSensorEmulated:
+    from smbus2 import SMBus
 
 if IsRaspberryPi5Emulated:
     from gpiozero.pins.mock import MockFactory
@@ -323,6 +324,7 @@ class MRSM_Magnetometer():
     Geometry_Radius3_mm    =   4.50
 
     ChipOffset_mm          =   1.0  # distance from reference plane (containing reference point) to sensor active point
+    A31301_maxReadingRange =   pow(2,15-1)-1  # the A31301 delivers signed 15bit values
 
     def __init__(self) -> None:
           
@@ -413,7 +415,14 @@ class MRSM_Magnetometer():
                 'F':   110,      # AD1 = 1.00 ,  AD0 =  0.67       * Vcc
         }
 
-        self.availableSensors = set(['1','2'])
+        if not IsMagneticSensorEmulated:
+            self.availableSensors = set(['1','2'])  #IH241108 use actually availale sensor positions
+            self.signalEmulator = None
+        else:
+            self.availableSensors = set(self.MgMGeometry.keys())  
+            self.signalEmulator = MRSM_Magnetometer.A31301_SimpleEmulator()
+        
+        # debug_message(self.availableSensors)
 
         # calculate X,Y coordinates of THE SENSOR ACTIVE POINT 
         #  X points to the right, Y points up, origin is in the center
@@ -432,7 +441,58 @@ class MRSM_Magnetometer():
          Y  =   2
          Z  =   3
     
-    def getReading(sensorPos,axis: MgMAxis):
-        # IH241107  c o n t i n u e   h e r e 
-        pass
+    def getReading(self,sensorPos,axis: MgMAxis) -> int:
+        if IsMagneticSensorEmulated:
+            return self.signalEmulator.getReading(sensorPos,axis)
+        else:
+            return 1234.5678
+            # see A31301 datasheet, p.28
+            # Output registers to use:
+            #
+            #   X_CHANNEL_15B (0x1E:0x1F[14:0])
+            #       This register holds the 15-bit signed output of the X-axis sensor output.
+            #   Y_CHANNEL_15B (0x20:0x21[14:0])
+            #       This register holds the 15-bit signed output of the Y-axis sensor output.
+            #   Z_CHANNEL_15B (0x22:0x23[14:0])
+            #       This register holds the 15-bit signed output of the Z-axis sensor output
+
+            # IH241107  TODO implement
+
+    def getNormalizedReading(self,sensorPos,axis: MgMAxis) -> float:
+         """
+         returns reading from -1.00 to +1.00, 1 is the max range of the sensor
+         """
+         return self.getReading(sensorPos,axis)/MRSM_Magnetometer.A31301_maxReadingRange
     
+    class A31301_SimpleEmulator():
+        """
+        Simple generator of time-dependent signal reading
+        """
+
+        def __init__(self) -> None:
+            pass
+         
+        def getReading(self,sensorPos,axis) -> int:
+            if axis==MRSM_Magnetometer.MgMAxis.X:                 
+                peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.5)
+            if axis==MRSM_Magnetometer.MgMAxis.Z:                 
+                peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.2)
+            if axis==MRSM_Magnetometer.MgMAxis.Y:
+                peakValue = int(sin(time()/pi/10)*MRSM_Magnetometer.A31301_maxReadingRange)                 
+            spreadCoefficient = {
+                    # sensorPos -> value from 0 to 1
+                    "1" :  1.00,
+                    "C" :  0.80,                    
+                    "7" :  0.80,                    
+                    "6" :  0.30,                    
+                    "D" :  0.30,                    
+                    "2" :  0.30,                    
+                    }
+            spreadFactor = 0.1
+            if sensorPos in spreadCoefficient:
+                spreadFactor = spreadCoefficient[sensorPos]                
+            randomFactor = uniform(0.9,1.0)            
+            returnValue = max(-MRSM_Magnetometer.A31301_maxReadingRange,min(MRSM_Magnetometer.A31301_maxReadingRange,
+                        peakValue*spreadFactor*randomFactor))
+            return returnValue
+                    

@@ -1107,7 +1107,9 @@ class MRSM_Presentation():
         """
         Special service and maintenance tasks
         """
-        IDLE_INACTIVITY_DURATION_SEC = 1e5 # IH241106 disable idle timer  (should be sys.maxint) 
+        IDLE_INACTIVITY_DURATION_SEC = int(1e6)  # IH241106 disable idle timer  (should be sys.maxint) 
+                                                 # IH241108 int is here because 1e4 would default to float
+        STATUS_UPDATE_PERIOD_MSEC = 250
 
         def __init__(self,parent) -> None:
 
@@ -1144,6 +1146,11 @@ class MRSM_Presentation():
             # self.infoWidgets += [self.lHTMLText1]
             self.serviceWidgets += [self.saHTMLText1]
 
+            #IH241108 added
+            self.status_update_timer = QTimer()
+            self.status_update_timer.timeout.connect(self.on_status_update_timeout)
+            
+
             self.deactivate()
 
         def activate(self):            
@@ -1151,14 +1158,21 @@ class MRSM_Presentation():
                 w.show()      
             self.parent.show()
             self.reset_idle_timer()  
+            self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)
     
         def deactivate(self):
             for w in self.serviceWidgets:
                 w.hide()
+            self.status_update_timer.stop()                
 
         def reset_idle_timer(self):
             self.parent.idle_timer.stop()
             self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
+
+        def on_status_update_timeout(self):
+            #IH241108 TODO implement
+            debug_message(f"Status Update:")  # C O N  T I N U E  H E R E
+            self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
     
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:
