@@ -114,7 +114,6 @@ class BoreLEDGroup(Enum):
         GROUP2                  =   2
         GROUP3                  =   3
         
-
 class MRSM_Controller():
 
     def __init__(self) -> None:
@@ -317,8 +316,7 @@ def LEDShowStep(d: dict):
             RaspberryPiGPIO.boreLEDGroup1.on() if d[BoreLEDGroup.GROUP1]>0.5 else RaspberryPiGPIO.boreLEDGroup1.off()
             RaspberryPiGPIO.boreLEDGroup2.on() if d[BoreLEDGroup.GROUP2]>0.5 else RaspberryPiGPIO.boreLEDGroup2.off()
             RaspberryPiGPIO.boreLEDGroup3.on() if d[BoreLEDGroup.GROUP3]>0.5 else RaspberryPiGPIO.boreLEDGroup3.off()
-
-  
+ 
 class MRSM_Magnetometer():
 
     Geometry_Radius1_mm    =   22.50
@@ -450,39 +448,38 @@ class MRSM_Magnetometer():
     
 
         #IH241111 for debugging only
-        I2C_address = self.MgMsensorI2CAddress['4']
-        doAgain = False
-        while doAgain:
+        if not IsMagneticSensorEmulated:
+            I2C_address = self.MgMsensorI2CAddress['4']
+            doAgain = True
+            while doAgain:
 
-            #IH241111 PROBLEM this is very instable wiht the current test wiring
-            MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
-            LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
-            
-            MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
-            LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
-            
-            MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
-            LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
-            
-            value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
-            value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
-            value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
+                #IH241111 PROBLEM this is very instable wiht the current test wiring
+                MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
+                LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
+                
+                MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
+                LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
+                
+                MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
+                LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
+                
+                value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
+                value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
+                value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
 
-            if(value_X & 0x4000):
-                value_X = value_X | 0x8000
-            if(value_Y & 0x4000):
-                value_Y = value_Y | 0x8000
-            if(value_Z & 0x4000):
-                value_Z = value_Z | 0x8000
+                if(value_X & 0x4000):
+                    value_X = value_X | 0x8000
+                if(value_Y & 0x4000):
+                    value_Y = value_Y | 0x8000
+                if(value_Z & 0x4000):
+                    value_Z = value_Z | 0x8000
 
-            debug_message(f'X: {value_X},  ' +
-                          f'Y: {value_Y},  ' +
-                          f'Z: {value_Z}')
-            sleep(1)
-            doAgain = False
+                debug_message(f'X: {value_X},  ' +
+                            f'Y: {value_Y},  ' +
+                            f'Z: {value_Z}')
+                sleep(1)
+                doAgain = False
         
-
-
 
 
     class MgMAxis(Enum):
@@ -512,6 +509,12 @@ class MRSM_Magnetometer():
          returns reading from -1.00 to +1.00, 1 is the max range of the sensor
          """
          return self.getReading(sensorPos,axis)/MRSM_Magnetometer.A31301_maxReadingRange
+    
+    def getNormalizedReadingForAllSensors(self,axis:MgMAxis) -> dict:
+        retDict = {}
+        for sensorPos in self.MgMGeometry:
+            retDict[sensorPos] = self.getNormalizedReading(sensorPos,axis)
+        return retDict
     
     class A31301_SimpleEmulator():
         """

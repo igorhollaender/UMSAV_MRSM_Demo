@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH241007
+#       Last update: IH241111
 #
 #
 """
@@ -129,7 +129,7 @@ if IsQtMultimediaAvailable:
         QVideoWidget
 
 
-from MRSM_Controller import MRSM_Controller
+from MRSM_Controller import MRSM_Controller,MRSM_Magnetometer
 from MRSM_ImageBase import ImageBase, Organ, ImagingPlane
 from MRSM_Stylesheet import MRSM_Stylesheet
 from MRSM_TextContent import Language, LanguageAbbrev, MRSM_Texts
@@ -1171,7 +1171,8 @@ class MRSM_Presentation():
 
         def on_status_update_timeout(self):
             #IH241108 TODO implement
-            debug_message(f"Status Update:")  # C O N  T I N U E  H E R E
+            currentAllValuesX = self.parent.hardwareController.magnetometer.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X)
+            debug_message(f"Status Update:{currentAllValuesX}") 
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
     
     def ShowFullScreen(self):
