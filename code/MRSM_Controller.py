@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241108
+#      Last update: IH241111
 #
 #
 """
@@ -55,6 +55,8 @@ Controller of the Raspberry Pi hardware
 #   For smbus2 documentation, see
 #       https://pypi.org/project/smbus2/
 #
+#   For i2c-tools documentation see
+#       https://thelinuxcode.com/i2c-linux-utilities/
 
 
 # TODOs
@@ -415,9 +417,19 @@ class MRSM_Magnetometer():
                 'F':   110,      # AD1 = 1.00 ,  AD0 =  0.67       * Vcc
         }
 
+        self.MgMsensorI2CRegister = {
+             'X_CHANNEL_15B_MSB' :  0x1e,
+             'X_CHANNEL_15B_LSB' :  0x1f,
+             'Y_CHANNEL_15B_MSB' :  0x20,
+             'Y_CHANNEL_15B_LSB' :  0x21,
+             'Z_CHANNEL_15B_MSB' :  0x22,
+             'Z_CHANNEL_15B_LSB' :  0x23,
+            }
+
         if not IsMagneticSensorEmulated:
             self.availableSensors = set(['1','2'])  #IH241108 use actually availale sensor positions
             self.signalEmulator = None
+            self.smbus = SMBus(1)   #using I2C bus 1
         else:
             self.availableSensors = set(self.MgMGeometry.keys())  
             self.signalEmulator = MRSM_Magnetometer.A31301_SimpleEmulator()
@@ -434,8 +446,45 @@ class MRSM_Magnetometer():
                 self.MgMGeometry[sensorPos]['Radius']*cos(radians(self.MgMGeometry[sensorPos]['Angle']))+
                 MRSM_Magnetometer.ChipOffset_mm*cos(radians(self.MgMGeometry[sensorPos]['Orientation'])))
         
-            # debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
+            debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
     
+
+        #IH241111 for debugging only
+        I2C_address = self.MgMsensorI2CAddress['4']
+        doAgain = False
+        while doAgain:
+
+            #IH241111 PROBLEM this is very instable wiht the current test wiring
+            MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
+            LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
+            
+            MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
+            LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
+            
+            MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
+            LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
+            
+            value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
+            value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
+            value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
+
+            if(value_X & 0x4000):
+                value_X = value_X | 0x8000
+            if(value_Y & 0x4000):
+                value_Y = value_Y | 0x8000
+            if(value_Z & 0x4000):
+                value_Z = value_Z | 0x8000
+
+            debug_message(f'X: {value_X},  ' +
+                          f'Y: {value_Y},  ' +
+                          f'Z: {value_Z}')
+            sleep(1)
+            doAgain = False
+        
+
+
+
+
     class MgMAxis(Enum):
          X  =   1
          Y  =   2
