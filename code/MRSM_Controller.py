@@ -342,7 +342,7 @@ class MRSM_Magnetometer():
                 #   'Radius'    in millimeters
                 #   'Angle'     in degrees, 0 is pointing up, clockwise
                 #   'Angle'     in degrees, 0 is pointing up, clockwise
-                #   'X','Y'     are carthesian coordinates OF THE SENSOR ACTIVE POINT, will be computed 
+                #   'X','Y'     are carthesian coordinates OF THE SENSOR ACTIVE POINT, will be computed, in millimeters
                 
                 '1':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
                          'Angle': 0*60.0, 'Orientation': 0*60.0,

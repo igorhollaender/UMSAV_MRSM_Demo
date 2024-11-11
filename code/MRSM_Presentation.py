@@ -133,6 +133,7 @@ from MRSM_Controller import MRSM_Controller,MRSM_Magnetometer
 from MRSM_ImageBase import ImageBase, Organ, ImagingPlane
 from MRSM_Stylesheet import MRSM_Stylesheet
 from MRSM_TextContent import Language, LanguageAbbrev, MRSM_Texts
+from MRSM_FieldVisualizer import FieldPlotCanvas
 
 
 
@@ -1170,7 +1171,6 @@ class MRSM_Presentation():
             self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
 
         def on_status_update_timeout(self):
-            #IH241108 TODO implement
             currentAllValuesX = self.parent.hardwareController.magnetometer.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X)
             debug_message(f"Status Update:{currentAllValuesX}") 
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            

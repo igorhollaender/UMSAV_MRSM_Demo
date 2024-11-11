@@ -14,17 +14,17 @@
 #-------------------------------------------------------------------------------
 
 
-__version__                 = "MRSM_Demo IH241111b"
+__version__                 = "MRSM_Demo IH241111c"
 
 IsWaveShareDisplayEmulated  = True   # set to False for real application
-IsRaspberryPi5Emulated      = True  # set to False for real application
-IsMagneticSensorEmulated  = True   # set to False for real application
+IsRaspberryPi5Emulated      = True   # set to False for real application
+IsMagneticSensorEmulated    = True   # set to False for real application
 IsQtMultimediaAvailable     = False  # IH240722 I had problems 
                                      # installing QtMultimedia on Raspberry OS,
                                      # so this is a workaround
 HasToShowExitButton         = False    # set to False for real application
                                      #  IH240930 HINT> if there is no Exit button, use Alt-F4 to close window
-HasToShowGoIdleButton       = False   # set to False for real application
+HasToShowGoIdleButton       = False  # set to False for real application
 
 HasToIncludeSegmentationPanel  = True   # set to False to run the stable version (Segmentation is experimental feature)
 
