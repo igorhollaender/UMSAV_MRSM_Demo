@@ -1207,11 +1207,11 @@ class MRSM_Presentation():
 
             #IH241108 added
             self.fieldPlotCanvas_Horizontal = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=200,dpi=100)
+                                                   figureHeight=200,figureWidth=200,dpi=100,title='HORIZONTAL')
             self.fieldPlotCanvas_Vertical   = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=200,dpi=100)
+                                                   figureHeight=200,figureWidth=200,dpi=100,title='VERTICAL')
             self.fieldPlotCanvas_Axial      = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=200,dpi=100)
+                                                   figureHeight=200,figureWidth=200,dpi=100,title='AXIAL')
             
             #IH241113 TODO adapt grid coordinates for RPI display
             self.grid.addWidget(self.fieldPlotCanvas_Horizontal,    0,  3,      5, 7) 
