@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH241111
+#       Last update: IH241113
 #
 #
 """
@@ -265,6 +265,11 @@ class MRSM_Presentation():
             self.grid.addWidget(self.bRunService,4,28,1,4)
             self.introWidgets += [self.bRunService]
 
+            #IH241113 added
+            self.bRunMagnetometer = parent.MRSM_PushButton(parent.lcls('MGMETER'),parent.MRSM_Window)
+            self.bRunMagnetometer.clicked.connect(self.parent.quit_intro_start_magnetometer)
+            self.grid.addWidget(self.bRunMagnetometer,3,28,1,4)  #IH241113 TODO modify coordinates for RPI display
+            self.introWidgets += [self.bRunMagnetometer]
 
             self.timer = QTimer()
             self.timer.timeout.connect(self.on_timeout)
@@ -1172,7 +1177,82 @@ class MRSM_Presentation():
 
         def on_status_update_timeout(self):
             currentAllValuesX = self.parent.hardwareController.magnetometer.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X)
-            debug_message(f"Status Update:{currentAllValuesX}") 
+            debug_message(f"Service Status Update:") 
+            self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
+    
+    class ShowMagnetometer():
+        """
+        Controlling and presenting magnetometric measurement
+        """
+        IDLE_INACTIVITY_DURATION_SEC = int(1e6)  # IH241106 disable idle timer  (should be sys.maxint) 
+                                                 # IH241108 int is here because 1e4 would default to float
+        STATUS_UPDATE_PERIOD_MSEC = 250
+
+        def __init__(self,parent) -> None:
+
+            self.grid :   QGridLayout   = parent.grid
+            self.parent : QWidget       = parent
+            self.serviceMagnetometerWidgets = []
+
+            self.bgLabel = QLabel("",self.parent.MRSM_Window)
+            self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
+            
+            # #IH240729 This is necessary to prevent the image from voluntarily resizing
+            self.bgLabel.setMinimumHeight(300)            
+            self.bgLabel.setMaximumHeight(300)            
+            self.bgLabel.setMinimumWidth(1460)            
+            self.bgLabel.setMaximumWidth(1460)            
+
+            self.serviceMagnetometerWidgets += [self.bgLabel]
+
+            #IH241108 added
+            self.fieldPlotCanvas_Horizontal = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                   figureHeight=200,figureWidth=200,dpi=100)
+            self.fieldPlotCanvas_Vertical   = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                   figureHeight=200,figureWidth=200,dpi=100)
+            self.fieldPlotCanvas_Axial      = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                   figureHeight=200,figureWidth=200,dpi=100)
+            
+            #IH241113 TODO adapt grid coordinates for RPI display
+            self.grid.addWidget(self.fieldPlotCanvas_Horizontal,    0,  3,      5, 7) 
+            self.grid.addWidget(self.fieldPlotCanvas_Vertical,      0,  3+7,    5, 7)
+            self.grid.addWidget(self.fieldPlotCanvas_Axial,         0,  3+7+7,  5, 7)
+            
+            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Horizontal]
+            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Vertical]
+            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Axial]
+
+            #IH241108 added
+            self.status_update_timer = QTimer()
+            self.status_update_timer.timeout.connect(self.on_status_update_timeout)
+            
+
+            self.deactivate()
+
+        def activate(self):            
+            for w in self.serviceMagnetometerWidgets:                                
+                w.show()      
+            self.parent.show()
+            self.reset_idle_timer()  
+            self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)
+    
+        def deactivate(self):
+            for w in self.serviceMagnetometerWidgets:
+                w.hide()
+            self.status_update_timer.stop()                
+
+        def reset_idle_timer(self):
+            self.parent.idle_timer.stop()
+            self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
+
+        def on_status_update_timeout(self):
+            self.fieldPlotCanvas_Horizontal.updateValues(self.parent.hardwareController.magnetometer
+                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.HORIZONTAL))
+            self.fieldPlotCanvas_Vertical.updateValues(self.parent.hardwareController.magnetometer
+                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.VERTICAL))
+            self.fieldPlotCanvas_Axial.updateValues(self.parent.hardwareController.magnetometer
+                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.AXIAL))
+            # debug_message(f"Status Update:{currentAllValuesX}") 
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
     
     def ShowFullScreen(self):
@@ -1227,15 +1307,17 @@ class MRSM_Presentation():
         if HasToIncludeSegmentationPanel:
             self.showDescription = self.ShowDescription(self)
         self.showService = self.ShowService(self)
+        self.showMagnetometer = self.ShowMagnetometer(self)
 
         self.actual_idle_break_sec = 0
 
         self.idle_timer = QTimer()
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
-        self.showIntro.activate()
-        # IH241001 for debugging only
-        # self.showDescription.activate()
+        # 
+        # self.showIntro.activate()
+        # IH241113 for debugging only
+        self.showMagnetometer.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
@@ -1281,6 +1363,10 @@ class MRSM_Presentation():
     def quit_intro_start_service(self):
         self.showIntro.deactivate()
         self.showService.activate() 
+
+    def quit_intro_start_magnetometer(self):
+        self.showIntro.deactivate()
+        self.showMagnetometer.activate() 
 
     def quit_app(self):
         """

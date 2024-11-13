@@ -10,7 +10,7 @@
 #      M  R  S  M  _  F i e l d  V i s u a l i z e r  .  p  y 
 #
 #
-#      Last update: IH241111
+#      Last update: IH241113
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
 
     def __init__(self,scatteredPointsDict,figureWidth,figureHeight,dpi=100,parent=None):
         figure = Figure(figsize=(figureWidth, figureHeight), dpi=dpi)
-        self.axes = fig.add_subplot(111)
+        self.axes = figure.add_subplot(111)
         super().__init__(figure)    
 
         self.scatteredPointDict = scatteredPointsDict 
@@ -49,18 +49,22 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
         # This means that when you iterate over a dictionary, 
         # the keys will be returned in the order they were added.
 
-        xScattered_Array = np.array([self.scatteredPointDict[p]['X'] for p in self.scatteredPointDict])
-        yScattered_Array = np.array([self.scatteredPointDict[p]['Y'] for p in self.scatteredPointDict])
+        self.xScattered_Array = np.array([self.scatteredPointDict[p]['X'] for p in self.scatteredPointDict])
+        self.yScattered_Array = np.array([self.scatteredPointDict[p]['Y'] for p in self.scatteredPointDict])
 
         # create regular grid
-        xRegularGrid_Array = np.linspace(xScattered_Array.min(),xScattered_Array.max(),FieldPlotCanvas.gridSizeX) 
-        yRegularGrid_Array = np.linspace(yScattered_Array.min(),yScattered_Array.max(),FieldPlotCanvas.gridSizeY) 
-        xRegularGrid_Array,yRegularGrid_Array = np.meshgrid(xRegularGrid_Array,yRegularGrid_Array)
+        self.xRegularGrid_Array = np.linspace(self.xScattered_Array.min(),self.xScattered_Array.max(),FieldPlotCanvas.gridSizeX) 
+        self.yRegularGrid_Array = np.linspace(self.yScattered_Array.min(),self.yScattered_Array.max(),FieldPlotCanvas.gridSizeY) 
+        self.xRegularGrid_Array,self.yRegularGrid_Array = np.meshgrid(self.xRegularGrid_Array,self.yRegularGrid_Array)
         
+        
+    def SetFieldValuesInScatteredPoints(self,valuesDict):
+        #IH241113
         # Interpolate scattered data to regular grid
-        zRegularGrid_Array = griddata((x, y), z, (xRegularGrid_Array, yRegularGrid_Array), method='cubic')
+        self.valueScattered_Array = np.array([valuesDict[p] for p in valuesDict])
+        self.valueRegularGrid_Array = griddata((self.xScattered_Array, self.yScattered_Array), self.valueScattered_Array, 
+                                      (self.xRegularGrid_Array, self.yRegularGrid_Array), method='cubic')
 
-    def SetFieldValuesInScatteredPoints(self,scatteredPointsDict):
-        #IH241111 TODO implement
-        pass
-
+    def updateValues(self,valuesDict):
+        self.SetFieldValuesInScatteredPoints(valuesDict)
+        #IH241113 TODO update plot

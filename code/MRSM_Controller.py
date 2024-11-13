@@ -338,11 +338,14 @@ class MRSM_Magnetometer():
                 #   position OF THE REFERENCE POINT is primarily given in polar coordinates (Radius,Angle)
                 #   origin is in the center of the scanner bore
                 #   'Orientation' gives angle of the sensor in degrees, 0 is pointing up, clockwise
+                #           looking at the sensor holder from the side of sensors
+                #           (pin 1 is always nearer to the observer)
 
                 #   'Radius'    in millimeters
                 #   'Angle'     in degrees, 0 is pointing up, clockwise
                 #   'Angle'     in degrees, 0 is pointing up, clockwise
-                #   'X','Y'     are carthesian coordinates OF THE SENSOR ACTIVE POINT, will be computed, in millimeters
+                #   'X','Y'     are carthesian coordinates OF THE SENSOR ACTIVE POINT, will be computed, in millimeters,
+        
                 
                 '1':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
                          'Angle': 0*60.0, 'Orientation': 0*60.0,
@@ -362,7 +365,6 @@ class MRSM_Magnetometer():
                 '6':    {'Radius': MRSM_Magnetometer.Geometry_Radius1_mm, 
                          'Angle': 5*60.0, 'Orientation': 5*60.0,
                          'X':None, 'Y':None },
-
                 '7':    {'Radius': MRSM_Magnetometer.Geometry_Radius2_mm, 
                          'Angle': 0*60.0+30.0, 'Orientation': 0*60.0-60.0,
                          'X':None, 'Y':None },
@@ -434,8 +436,8 @@ class MRSM_Magnetometer():
         
         # debug_message(self.availableSensors)
 
-        # calculate X,Y coordinates of THE SENSOR ACTIVE POINT 
-        #  X points to the right, Y points up, origin is in the center
+        # calculate X,Y coordinates of THE SENSOR ACTIVE POINT in the Scanner coordinate system,
+        #  X (Horizontal) points to the right, Y (Vertical) points up, origin is in the center
         for sensorPos in self.MgMGeometry:
             self.MgMGeometry[sensorPos]['X'] = (
                 self.MgMGeometry[sensorPos]['Radius']*sin(radians(self.MgMGeometry[sensorPos]['Angle']))+
@@ -444,7 +446,7 @@ class MRSM_Magnetometer():
                 self.MgMGeometry[sensorPos]['Radius']*cos(radians(self.MgMGeometry[sensorPos]['Angle']))+
                 MRSM_Magnetometer.ChipOffset_mm*cos(radians(self.MgMGeometry[sensorPos]['Orientation'])))
         
-            debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
+            # debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
     
 
         #IH241111 for debugging only
@@ -483,9 +485,20 @@ class MRSM_Magnetometer():
 
 
     class MgMAxis(Enum):
+         """
+         in the Sensor coordinate space
+         """
          X  =   1
          Y  =   2
          Z  =   3
+    
+    class MgMOrientation(Enum):
+         """
+         in the Scanner coordinate space
+         """
+         HORIZONTAL = 1
+         VERTICAL   = 2
+         AXIAL      = 3
     
     def getReading(self,sensorPos,axis: MgMAxis) -> int:
         if IsMagneticSensorEmulated:
@@ -516,6 +529,34 @@ class MRSM_Magnetometer():
             retDict[sensorPos] = self.getNormalizedReading(sensorPos,axis)
         return retDict
     
+    def getNormalizedReadingForAllSensorsInScannerCoordinates(self,orientation:MgMOrientation) -> dict:
+        retDict = {}
+        for sensorPos in self.MgMGeometry:
+            readingX = self.getNormalizedReading(sensorPos,MRSM_Magnetometer.MgMAxis.X)
+            readingY = self.getNormalizedReading(sensorPos,MRSM_Magnetometer.MgMAxis.Y)
+            readingZ = self.getNormalizedReading(sensorPos,MRSM_Magnetometer.MgMAxis.Z)
+
+            # sensor mount geometry:
+            #   if pin 1 is pointing in the orientation of patient head (cranial direction):
+            #       X is in the AXIAL direction, showing to patient head (cranial direction)
+            #       Y in in the tangential direction
+            #       Z is in the radial direction, pointing out of the center
+            #   XYZ is  LEFTHANDED system (see A31301 datasheet)
+
+            #IH241113 CHECK these formulae:
+            if orientation==MRSM_Magnetometer.MgMOrientation.AXIAL:
+                retDict[sensorPos] = readingX
+            if orientation==MRSM_Magnetometer.MgMOrientation.VERTICAL:
+                retDict[sensorPos] = (
+                        readingZ * cos(radians(self.MgMGeometry[sensorPos]['Orientation']))
+                      + readingY * sin(radians(self.MgMGeometry[sensorPos]['Orientation'])))
+            if orientation==MRSM_Magnetometer.MgMOrientation.HORIZONTAL:
+                retDict[sensorPos] = (
+                        readingY * cos(radians(self.MgMGeometry[sensorPos]['Orientation'])) 
+                      - readingZ * sin(radians(self.MgMGeometry[sensorPos]['Orientation'])))
+            
+        return retDict
+
     class A31301_SimpleEmulator():
         """
         Simple generator of time-dependent signal reading
