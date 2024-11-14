@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#       Last update: IH241113
+#       Last update: IH241114
 #
 #
 """
@@ -1186,7 +1186,7 @@ class MRSM_Presentation():
         """
         IDLE_INACTIVITY_DURATION_SEC = int(1e6)  # IH241106 disable idle timer  (should be sys.maxint) 
                                                  # IH241108 int is here because 1e4 would default to float
-        STATUS_UPDATE_PERIOD_MSEC = 250
+        STATUS_UPDATE_PERIOD_MSEC = 200
 
         def __init__(self,parent) -> None:
 
@@ -1207,23 +1207,40 @@ class MRSM_Presentation():
 
             #IH241108 added
             self.fieldPlotCanvas_Horizontal = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=200,dpi=100,title='HORIZONTAL',
+                                                   figureHeight=200,figureWidth=220,dpi=100,title='HORIZONTAL',
                                                    hasToIncludeColorbar=False)
             self.fieldPlotCanvas_Vertical   = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=200,dpi=100,title='VERTICAL',
+                                                   figureHeight=200,figureWidth=220,dpi=100,title='VERTICAL',
                                                    hasToIncludeColorbar=False)
             self.fieldPlotCanvas_Axial      = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=200,dpi=100,title='AXIAL',
+                                                   figureHeight=200,figureWidth=220,dpi=100,title='AXIAL',
+                                                   hasToIncludeColorbar=False)
+            #IH241114 HACK we add another canvas just to show the colorbar
+            self.fieldPlotCanvas_Colorbar      = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                   figureHeight=200,figureWidth=10,dpi=100,
                                                    hasToIncludeColorbar=True)
-            
+
             #IH241113 TODO adapt grid coordinates for RPI display
-            self.grid.addWidget(self.fieldPlotCanvas_Horizontal,    0,  3,      5, 8) 
-            self.grid.addWidget(self.fieldPlotCanvas_Vertical,      0,  3+7,    5, 8)
-            self.grid.addWidget(self.fieldPlotCanvas_Axial,         0,  3+7+7,  5, 8)
+            self.grid.addWidget(self.fieldPlotCanvas_Horizontal,    0,  3,      5, 7) 
+            self.grid.addWidget(self.fieldPlotCanvas_Vertical,      0,  3+7,    5, 7)
+            self.grid.addWidget(self.fieldPlotCanvas_Axial,         0,  3+7+7,  5, 7)
+
+            self.grid.addWidget(self.fieldPlotCanvas_Colorbar,      0,  3+7+7+7,  5, 2)
             
             self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Horizontal]
             self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Vertical]
             self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Axial]
+            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Colorbar]
+
+
+            self.plotLabel1 = QLabel("Components of the B<sub>0</sub> in the transversal plane (in relative units, cranial view)",
+                                     self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+            # self.grid.addWidget(self.plotLabel1,5,8,1,10)
+            #IH241114 we are ignoring here the Grid layouter, to save space
+            self.plotLabel1.move(250,3) #IH241114 standard window width is 1480
+            self.plotLabel1.resize(800,17)
+            self.serviceMagnetometerWidgets += [self.plotLabel1]
+ 
 
             #IH241108 added
             self.status_update_timer = QTimer()
@@ -1255,6 +1272,10 @@ class MRSM_Presentation():
                 .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.VERTICAL))
             self.fieldPlotCanvas_Axial.UpdatePlot(self.parent.hardwareController.magnetometer
                 .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.AXIAL))
+            
+            self.fieldPlotCanvas_Colorbar.UpdatePlot(self.parent.hardwareController.magnetometer
+                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.AXIAL))
+            
             # debug_message(f"Status Update:") 
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
     
@@ -1318,9 +1339,9 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # 
-        # self.showIntro.activate()
+        self.showIntro.activate()
         # IH241113 for debugging only
-        self.showMagnetometer.activate()
+        # self.showMagnetometer.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()

@@ -325,8 +325,8 @@ MRSM_Texts = [
                         visia kolmo nadol, pretože na ne pôsobí zemská príťažlivosť). Z takéhoto stavu ich možno vychýliť
                         krátkym pôsobením iného magnetického poľa (ako keď do stojacej hojdačky šťuchneme). Jadrá atómov sa
                         začnú pohybovať a snažia sa vrátiť do pôvodného stavu (hojdačka sa rozhojdá a postupne sa vracia do pôvodnej polohy).
-                        V akom rytme (<i>frekvencii</i>) sa hojdačka kýve, záleží okrem iného na tom, či na nej sedí veľké alebo malé dieťa. Podobne je to
-                        aj u atómov. Keď si budeme všímať hojdanie, môžeme usúdiť, aké je dieťa veľké (správnejšie: <i>ťažké</i>), a to bez toho,
+                        V akom rytme (<i>frekvencii</i>) sa hojdačka kýve, záleží okrem iného na tom, či na nej dieťa sedí alebo stojí. Podobne je to
+                        aj u atómov. Keď si budeme všímať hojdanie, môžeme usúdiť, v akej polohe dieťa je (správnejšie: <i>v akej polohe má ťažisko</i>), a to bez toho,
                         aby sme dieťa priamo videli. Ešte lepšie to uvidíme, keď sa rovnako veľké deti na hojdačkách pochytajú za ruky, pretože vtedy
                         sa po chvíli budú všetky hojdať rovnako dopredu-dozadu. A tak isto sa správajú aj atómy: nechytajú sa za ruky, 
                         ale sú vzájomne prepojené, pretože sú blízko seba. A my môžeme usúdiť, aké majú vlastnosti (napríklad či sú to atómy 

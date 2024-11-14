@@ -30,6 +30,8 @@ import matplotlib.pyplot as plt
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+from matplotlib.patches import Circle,Polygon
+from matplotlib.collections import PatchCollection
 
 from MRSM_Utilities import debug_message, error_message
 
@@ -46,8 +48,9 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
         self.title = title
         self.hasToIncludeColorbar = hasToIncludeColorbar
 
-        self.figure = Figure(figsize=(figureWidth, figureHeight), dpi=dpi)
+        self.figure = Figure(figsize=(figureWidth, figureHeight), dpi=dpi,facecolor='blue')
         self.axes = self.figure.add_subplot(111)        
+        self.axes.set_position([-0.1,-0.1,1.2,1.2])
         super().__init__(self.figure)    
 
         
@@ -64,7 +67,7 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
         self.yRegularGrid_Array = np.linspace(self.yScattered_Array.min(),self.yScattered_Array.max(),FieldPlotCanvas.gridSizeY) 
         self.xRegularGrid_Array,self.yRegularGrid_Array = np.meshgrid(self.xRegularGrid_Array,self.yRegularGrid_Array)
         
-        self.UpdatePlot({k: 0 for k in self.scatteredPointDict.keys()}) #use zero initaial values
+        self.UpdatePlot({k: 0 for k in self.scatteredPointDict.keys()}) #use zero initial values
 
     def UpdatePlot(self,valuesDict):
 
@@ -74,11 +77,10 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
 
         # self.levels = [-0.5,-0.1,0.0,0.1,0.5]
         self.levels = np.linspace(-1.0,1.0,21)
-        # self.levels = [-0.5,-0.02,0.0,0.02,0.5]
         
+        # purge old plots
         self.axes.cla()
-        # self.axes = self.figure.add_subplot(111)
-
+       
         # show color field map
         self.contourfPlot = self.axes.contourf(
                         self.xRegularGrid_Array,
@@ -86,37 +88,54 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
                         self.valueRegularGrid_Array,
                         levels=self.levels,
                         extend='both',
-                        cmap='viridis'
+                        cmap='PiYG'
+                        #IH241114 for a choice of cmap's, see
+                        # https://matplotlib.org/stable/users/explain/colors/colormaps.html
         )
 
+        if self.hasToIncludeColorbar:    
+            if not hasattr(self,'colorbar'):
+                self.colorbar = plt.colorbar(self.contourfPlot,location='left')
+                self.colorbar.ax.tick_params(labelsize=1000) #IH241114 this does not work
+                #IH241114 WARNNG The colorbar color scale is not updated, ie. it always persists as having been setup initially
+
         # show isolines
-        self.contourPlot = self.axes.contour(
+        if not self.hasToIncludeColorbar:
+          self.contourPlot = self.axes.contour(
                         self.xRegularGrid_Array,
                         self.yRegularGrid_Array,
                         self.valueRegularGrid_Array,
                         levels=self.levels,
                         colors='k',
                         linewidths=0.5
-        )
-        plt.clabel(self.contourPlot, inline=1, fontsize=8)
+          )
+          plt.clabel(self.contourPlot, inline=1, fontsize=8)
 
         # show measuring points
-        self.scatterPlot = self.axes.scatter(
+        if not self.hasToIncludeColorbar:
+          self.scatterPlot = self.axes.scatter(
                         self.xScattered_Array,
                         self.yScattered_Array,
                         c='red',
                         s=10
-        )
+          )
 
-        self.axes.set_axis_off()
-        self.axes.set_title(self.title)
+        # show additional graphics
+        patches = []
+        patches.append(Circle((0,0),30))
+        patchCollection = PatchCollection(patches,alpha=0.5)
+        self.axes.add_collection(patchCollection)
+
+        # cosmetics
         self.axes.axis('equal')
-        if self.hasToIncludeColorbar:
-            #IH241114 PROBLEM HERE This does not work
-            
-            if hasattr(self,'colorbar'):
-                self.colorbar.ax.remove()
-            # self.colorbar = plt.colorbar(self.contourfPlot)
+        self.axes.set_axis_off()
+        
+        #IH24114 'text' used rather than 'title' to save space
+        self.axes.text(0,24.5,self.title,color='white',fontsize='x-small',horizontalalignment='center',verticalalignment='bottom')
+        # self.axes.set_title(self.title,color='white')
+        # self.axes.title.set_fontsize('x-small')
+        
+        
 
         self.draw()
        
