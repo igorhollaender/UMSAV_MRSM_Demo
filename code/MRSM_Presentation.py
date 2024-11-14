@@ -75,6 +75,7 @@ from MRSM_Globals import (
     IsWaveShareDisplayEmulated,
     IsRaspberryPi5Emulated,
     IsQtMultimediaAvailable,
+    IsMagneticSensorEmulated,
     HasToShowExitButton,
     HasToShowGoIdleButton,
     HasToIncludeSegmentationPanel,
@@ -106,6 +107,7 @@ from PyQt6.QtCore import (
 
 from PyQt6.QtWidgets import (
     QApplication,
+    QDial,
     QGraphicsEllipseItem,
     QGraphicsItem,
     QGraphicsRectItem,
@@ -1216,7 +1218,7 @@ class MRSM_Presentation():
                                                    figureHeight=200,figureWidth=220,dpi=100,title='AXIAL',
                                                    hasToIncludeColorbar=False)
             #IH241114 HACK we add another canvas just to show the colorbar
-            self.fieldPlotCanvas_Colorbar      = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+            self.fieldPlotCanvas_Colorbar    = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
                                                    figureHeight=200,figureWidth=10,dpi=100,
                                                    hasToIncludeColorbar=True)
 
@@ -1235,19 +1237,44 @@ class MRSM_Presentation():
 
             self.plotLabel1 = QLabel("Components of the B<sub>0</sub> in the transversal plane (in relative units, cranial view)",
                                      self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-            # self.grid.addWidget(self.plotLabel1,5,8,1,10)
+            # self.grid.addWidget(self.plotLabel,1,5,8,1,10)
             #IH241114 we are ignoring here the Grid layouter, to save space
             self.plotLabel1.move(250,3) #IH241114 standard window width is 1480
             self.plotLabel1.resize(800,17)
             self.serviceMagnetometerWidgets += [self.plotLabel1]
+ 
+            if IsMagneticSensorEmulated:
+                self.Label2 = QLabel("SIMULATED VALUES!",
+                                     self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+                self.grid.addWidget(self.Label2,4,27,1,5)
+                self.serviceMagnetometerWidgets += [self.Label2]
+ 
+            # IH241114 added
+            self.holderRotationAngleDial = QDial()
+            self.holderRotationAngleDial.setRange(-30,30)  # in degrees
+            self.holderRotationAngleDial.setSingleStep(10) 
+            self.holderRotationAngleDial.valueChanged.connect(self.holderRotationAngleDial_valueChanged)
+            
+            self.grid.addWidget(self.holderRotationAngleDial,0,29,3,3)
+            self.serviceMagnetometerWidgets += [self.holderRotationAngleDial]
+
+            # self.holderAxialPositionDial = QDial()
+            # self.holderAxialPositionDial.setRange(0,150)    # in millimeters
+            # self.holderAxialPositionDial.setSingleStep(2) 
+            # self.grid.addWidget(self.holderAxialPositionDial,2,29,3,3)
+            # self.serviceMagnetometerWidgets += [self.holderAxialPositionDial]
  
 
             #IH241108 added
             self.status_update_timer = QTimer()
             self.status_update_timer.timeout.connect(self.on_status_update_timeout)
             
-
             self.deactivate()
+
+
+        def holderRotationAngleDial_valueChanged(self,value):
+            self.setHolderAxialRotationAngle(value)
+
 
         def activate(self):            
             for w in self.serviceMagnetometerWidgets:                                
@@ -1278,7 +1305,17 @@ class MRSM_Presentation():
             
             # debug_message(f"Status Update:") 
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
-    
+        
+
+        def setHolderAxialRotationAngle(self,rotationAngleDeg):
+            self.parent.hardwareController.magnetometer.setHolderAxialRotationAngle(rotationAngleDeg)
+            self.fieldPlotCanvas_Horizontal.updateScatteredPointPositions()
+            self.fieldPlotCanvas_Vertical.updateScatteredPointPositions()
+            self.fieldPlotCanvas_Axial.updateScatteredPointPositions()
+            self.fieldPlotCanvas_Colorbar.updateScatteredPointPositions()
+          
+
+
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:
             self.MRSM_Window.show()

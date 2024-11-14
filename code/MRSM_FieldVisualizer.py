@@ -53,8 +53,11 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
         self.axes.set_position([-0.1,-0.1,1.2,1.2])
         super().__init__(self.figure)    
 
-        
-        #IH241111 I was not sure if the order "for p in self.scatteredPointDict]" is stable. But this is in doc:
+        self.updateScatteredPointPositions()
+     
+    def updateScatteredPointPositions(self):
+       
+        #IH241111 I was not sure if the order "for p in self.scatteredPointDict" is stable. But this is in doc:
         # Python 3.7 and later: Dictionaries maintain the insertion order of keys. 
         # This means that when you iterate over a dictionary, 
         # the keys will be returned in the order they were added.
@@ -68,6 +71,7 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
         self.xRegularGrid_Array,self.yRegularGrid_Array = np.meshgrid(self.xRegularGrid_Array,self.yRegularGrid_Array)
         
         self.UpdatePlot({k: 0 for k in self.scatteredPointDict.keys()}) #use zero initial values
+
 
     def UpdatePlot(self,valuesDict):
 
@@ -97,7 +101,11 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
             if not hasattr(self,'colorbar'):
                 self.colorbar = plt.colorbar(self.contourfPlot,location='left')
                 self.colorbar.ax.tick_params(labelsize=1000) #IH241114 this does not work
-                #IH241114 WARNNG The colorbar color scale is not updated, ie. it always persists as having been setup initially
+                # IH241114 WARNING The colorbar color scale is not updated, ie. it always persists as having been setup initially
+
+                # IH241114 PROBLEM this issues the following warning:
+                # UserWarning: Adding colorbar to a different Figure <Figure size 1000x20000 with 2 Axes>
+                # than <Figure size 640x480 with 1 Axes> which fig.colorbar is called on.
 
         # show isolines
         if not self.hasToIncludeColorbar:
@@ -119,6 +127,11 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
                         c='red',
                         s=10
           )
+          pntIndex=0 
+          for pntName in valuesDict:
+            #IH 241114 this relies on the fixed order of keys in a dictionary
+            self.axes.text(self.xScattered_Array[pntIndex]+0.5,self.yScattered_Array[pntIndex]-0.5,pntName,fontsize=8,color='red')
+            pntIndex +=1
 
         # show additional graphics
         patches = []

@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241111
+#      Last update: IH241114
 #
 #
 """
@@ -327,7 +327,9 @@ class MRSM_Magnetometer():
     A31301_maxReadingRange =   pow(2,15-1)-1  # the A31301 delivers signed 15bit values
 
     def __init__(self) -> None:
-          
+        
+        self.holderRotationAngleDeg = 0.0  #rotation angle is degrees, 0 is pointing up, clockwise in the cranial view
+        
         self.MgMGeometry = {
              
                 #   for sensor geometry, see 
@@ -436,17 +438,19 @@ class MRSM_Magnetometer():
         
         # debug_message(self.availableSensors)
 
-        # calculate X,Y coordinates of THE SENSOR ACTIVE POINT in the Scanner coordinate system,
-        #  X (Horizontal) points to the right, Y (Vertical) points up, origin is in the center
-        for sensorPos in self.MgMGeometry:
-            self.MgMGeometry[sensorPos]['X'] = (
-                self.MgMGeometry[sensorPos]['Radius']*sin(radians(self.MgMGeometry[sensorPos]['Angle']))+
-                MRSM_Magnetometer.ChipOffset_mm*sin(radians(self.MgMGeometry[sensorPos]['Orientation'])))
-            self.MgMGeometry[sensorPos]['Y'] = (
-                self.MgMGeometry[sensorPos]['Radius']*cos(radians(self.MgMGeometry[sensorPos]['Angle']))+
-                MRSM_Magnetometer.ChipOffset_mm*cos(radians(self.MgMGeometry[sensorPos]['Orientation'])))
+        self.calculateSensorXY()
+
+        # # calculate X,Y coordinates of THE SENSOR ACTIVE POINT in the Scanner coordinate system,
+        # #  X (Horizontal) points to the right, Y (Vertical) points up, origin is in the center
+        # for sensorPos in self.MgMGeometry:
+        #     self.MgMGeometry[sensorPos]['X'] = (
+        #         self.MgMGeometry[sensorPos]['Radius']*sin(radians(self.MgMGeometry[sensorPos]['Angle']))+
+        #         MRSM_Magnetometer.ChipOffset_mm*sin(radians(self.MgMGeometry[sensorPos]['Orientation'])))
+        #     self.MgMGeometry[sensorPos]['Y'] = (
+        #         self.MgMGeometry[sensorPos]['Radius']*cos(radians(self.MgMGeometry[sensorPos]['Angle']))+
+        #         MRSM_Magnetometer.ChipOffset_mm*cos(radians(self.MgMGeometry[sensorPos]['Orientation'])))
         
-            # debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
+        #     # debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
     
 
         #IH241111 for debugging only
@@ -481,12 +485,26 @@ class MRSM_Magnetometer():
                             f'Z: {value_Z}')
                 sleep(1)
                 doAgain = False
-        
 
+    def calculateSensorXY(self):
+        """
+        calculate X,Y coordinates of THE SENSOR ACTIVE POINT in the Scanner coordinate system,
+        X (Horizontal) points to the right, Y (Vertical) points up, origin is in the center
+        """
+        for sensorPos in self.MgMGeometry:
+            self.MgMGeometry[sensorPos]['X'] = (
+                self.MgMGeometry[sensorPos]['Radius']*sin(radians(self.MgMGeometry[sensorPos]['Angle']+self.holderRotationAngleDeg))+
+                MRSM_Magnetometer.ChipOffset_mm*sin(radians(self.MgMGeometry[sensorPos]['Orientation']+self.holderRotationAngleDeg)))
+            self.MgMGeometry[sensorPos]['Y'] = (
+                self.MgMGeometry[sensorPos]['Radius']*cos(radians(self.MgMGeometry[sensorPos]['Angle']+self.holderRotationAngleDeg))+
+                MRSM_Magnetometer.ChipOffset_mm*cos(radians(self.MgMGeometry[sensorPos]['Orientation']+self.holderRotationAngleDeg)))
+        
+            # debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
+    
 
     class MgMAxis(Enum):
          """
-         in the Sensor coordinate space
+         in the Sensor coordinate frame
          """
          X  =   1
          Y  =   2
@@ -494,11 +512,18 @@ class MRSM_Magnetometer():
     
     class MgMOrientation(Enum):
          """
-         in the Scanner coordinate space
+         in the Scanner coordinate frame
          """
          HORIZONTAL = 1
          VERTICAL   = 2
          AXIAL      = 3
+
+    def setHolderAxialRotationAngle(self,rotationAngleDeg):
+        """
+        rotation angle is degrees, 0 is showing up, clockwise in the cranial view
+        """
+        self.holderRotationAngleDeg = rotationAngleDeg
+        self.calculateSensorXY()
     
     def getReading(self,sensorPos,axis: MgMAxis) -> int:
         if IsMagneticSensorEmulated:
@@ -566,12 +591,13 @@ class MRSM_Magnetometer():
             pass
          
         def getReading(self,sensorPos,axis) -> int:
-            if axis==MRSM_Magnetometer.MgMAxis.X:                 
-                peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.5)
+            if axis==MRSM_Magnetometer.MgMAxis.X:           
+                peakValue = int(sin(time()/pi/10)*MRSM_Magnetometer.A31301_maxReadingRange)         
             if axis==MRSM_Magnetometer.MgMAxis.Z:                 
-                peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.2)
+                peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.7)
             if axis==MRSM_Magnetometer.MgMAxis.Y:
-                peakValue = int(sin(time()/pi/10)*MRSM_Magnetometer.A31301_maxReadingRange)                 
+                peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.9)
+                             
             spreadCoefficient = {
                     # sensorPos -> value from 0 to 1
                     "1" :  1.00,
