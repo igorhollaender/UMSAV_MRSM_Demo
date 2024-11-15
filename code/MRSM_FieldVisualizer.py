@@ -143,8 +143,8 @@ class FieldPlotCanvas(FigureCanvasQTAgg):
         self.axes.axis('equal')
         self.axes.set_axis_off()
         
-        #IH24114 'text' used rather than 'title' to save space
-        self.axes.text(0,24.5,self.title,color='white',fontsize='x-small',horizontalalignment='center',verticalalignment='bottom')
+        #IH241114 'text' used rather than 'title' to save space
+        self.axes.text(0,-27.5,self.title,color='white',fontsize='x-small',horizontalalignment='center',verticalalignment='bottom')
         # self.axes.set_title(self.title,color='white')
         # self.axes.title.set_fontsize('x-small')
         

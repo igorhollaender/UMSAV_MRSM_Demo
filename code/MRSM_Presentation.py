@@ -1240,7 +1240,7 @@ class MRSM_Presentation():
             # self.grid.addWidget(self.plotLabel,1,5,8,1,10)
             #IH241114 we are ignoring here the Grid layouter, to save space
             self.plotLabel1.move(250,3) #IH241114 standard window width is 1480
-            self.plotLabel1.resize(800,17)
+            self.plotLabel1.resize(1000,17)
             self.serviceMagnetometerWidgets += [self.plotLabel1]
  
             if IsMagneticSensorEmulated:
