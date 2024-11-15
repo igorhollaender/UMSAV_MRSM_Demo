@@ -4,17 +4,17 @@
 
 #-------------------------------------------------------------------------------
 #
-#   The Magnetic Resonance Scanner Mockup Project
+#      The Magnetic Resonance Scanner Mockup Project
 #
 #
 #      M  R  S  M  _  G l o b a l s  .  p  y 
 #
 #
-#      Last update: IH241114
+#      Last update: IH241115
 #-------------------------------------------------------------------------------
 
 
-__version__                 = "MRSM_Demo IH241114a"
+__version__                 = "MRSM_Demo IH241115a"
 
 IsWaveShareDisplayEmulated  = True   # set to False for real application
 IsRaspberryPi5Emulated      = True   # set to False for real application
@@ -28,7 +28,7 @@ HasToShowGoIdleButton       = False  # set to False for real application
 
 HasToIncludeSegmentationPanel  = True   # set to False to run the stable version (Segmentation is experimental feature)
 
-VerboseLevel                = 2     # 0 is complete muted, 1 is standard, 2 is for 
+VerboseLevel                = 2     # 0 is complete muted, 1 is standard, 2 is for debugging
 
 
 #-------------------------------------------------------------------------------

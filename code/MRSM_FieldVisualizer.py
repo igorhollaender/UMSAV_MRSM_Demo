@@ -4,13 +4,13 @@
 
 #-------------------------------------------------------------------------------
 #
-#   The Magnetic Resonance Scanner Mockup Project
+#      The Magnetic Resonance Scanner Mockup Project
 #
 #
 #      M  R  S  M  _  F i e l d  V i s u a l i z e r  .  p  y 
 #
 #
-#      Last update: IH241114
+#      Last update: IH241115
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
