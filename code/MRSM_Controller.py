@@ -537,7 +537,7 @@ class MRSM_Magnetometer():
         """
         currently, this has no effect on calculations, just logging in export file
         """
-        self.axialPositionMm = axialPositionMm 
+        self.holderAxialPositionMm = axialPositionMm 
     
     
     def storeCurrentReadings(self):
@@ -546,12 +546,18 @@ class MRSM_Magnetometer():
         """
         self.exportFilename="MRSM_readings.json"  #IH241118 for debugging only
         self.readingsDict = {
-            "_comment":                 'This is an MRSM export file',
+            "_comment":                 """
+This is an MRSM export file.
+""",
             "MRSM_version":             __version__,
             "datestamp":                asctime(),
             "sensorGeometry":           self.MgMGeometry,
             "holderAxialPositionMM":    self.holderAxialPositionMm,
             "holderRotationAngleDeg":   self.holderRotationAngleDeg,
+            "readings_comment":         """
+The readings are given in the sensor's own coordinate system. 
+The values are relative to a maximum possible readout (sensor max range)",
+""",
             "readings_X":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X),
             "readings_Y":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Y),
             "readings_Z":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Z),

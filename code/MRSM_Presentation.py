@@ -107,8 +107,6 @@ from PyQt6.QtCore import (
 
 from PyQt6.QtWidgets import (
     QApplication,
-    QDial,
-    QGraphicsEllipseItem,
     QGraphicsItem,
     QGraphicsRectItem,
     QGraphicsScene,
@@ -116,6 +114,7 @@ from PyQt6.QtWidgets import (
     QGraphicsView,
     QGridLayout,
     QLabel,
+    QMessageBox,
     QPushButton,
     QScrollArea,
     QSpinBox,
@@ -1319,7 +1318,10 @@ class MRSM_Presentation():
             self.setHolderAxialPosition(value)
 
         def bStore_clicked(self):
-            self.parent.hardwareController.magnetometer.storeCurrentReadings()
+            try:
+                self.parent.hardwareController.magnetometer.storeCurrentReadings()
+            except FileNotFoundError:
+                self.parent.showMessageBoxCritical("Could not store file.")
 
         
         def activate(self):            
@@ -1498,3 +1500,15 @@ class MRSM_Presentation():
             self.MRSM_Window.show()
         else:
             self.MRSM_Window.showFullScreen()
+
+    def showMessageBoxCritical(self,text):
+        button = QMessageBox.critical(
+            self.MRSM_Window,
+            "MRSM Problem",
+            text,
+            buttons=QMessageBox.StandardButton.Close,
+            defaultButton=QMessageBox.StandardButton.Close,
+        )
+        # IH241118  c o n t i n u e   h e r e
+        if button == QMessageBox.StandardButton.Close:
+            return
