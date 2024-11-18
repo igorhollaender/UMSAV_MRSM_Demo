@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#      Last update: IH241114
+#      Last update: IH241118
 #
 #
 """
@@ -135,7 +135,7 @@ from MRSM_Controller import MRSM_Controller,MRSM_Magnetometer
 from MRSM_ImageBase import ImageBase, Organ, ImagingPlane
 from MRSM_Stylesheet import MRSM_Stylesheet
 from MRSM_TextContent import Language, LanguageAbbrev, MRSM_Texts
-from MRSM_FieldVisualizer import FieldPlotCanvas
+# from MRSM_FieldVisualizer import FieldPlotCanvas  # IH241118 will be activated later, depending on command line parameter
 
 
 
@@ -1207,48 +1207,53 @@ class MRSM_Presentation():
 
             self.serviceMagnetometerWidgets += [self.bgLabel]
 
-            #IH241108 added
-            self.fieldPlotCanvas_Horizontal = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=220,dpi=100,title='HORIZONTAL',
-                                                   hasToIncludeColorbar=False)
-            self.fieldPlotCanvas_Vertical   = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=220,dpi=100,title='VERTICAL',
-                                                   hasToIncludeColorbar=False)
-            self.fieldPlotCanvas_Axial      = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=220,dpi=100,title='AXIAL',
-                                                   hasToIncludeColorbar=False)
-            #IH241114 HACK we add another canvas just to show the colorbar
-            self.fieldPlotCanvas_Colorbar    = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
-                                                   figureHeight=200,figureWidth=10,dpi=100,
-                                                   hasToIncludeColorbar=True)
-
-            #IH241113 TODO adapt grid coordinates for RPI display
-            self.grid.addWidget(self.fieldPlotCanvas_Horizontal,    0,  3,      5, 7) 
-            self.grid.addWidget(self.fieldPlotCanvas_Vertical,      0,  3+7,    5, 7)
-            self.grid.addWidget(self.fieldPlotCanvas_Axial,         0,  3+7+7,  5, 7)
-
-            self.grid.addWidget(self.fieldPlotCanvas_Colorbar,      0,  3+7+7+7,  5, 2)
             
-            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Horizontal]
-            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Vertical]
-            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Axial]
-            self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Colorbar]
+            #IH241108 added
+            #IH241108 added optionalization
+            if self.parent.hasToUseMagFieldVisualization:
+                from MRSM_FieldVisualizer import FieldPlotCanvas
+                
+                self.fieldPlotCanvas_Horizontal = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                    figureHeight=200,figureWidth=220,dpi=100,title='HORIZONTAL',
+                                                    hasToIncludeColorbar=False)
+                self.fieldPlotCanvas_Vertical   = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                    figureHeight=200,figureWidth=220,dpi=100,title='VERTICAL',
+                                                    hasToIncludeColorbar=False)
+                self.fieldPlotCanvas_Axial      = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                    figureHeight=200,figureWidth=220,dpi=100,title='AXIAL',
+                                                    hasToIncludeColorbar=False)
+                #IH241114 HACK we add another canvas just to show the colorbar
+                self.fieldPlotCanvas_Colorbar    = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
+                                                    figureHeight=200,figureWidth=10,dpi=100,
+                                                    hasToIncludeColorbar=True)
+
+                #IH241113 TODO adapt grid coordinates for RPI display
+                self.grid.addWidget(self.fieldPlotCanvas_Horizontal,    0,  3,      5, 7) 
+                self.grid.addWidget(self.fieldPlotCanvas_Vertical,      0,  3+7,    5, 7)
+                self.grid.addWidget(self.fieldPlotCanvas_Axial,         0,  3+7+7,  5, 7)
+
+                self.grid.addWidget(self.fieldPlotCanvas_Colorbar,      0,  3+7+7+7,  5, 2)
+                
+                self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Horizontal]
+                self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Vertical]
+                self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Axial]
+                self.serviceMagnetometerWidgets += [self.fieldPlotCanvas_Colorbar]
 
 
-            self.plotLabel1 = QLabel("Components of the B<sub>0</sub> in the transversal plane (in relative units, cranial view)",
-                                     self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-            # self.grid.addWidget(self.plotLabel,1,5,8,1,10)
-            #IH241114 we are ignoring here the Grid layouter, to save space
-            self.plotLabel1.move(250,3) #IH241114 standard window width is 1480
-            self.plotLabel1.resize(1000,17)
-            self.serviceMagnetometerWidgets += [self.plotLabel1]
- 
-            if IsMagneticSensorEmulated:
-                self.Label2 = QLabel("SIMULATED VALUES!",
-                                     self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-                self.grid.addWidget(self.Label2,4,27,1,5)
-                self.serviceMagnetometerWidgets += [self.Label2]
- 
+                self.plotLabel1 = QLabel("Components of the B<sub>0</sub> in the transversal plane (in relative units, cranial view)",
+                                        self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+                # self.grid.addWidget(self.plotLabel,1,5,8,1,10)
+                #IH241114 we are ignoring here the Grid layouter, to save space
+                self.plotLabel1.move(250,3) #IH241114 standard window width is 1480
+                self.plotLabel1.resize(1000,17)
+                self.serviceMagnetometerWidgets += [self.plotLabel1]
+    
+                if IsMagneticSensorEmulated:
+                    self.Label2 = QLabel("SIMULATED VALUES!",
+                                        self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+                    self.grid.addWidget(self.Label2,4,27,1,5)
+                    self.serviceMagnetometerWidgets += [self.Label2]
+    
             # IH241114 added
             self.holderRotationAngleDial = QDial()
             self.holderRotationAngleDial.setRange(-30,30)  # in degrees
@@ -1293,15 +1298,17 @@ class MRSM_Presentation():
             self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
 
         def on_status_update_timeout(self):
-            self.fieldPlotCanvas_Horizontal.UpdatePlot(self.parent.hardwareController.magnetometer
-                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.HORIZONTAL))
-            self.fieldPlotCanvas_Vertical.UpdatePlot(self.parent.hardwareController.magnetometer
-                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.VERTICAL))
-            self.fieldPlotCanvas_Axial.UpdatePlot(self.parent.hardwareController.magnetometer
-                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.AXIAL))
-            
-            self.fieldPlotCanvas_Colorbar.UpdatePlot(self.parent.hardwareController.magnetometer
-                .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.AXIAL))
+            #IH241108 added optionalization
+            if self.parent.hasToUseMagFieldVisualization:
+                self.fieldPlotCanvas_Horizontal.UpdatePlot(self.parent.hardwareController.magnetometer
+                    .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.HORIZONTAL))
+                self.fieldPlotCanvas_Vertical.UpdatePlot(self.parent.hardwareController.magnetometer
+                    .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.VERTICAL))
+                self.fieldPlotCanvas_Axial.UpdatePlot(self.parent.hardwareController.magnetometer
+                    .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.AXIAL))
+                
+                self.fieldPlotCanvas_Colorbar.UpdatePlot(self.parent.hardwareController.magnetometer
+                    .getNormalizedReadingForAllSensorsInScannerCoordinates(MRSM_Magnetometer.MgMOrientation.AXIAL))
             
             # debug_message(f"Status Update:") 
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
@@ -1309,11 +1316,13 @@ class MRSM_Presentation():
 
         def setHolderAxialRotationAngle(self,rotationAngleDeg):
             self.parent.hardwareController.magnetometer.setHolderAxialRotationAngle(rotationAngleDeg)
-            self.fieldPlotCanvas_Horizontal.updateScatteredPointPositions()
-            self.fieldPlotCanvas_Vertical.updateScatteredPointPositions()
-            self.fieldPlotCanvas_Axial.updateScatteredPointPositions()
-            self.fieldPlotCanvas_Colorbar.updateScatteredPointPositions()
-          
+            #IH241108 added optionalization
+            if self.parent.hasToUseMagFieldVisualization:  
+                self.fieldPlotCanvas_Horizontal.updateScatteredPointPositions()
+                self.fieldPlotCanvas_Vertical.updateScatteredPointPositions()
+                self.fieldPlotCanvas_Axial.updateScatteredPointPositions()
+                self.fieldPlotCanvas_Colorbar.updateScatteredPointPositions()
+            
 
 
     def ShowFullScreen(self):
@@ -1331,10 +1340,12 @@ class MRSM_Presentation():
     def __init__(self,
             language : Language=Language.ENGLISH,
             hardwareController : MRSM_Controller =None,
+            hasToUseMagFieldVisualization: bool=False,
             ):
         self.language = language
         self.MRSM_Window = QWidget()
         self.hardwareController = hardwareController
+        self.hasToUseMagFieldVisualization = hasToUseMagFieldVisualization
 
         #   This implementation targets the 
         #   https://www.waveshare.com/11.9inch-HDMI-LCD.htm
@@ -1368,7 +1379,10 @@ class MRSM_Presentation():
         if HasToIncludeSegmentationPanel:
             self.showDescription = self.ShowDescription(self)
         self.showService = self.ShowService(self)
-        self.showMagnetometer = self.ShowMagnetometer(self)
+        
+        if self.hasToUseMagFieldVisualization:
+            	from MRSM_FieldVisualizer import FieldPlotCanvas
+        self.showMagnetometer = self.ShowMagnetometer(self)        
 
         self.actual_idle_break_sec = 0
 

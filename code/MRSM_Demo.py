@@ -156,7 +156,12 @@ class MSRM_Demo_QApplication(QApplication):
             "language",
             "EN"
         )
+        magFieldVisualization_option = QCommandLineOption(
+            "f",
+            "Use complex magnetic field visualization (takes longer to load)",
+        )
         parser.addOption(language_option)
+        parser.addOption(magFieldVisualization_option)
                 
         parser.process(self)
 
@@ -164,6 +169,8 @@ class MSRM_Demo_QApplication(QApplication):
         if self.app_language is None:
             error_message(f'Invalid language: {parser.value(language_option)}. Using EN instead.')
             self.app_language = Language.ENGLISH
+
+        self.hasToUseMagFieldVisualization = parser.isSet(magFieldVisualization_option)
         
 
 def finalizeApp():
@@ -176,7 +183,8 @@ MRSM_application.aboutToQuit.connect(finalizeApp)
 MRSM_controller = MRSM_Controller()
 MRSM_presentation = MRSM_Presentation(
         language=MRSM_application.app_language,
-        hardwareController=MRSM_controller
+        hardwareController=MRSM_controller,
+        hasToUseMagFieldVisualization=MRSM_application.hasToUseMagFieldVisualization
         )
 MRSM_presentation.show()
 MRSM_application.exec()
