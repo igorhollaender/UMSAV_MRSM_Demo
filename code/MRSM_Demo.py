@@ -159,6 +159,7 @@ class MSRM_Demo_QApplication(QApplication):
         magFieldVisualization_option = QCommandLineOption(
             "f",
             "Use complex magnetic field visualization (takes longer to load)",
+            # defaut is not to use this
         )
         parser.addOption(language_option)
         parser.addOption(magFieldVisualization_option)

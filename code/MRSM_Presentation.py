@@ -118,6 +118,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QScrollArea,
+    QSpinBox,
     QWidget,            
 )                  
 
@@ -1212,7 +1213,7 @@ class MRSM_Presentation():
             #IH241108 added optionalization
             if self.parent.hasToUseMagFieldVisualization:
                 from MRSM_FieldVisualizer import FieldPlotCanvas
-                
+
                 self.fieldPlotCanvas_Horizontal = FieldPlotCanvas(self.parent.hardwareController.magnetometer.MgMGeometry,
                                                     figureHeight=200,figureWidth=220,dpi=100,title='HORIZONTAL',
                                                     hasToIncludeColorbar=False)
@@ -1254,21 +1255,55 @@ class MRSM_Presentation():
                     self.grid.addWidget(self.Label2,4,27,1,5)
                     self.serviceMagnetometerWidgets += [self.Label2]
     
-            # IH241114 added
-            self.holderRotationAngleDial = QDial()
-            self.holderRotationAngleDial.setRange(-30,30)  # in degrees
-            self.holderRotationAngleDial.setSingleStep(10) 
-            self.holderRotationAngleDial.valueChanged.connect(self.holderRotationAngleDial_valueChanged)
-            
-            self.grid.addWidget(self.holderRotationAngleDial,0,29,3,3)
-            self.serviceMagnetometerWidgets += [self.holderRotationAngleDial]
 
-            # self.holderAxialPositionDial = QDial()
-            # self.holderAxialPositionDial.setRange(0,150)    # in millimeters
-            # self.holderAxialPositionDial.setSingleStep(2) 
-            # self.grid.addWidget(self.holderAxialPositionDial,2,29,3,3)
-            # self.serviceMagnetometerWidgets += [self.holderAxialPositionDial]
- 
+            # IH241118 added
+            spinBox_width  = 150
+            spinBox_height = 48
+
+            holderRotationAngleSpinBox_x = 1290
+            holderRotationAngleSpinBox_y = 40
+
+            self.holderRotationAngleSpinBox = QSpinBox(self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignCenter)
+            self.holderRotationAngleSpinBox.move(holderRotationAngleSpinBox_x,holderRotationAngleSpinBox_y) 
+            self.holderRotationAngleSpinBox.resize(spinBox_width,spinBox_height)
+            self.holderRotationAngleSpinBox.setRange(-30,30)  # in degrees
+            self.holderRotationAngleSpinBox.setSingleStep(10) 
+            self.holderRotationAngleSpinBox.valueChanged.connect(self.holderRotationAngleSpinBox_valueChanged)
+            self.serviceMagnetometerWidgets += [self.holderRotationAngleSpinBox]
+
+            self.holderRotationAngleLabel = QLabel("Rotation angle [deg]",
+                                        self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignCenter)
+            self.holderRotationAngleLabel.move(holderRotationAngleSpinBox_x,holderRotationAngleSpinBox_y-20) 
+            self.holderRotationAngleLabel.resize(spinBox_width,17)
+            self.serviceMagnetometerWidgets += [self.holderRotationAngleLabel]
+            
+
+            holderAxialPositionSpinBox_x = 1290
+            holderAxialPositionSpinBox_y = 120
+            
+            self.holderAxialPositionSpinBox = QSpinBox(parent=self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignCenter)
+            self.holderAxialPositionSpinBox.move(holderAxialPositionSpinBox_x,holderAxialPositionSpinBox_y) 
+            self.holderAxialPositionSpinBox.resize(spinBox_width,spinBox_height)
+            self.holderAxialPositionSpinBox.setRange(0,150)  # in degrees
+            self.holderAxialPositionSpinBox.setSingleStep(10) 
+            self.holderAxialPositionSpinBox.valueChanged.connect(self.holderAxialPositionSpinBox_valueChanged)
+            self.serviceMagnetometerWidgets += [self.holderAxialPositionSpinBox]
+
+            self.holderAxialPositionLabel = QLabel("Axial position [mm]",
+                                        self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignCenter)
+            self.holderAxialPositionLabel.move(holderAxialPositionSpinBox_x,holderAxialPositionSpinBox_y-20) 
+            self.holderAxialPositionLabel.resize(spinBox_width,17)
+            self.serviceMagnetometerWidgets += [self.holderAxialPositionLabel]
+
+          
+            self.bStore = self.parent.MRSM_PushButton(self.parent.lcls('STORE'),self.parent.MRSM_Window)
+            self.bStore.move(1315,200) 
+            self.bStore.clicked.connect(self.bStore_clicked)
+            # self.grid.addWidget(self.bStore,0,28,8,10)
+            self.serviceMagnetometerWidgets += [self.bStore]
+
+            
+
 
             #IH241108 added
             self.status_update_timer = QTimer()
@@ -1277,10 +1312,16 @@ class MRSM_Presentation():
             self.deactivate()
 
 
-        def holderRotationAngleDial_valueChanged(self,value):
+        def holderRotationAngleSpinBox_valueChanged(self,value):
             self.setHolderAxialRotationAngle(value)
 
+        def holderAxialPositionSpinBox_valueChanged(self,value):
+            self.setHolderAxialPosition(value)
 
+        def bStore_clicked(self):
+            self.parent.hardwareController.magnetometer.storeCurrentReadings()
+
+        
         def activate(self):            
             for w in self.serviceMagnetometerWidgets:                                
                 w.show()      
@@ -1322,8 +1363,11 @@ class MRSM_Presentation():
                 self.fieldPlotCanvas_Vertical.updateScatteredPointPositions()
                 self.fieldPlotCanvas_Axial.updateScatteredPointPositions()
                 self.fieldPlotCanvas_Colorbar.updateScatteredPointPositions()
-            
+         
 
+        def setHolderAxialPosition(self,axialPositionMm):
+            self.parent.hardwareController.magnetometer.setHolderAxialPosition(axialPositionMm)
+           
 
     def ShowFullScreen(self):
         if IsWaveShareDisplayEmulated:

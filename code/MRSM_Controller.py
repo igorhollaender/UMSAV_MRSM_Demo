@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241115
+#      Last update: IH241118
 #
 #
 """
@@ -326,10 +326,13 @@ class MRSM_Magnetometer():
     ChipOffset_mm          =   1.0  # distance from reference plane (containing reference point) to sensor active point
     A31301_maxReadingRange =   pow(2,15-1)-1  # the A31301 delivers signed 15bit values
 
+
+
     def __init__(self) -> None:
         
-        self.holderRotationAngleDeg = 0.0  #rotation angle is degrees, 0 is pointing up, clockwise in the cranial view
-        
+        self.holderRotationAngleDeg = 0.0   # rotation angle is degrees, 0 is pointing up, clockwise in the cranial view
+        self.axialPositionMm = 0.0          # axial position in M, TODO specify 
+
         self.MgMGeometry = {
              
                 #   for sensor geometry, see 
@@ -525,6 +528,20 @@ class MRSM_Magnetometer():
         self.holderRotationAngleDeg = rotationAngleDeg
         self.calculateSensorXY()
     
+    def setHolderAxialPosition(self,axialPositionMm):
+        """
+        currently, this has no effect on calculations, just logging in export file
+        """
+        self.axialPositionMm = axialPositionMm 
+    
+    
+    def storeCurrentReadings(self):
+        """
+        currently, this has no effect on calculations, just logging in export file
+        """
+        # IH241118 TODO implement
+        pass
+
     def getReading(self,sensorPos,axis: MgMAxis) -> int:
         if IsMagneticSensorEmulated:
             return self.signalEmulator.getReading(sensorPos,axis)

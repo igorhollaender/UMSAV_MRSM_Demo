@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="MRSM_icons.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:zoom="0.69664703"
+     inkscape:cx="330.87057"
+     inkscape:cy="417.71513"
+     inkscape:window-width="1936"
+     inkscape:window-height="1328"
+     inkscape:window-x="297"
+     inkscape:window-y="78"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1">
+    <sodipodi:guide
+       position="-88.872123,167.10997"
+       orientation="1,0"
+       id="guide1497" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g2183"
+       transform="translate(7.2509212,-23.547315)"
+       inkscape:export-filename="C:\Users\tatino\Downloads\MRSM_left_arrow_for_QSpinBox.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96">
+      <rect
+         style="opacity:0.5;fill:none;stroke:#f2f2f2;stroke-width:0.146193;stroke-linecap:round;stroke-linejoin:bevel;stop-color:#000000"
+         id="rect846"
+         width="132.14548"
+         height="132.14548"
+         x="33.445087"
+         y="36.483452" />
+      <path
+         sodipodi:type="star"
+         style="opacity:0.5;fill:#008000;stroke:#f2f2f2;stroke-width:0.377953;stroke-linecap:round;stroke-linejoin:bevel;stop-color:#000000"
+         id="path1801"
+         inkscape:flatsided="true"
+         sodipodi:sides="3"
+         sodipodi:cx="82.216171"
+         sodipodi:cy="-286.23407"
+         sodipodi:r1="221.99367"
+         sodipodi:r2="110.99683"
+         sodipodi:arg1="1.0471976"
+         sodipodi:arg2="2.0943951"
+         inkscape:rounded="0"
+         inkscape:randomized="0"
+         d="M 193.213,-93.981909 -139.7775,-286.23408 193.21301,-478.48622 Z"
+         transform="matrix(0.2263917,0,0,0.2263917,93.458452,167.35721)"
+         inkscape:transform-center-x="12.56438"
+         inkscape:transform-center-y="2.4500915e-06" />
+    </g>
+    <g
+       id="g2183-6"
+       transform="rotate(180,103.14329,161.79855)"
+       inkscape:export-filename="C:\Users\tatino\Downloads\MRSM_right_arrow_for_QSpinBox.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96">
+      <rect
+         style="opacity:0.5;fill:none;stroke:#f2f2f2;stroke-width:0.146193;stroke-linecap:round;stroke-linejoin:bevel;stop-color:#000000"
+         id="rect846-3"
+         width="132.14548"
+         height="132.14548"
+         x="33.445087"
+         y="36.483452" />
+      <path
+         sodipodi:type="star"
+         style="opacity:0.5;fill:#008000;stroke:#f2f2f2;stroke-width:0.377953;stroke-linecap:round;stroke-linejoin:bevel;stop-color:#000000"
+         id="path1801-0"
+         inkscape:flatsided="true"
+         sodipodi:sides="3"
+         sodipodi:cx="82.216171"
+         sodipodi:cy="-286.23407"
+         sodipodi:r1="221.99367"
+         sodipodi:r2="110.99683"
+         sodipodi:arg1="1.0471976"
+         sodipodi:arg2="2.0943951"
+         inkscape:rounded="0"
+         inkscape:randomized="0"
+         transform="matrix(0.2263917,0,0,0.2263917,93.458452,167.35721)"
+         inkscape:transform-center-x="12.56438"
+         inkscape:transform-center-y="2.4500915e-06"
+         d="M 193.213,-93.981909 -139.7775,-286.23408 193.21301,-478.48622 Z" />
+    </g>
+  </g>
+</svg>

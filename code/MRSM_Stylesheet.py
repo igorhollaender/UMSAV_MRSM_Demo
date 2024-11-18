@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH240909
+#      Last update: IH241118
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -102,4 +102,32 @@ QLabel#lRollerShadePaneRight
     background-color: darkCyan;
     /* background-color: black; */ 
 }
-    """
+    
+
+QSpinBox {
+  border: 3px solid #225522;
+  border-radius: 3px;
+  font: bold 30px;
+}
+
+/* see https://stackoverflow.com/questions/48711420/qt-creator-horizontal-spin-box */
+QSpinBox::up-button  {
+  subcontrol-origin: margin;
+  subcontrol-position: center right;
+  image: url("resources/images/icons/MRSM_right_arrow_for_QSpinBox.png");
+  background-color: #ABABff;
+  left: -3px;
+  height: 40px;
+  width: 40px;
+}
+
+QSpinBox::down-button  {
+  subcontrol-origin: margin;
+  subcontrol-position: center left;
+  image: url("resources/images/icons/MRSM_left_arrow_for_QSpinBox.png");
+  background-color: #ABABff;
+  right: -3px;
+  height: 40px;
+  width: 40px;
+}
+"""
