@@ -69,12 +69,14 @@ Controller of the Raspberry Pi hardware
 #-------------------------------------------------------------------------------
 
 from enum import Enum
-from time import sleep, time
+from time import sleep, time, asctime
 from math import sin,cos,pi,radians
 from random import random, uniform
 
-from MRSM_Globals import IsRaspberryPi5Emulated, IsMagneticSensorEmulated
+
+from MRSM_Globals import IsRaspberryPi5Emulated, IsMagneticSensorEmulated, __version__
 from MRSM_Utilities import error_message, debug_message
+from MRSM_DataExporter import JSONDataExporter
 from MRSM_Utilities import (
     TimerIterator,
 )
@@ -116,7 +118,7 @@ class BoreLEDGroup(Enum):
         
 class MRSM_Controller():
 
-    def __init__(self) -> None:
+    def __init__(self,exportDirectory='.') -> None:
 
         # audio 
 
@@ -140,8 +142,9 @@ class MRSM_Controller():
 
         # Magnetometer
 
-        self.magnetometer = MRSM_Magnetometer()
-       
+        self.exportDirectory = exportDirectory
+        self.magnetometer = MRSM_Magnetometer(self.exportDirectory)
+
       
     def finalize(self):
          self.audioPlayer.finalize()
@@ -328,10 +331,12 @@ class MRSM_Magnetometer():
 
 
 
-    def __init__(self) -> None:
+    def __init__(self,exportDirectory='.') -> None:
         
-        self.holderRotationAngleDeg = 0.0   # rotation angle is degrees, 0 is pointing up, clockwise in the cranial view
-        self.axialPositionMm = 0.0          # axial position in M, TODO specify 
+        self.holderRotationAngleDeg     = 0.0   # rotation angle is degrees, 0 is pointing up, clockwise in the cranial view
+        self.holderAxialPositionMm      = 0.0   # axial position in M, TODO specify 
+        self.exportDirectory            = exportDirectory
+        self.dataExporter = JSONDataExporter(self.exportDirectory)
 
         self.MgMGeometry = {
              
@@ -537,11 +542,23 @@ class MRSM_Magnetometer():
     
     def storeCurrentReadings(self):
         """
-        currently, this has no effect on calculations, just logging in export file
+        export data to a JSON file with (fixed file name, will be overwitten each time)
         """
-        # IH241118 TODO implement
-        pass
+        self.exportFilename="MRSM_readings.json"  #IH241118 for debugging only
+        self.readingsDict = {
+            "_comment":                 'This is an MRSM export file',
+            "MRSM_version":             __version__,
+            "datestamp":                asctime(),
+            "sensorGeometry":           self.MgMGeometry,
+            "holderAxialPositionMM":    self.holderAxialPositionMm,
+            "holderRotationAngleDeg":   self.holderRotationAngleDeg,
+            "readings_X":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X),
+            "readings_Y":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Y),
+            "readings_Z":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Z),
+        }
 
+        self.dataExporter.export(self.readingsDict, self.exportFilename)
+        
     def getReading(self,sensorPos,axis: MgMAxis) -> int:
         if IsMagneticSensorEmulated:
             return self.signalEmulator.getReading(sensorPos,axis)
@@ -598,7 +615,7 @@ class MRSM_Magnetometer():
                       - readingZ * sin(radians(self.MgMGeometry[sensorPos]['Orientation'])))
             
         return retDict
-
+    
     class A31301_SimpleEmulator():
         """
         Simple generator of time-dependent signal reading

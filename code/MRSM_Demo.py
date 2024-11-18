@@ -161,8 +161,15 @@ class MSRM_Demo_QApplication(QApplication):
             "Use complex magnetic field visualization (takes longer to load)",
             # defaut is not to use this
         )
+        exportDirectory_option = QCommandLineOption(
+            "d",
+            "Directory to be used for exported data files",
+            "exportDirectory",
+            "."
+        )
         parser.addOption(language_option)
         parser.addOption(magFieldVisualization_option)
+        parser.addOption(exportDirectory_option)
                 
         parser.process(self)
 
@@ -172,6 +179,8 @@ class MSRM_Demo_QApplication(QApplication):
             self.app_language = Language.ENGLISH
 
         self.hasToUseMagFieldVisualization = parser.isSet(magFieldVisualization_option)
+        self.exportDirectory = parser.value(exportDirectory_option)
+        pass
         
 
 def finalizeApp():
@@ -181,11 +190,11 @@ def finalizeApp():
 MRSM_application = MSRM_Demo_QApplication(sys.argv)
 MRSM_application.parseCommandLine()
 MRSM_application.aboutToQuit.connect(finalizeApp)
-MRSM_controller = MRSM_Controller()
+MRSM_controller = MRSM_Controller(exportDirectory=MRSM_application.exportDirectory)
 MRSM_presentation = MRSM_Presentation(
         language=MRSM_application.app_language,
         hardwareController=MRSM_controller,
-        hasToUseMagFieldVisualization=MRSM_application.hasToUseMagFieldVisualization
+        hasToUseMagFieldVisualization=MRSM_application.hasToUseMagFieldVisualization,
         )
 MRSM_presentation.show()
 MRSM_application.exec()

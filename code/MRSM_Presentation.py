@@ -1427,7 +1427,7 @@ class MRSM_Presentation():
         if self.hasToUseMagFieldVisualization:
             	from MRSM_FieldVisualizer import FieldPlotCanvas
         self.showMagnetometer = self.ShowMagnetometer(self)        
-
+        
         self.actual_idle_break_sec = 0
 
         self.idle_timer = QTimer()
