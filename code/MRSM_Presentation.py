@@ -1117,7 +1117,7 @@ class MRSM_Presentation():
         """
         IDLE_INACTIVITY_DURATION_SEC = int(1e6)  # IH241106 disable idle timer  (should be sys.maxint) 
                                                  # IH241108 int is here because 1e4 would default to float
-        STATUS_UPDATE_PERIOD_MSEC = 250
+        STATUS_UPDATE_PERIOD_MSEC = 2000
 
         def __init__(self,parent) -> None:
 
@@ -1501,6 +1501,9 @@ class MRSM_Presentation():
         else:
             self.MRSM_Window.showFullScreen()
 
+    # IH241119 TODO reimplement this to allow setting parameters to the window 
+    # for example: Qt Qt::WindowStaysOnTopHint
+
     def showMessageBoxCritical(self,text):
         button = QMessageBox.critical(
             self.MRSM_Window,
@@ -1509,6 +1512,7 @@ class MRSM_Presentation():
             buttons=QMessageBox.StandardButton.Close,
             defaultButton=QMessageBox.StandardButton.Close,
         )
+        
         # IH241118  c o n t i n u e   h e r e
         if button == QMessageBox.StandardButton.Close:
             return

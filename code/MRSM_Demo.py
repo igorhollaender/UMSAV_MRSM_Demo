@@ -62,6 +62,11 @@ Demo application to run on the Raspberry Pi MRSM controller: Main
 #
 #-------------------------------------------------------------------------------
 #
+#   To install packages like numpy, scipy, matplotlib etc. on RPI, use (example)
+#       sudo apt update
+#       sudo apt install -y python3-scipy
+#-------------------------------------------------------------------------------
+#
 #  For autostart apps in the desktop enviroment, use the Main Menu Editor
 #
 #      https://stackoverflow.com/questions/17939480/executing-a-script-after-the-user-has-logged-in-on-raspberry-pi/64957268#64957268
