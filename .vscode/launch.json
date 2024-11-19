@@ -38,7 +38,7 @@
             "args":
                 [""                
                 ,"-l=SK"   
-                ,"-d=C:/TEMPxxx"             
+                ,"-d=C:/TEMP"             
                 ]
         },
         {
