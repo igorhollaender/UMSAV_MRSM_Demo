@@ -1117,7 +1117,7 @@ class MRSM_Presentation():
         """
         IDLE_INACTIVITY_DURATION_SEC = int(1e6)  # IH241106 disable idle timer  (should be sys.maxint) 
                                                  # IH241108 int is here because 1e4 would default to float
-        STATUS_UPDATE_PERIOD_MSEC = 2000
+        STATUS_UPDATE_PERIOD_MSEC = 1000
 
         def __init__(self,parent) -> None:
 
