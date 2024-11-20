@@ -14,7 +14,7 @@
 #-------------------------------------------------------------------------------
 
 
-__version__                 = "MRSM_Demo IH241120b"
+__version__                 = "MRSM_Demo IH241120c"
 
 IsWaveShareDisplayEmulated  = True   # set to False for real application
 IsRaspberryPi5Emulated      = True   # set to False for real application

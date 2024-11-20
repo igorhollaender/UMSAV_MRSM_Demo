@@ -16,6 +16,7 @@
 # for examples, see
 # https://github.com/Axel-Erfurt/Python-QT-VideoPlayer/blob/master/QT6_VideoPlayer.py
 # https://doc.qt.io/qtforpython-6/overviews/stylesheet-examples.html
+# https://doc.qt.io/qt-6/stylesheet-examples.html
 
 # for a guide on colors, see
 # https://doc.qt.io/qtforpython-5/PySide2/QtGui/QColor.html
@@ -135,7 +136,19 @@ QSpinBox::down-button  {
   width: 40px;
 }
 
-QDialog#messageDialog {
+MessageDialog {
+  background-color: #ABABff;
+}
+MessageDialog#messageDialogCannotWriteFile {
   background-color: red;
+}
+MessageDialog#messageDialogWriteOK {
+  background-color: green;
+}
+
+QLabel#MessageDialogLabel {
+  font: bold 13px;
+  /* text alignment is specified in code */  
+  background-color: #ABABff;
 }
 """

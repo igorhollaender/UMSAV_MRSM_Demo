@@ -138,6 +138,7 @@ from MRSM_Controller import MRSM_Controller,MRSM_Magnetometer
 from MRSM_ImageBase import ImageBase, Organ, ImagingPlane
 from MRSM_Stylesheet import MRSM_Stylesheet
 from MRSM_TextContent import Language, LanguageAbbrev, MRSM_Texts
+from MRSM_DataExporter import JSONDataExporter
 # from MRSM_FieldVisualizer import FieldPlotCanvas  # IH241118 will be activated later, depending on command line parameter
 
 
@@ -1324,11 +1325,23 @@ class MRSM_Presentation():
         def bStore_clicked(self):
             try:
                 self.parent.hardwareController.magnetometer.storeCurrentReadings()
-            except FileNotFoundError:
-                # self.parent.showMessageBoxCritical("Could not store file.")
-                mDialog = self.parent.MessageDialog(messageText="LALALA",parent=self.parent.MRSM_Window)
+            except JSONDataExporter.FileExportException as e:                
+                mDialog = self.parent.MessageDialog(
+                    messageText=f'Cannot write:  <p style="font-family: Courier ">{e.filename}</p>',
+                    dialogObjectName="messageDialogCannotWriteFile",
+                    parent=self.parent.MRSM_Window)                
+                if mDialog.exec():  # IH241120 this could be simplified, but is ready for future modification
+                    pass
+            else:
+                mDialog = self.parent.MessageDialog(
+                    messageText=f'Stored: <p style="font-family: Courier ">{self.parent.hardwareController.magnetometer.dataExporter.dirfilename}</p>',
+                    dialogObjectName="messageDialogWriteOK",
+                    parent=self.parent.MRSM_Window)
                 if mDialog.exec():
                     pass
+            finally:                
+                    pass
+
 
         
         def activate(self):            
@@ -1443,9 +1456,9 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # 
-        # self.showIntro.activate()
+        self.showIntro.activate()
         # IH241113 for debugging only   DEBUGACTIVATION
-        self.showMagnetometer.activate()
+        # self.showMagnetometer.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
@@ -1508,33 +1521,33 @@ class MRSM_Presentation():
         else:
             self.MRSM_Window.showFullScreen()
 
-    # IH241119 TODO reimplement this to allow setting parameters to the window 
-    # for example: Qt Qt::WindowStaysOnTopHint
-
     class MessageDialog(QDialog):
-        def __init__(self, messageText="", parent: QWidget | None = ...) -> None:
+        def __init__(self, messageText="", dialogObjectName="messageDialog", parent: QWidget | None = ...) -> None:
             super().__init__(parent)
             self.buttonBox = QDialogButtonBox(
                     QDialogButtonBox.StandardButton.Close
                     )
             self.buttonBox.clicked.connect(self.accept) #IH241120 any button will fire the event
+            for b in self.buttonBox.buttons():
+                if b.text()==self.buttonBox.button(QDialogButtonBox.StandardButton.Close).text():                    
+                    b.setFixedWidth(100)  # IH241120 THIS DOES NOT WORK AS EXPECTED
+            # IH241120 BUG The Close button has an ugly rectangular shape, and is too narrow
+
             layout = QVBoxLayout()
             message = QLabel(messageText)
+            message.setObjectName("MessageDialogLabel")
+            message.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            message.setWordWrap(True)            
             layout.addWidget(message)
             layout.addWidget(self.buttonBox)
             self.setLayout(layout)
-            self.setObjectName("messageDialog")
+            self.setObjectName(dialogObjectName)
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
             self.setFixedSize(240,290)
             self.move(1220,20)
 
 
-            
-
-
-
-
-
+    # IH241120 OBSOLETE
     def showMessageBoxCritical(self,text):
         button = QMessageBox.critical(
             self.MRSM_Window,
