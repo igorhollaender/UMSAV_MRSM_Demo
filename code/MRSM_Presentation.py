@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#      Last update: IH241118
+#      Last update: IH241120
 #
 #
 """
@@ -107,6 +107,8 @@ from PyQt6.QtCore import (
 
 from PyQt6.QtWidgets import (
     QApplication,
+    QDialog,
+    QDialogButtonBox,
     QGraphicsItem,
     QGraphicsRectItem,
     QGraphicsScene,
@@ -118,6 +120,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSpinBox,
+    QVBoxLayout,
     QWidget,            
 )                  
 
@@ -1244,8 +1247,8 @@ class MRSM_Presentation():
                                         self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
                 # self.grid.addWidget(self.plotLabel,1,5,8,1,10)
                 #IH241114 we are ignoring here the Grid layouter, to save space
-                self.plotLabel1.move(250,3) #IH241114 standard window width is 1480
-                self.plotLabel1.resize(1000,17)
+                self.plotLabel1.move(200,3) #IH241114 standard window width is 1480
+                self.plotLabel1.resize(1100,17)
                 self.serviceMagnetometerWidgets += [self.plotLabel1]
     
                 if IsMagneticSensorEmulated:
@@ -1297,7 +1300,8 @@ class MRSM_Presentation():
           
             self.bStore = self.parent.MRSM_PushButton(self.parent.lcls('STORE'),self.parent.MRSM_Window)
             self.bStore.move(1315,200) 
-            self.bStore.clicked.connect(self.bStore_clicked)
+            self.bStore.clicked.connect(self.bStore_clicked)            
+            self.bStore.setObjectName("bStore")  # this is for stylesheet reference
             # self.grid.addWidget(self.bStore,0,28,8,10)
             self.serviceMagnetometerWidgets += [self.bStore]
 
@@ -1321,7 +1325,10 @@ class MRSM_Presentation():
             try:
                 self.parent.hardwareController.magnetometer.storeCurrentReadings()
             except FileNotFoundError:
-                self.parent.showMessageBoxCritical("Could not store file.")
+                # self.parent.showMessageBoxCritical("Could not store file.")
+                mDialog = self.parent.MessageDialog(messageText="LALALA",parent=self.parent.MRSM_Window)
+                if mDialog.exec():
+                    pass
 
         
         def activate(self):            
@@ -1436,9 +1443,9 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # 
-        self.showIntro.activate()
-        # IH241113 for debugging only
-        # self.showMagnetometer.activate()
+        # self.showIntro.activate()
+        # IH241113 for debugging only   DEBUGACTIVATION
+        self.showMagnetometer.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
@@ -1503,6 +1510,30 @@ class MRSM_Presentation():
 
     # IH241119 TODO reimplement this to allow setting parameters to the window 
     # for example: Qt Qt::WindowStaysOnTopHint
+
+    class MessageDialog(QDialog):
+        def __init__(self, messageText="", parent: QWidget | None = ...) -> None:
+            super().__init__(parent)
+            self.buttonBox = QDialogButtonBox(
+                    QDialogButtonBox.StandardButton.Close
+                    )
+            self.buttonBox.clicked.connect(self.accept) #IH241120 any button will fire the event
+            layout = QVBoxLayout()
+            message = QLabel(messageText)
+            layout.addWidget(message)
+            layout.addWidget(self.buttonBox)
+            self.setLayout(layout)
+            self.setObjectName("messageDialog")
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+            self.setFixedSize(240,290)
+            self.move(1220,20)
+
+
+            
+
+
+
+
 
     def showMessageBoxCritical(self,text):
         button = QMessageBox.critical(

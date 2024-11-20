@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH241118
+#      Last update: IH241120
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -60,6 +60,10 @@ QPushButton#bTransversal:disabled
     background-color: green;
 }
 
+QPushButton#bStore:pressed
+{ 
+    background-color: lightgreen;
+}
 
 QLabel#lCountdown, 
 QLabel#lVersion  
@@ -129,5 +133,9 @@ QSpinBox::down-button  {
   right: -3px;
   height: 40px;
   width: 40px;
+}
+
+QDialog#messageDialog {
+  background-color: red;
 }
 """
