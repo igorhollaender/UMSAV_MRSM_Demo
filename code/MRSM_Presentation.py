@@ -1248,7 +1248,7 @@ class MRSM_Presentation():
                                         self.parent.MRSM_Window,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
                 # self.grid.addWidget(self.plotLabel,1,5,8,1,10)
                 #IH241114 we are ignoring here the Grid layouter, to save space
-                self.plotLabel1.move(200,3) #IH241114 standard window width is 1480
+                self.plotLabel1.move(150,3) #IH241114 standard window width is 1480
                 self.plotLabel1.resize(1100,17)
                 self.serviceMagnetometerWidgets += [self.plotLabel1]
     
@@ -1532,6 +1532,7 @@ class MRSM_Presentation():
                 if b.text()==self.buttonBox.button(QDialogButtonBox.StandardButton.Close).text():                    
                     b.setFixedWidth(100)  # IH241120 THIS DOES NOT WORK AS EXPECTED
             # IH241120 BUG The Close button has an ugly rectangular shape, and is too narrow
+            # IH241120>   BUT in RPI it looks acceptable
 
             layout = QVBoxLayout()
             message = QLabel(messageText)
@@ -1546,17 +1547,3 @@ class MRSM_Presentation():
             self.setFixedSize(240,290)
             self.move(1220,20)
 
-
-    # IH241120 OBSOLETE
-    def showMessageBoxCritical(self,text):
-        button = QMessageBox.critical(
-            self.MRSM_Window,
-            "MRSM Problem",
-            text,
-            buttons=QMessageBox.StandardButton.Close,
-            defaultButton=QMessageBox.StandardButton.Close,
-        )
-        
-        # IH241118  c o n t i n u e   h e r e
-        if button == QMessageBox.StandardButton.Close:
-            return

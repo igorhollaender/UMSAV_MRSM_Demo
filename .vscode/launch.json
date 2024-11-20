@@ -62,7 +62,7 @@
                 [""                
                 ,"-l=SK"      
                 ,"-f"    
-                ,"-d=/home/um/shared"          
+                ,"-d=/home/um/sharedX"          
                 ]
         },
         {
