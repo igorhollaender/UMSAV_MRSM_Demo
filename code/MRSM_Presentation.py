@@ -114,6 +114,7 @@ from PyQt6.QtWidgets import (
     QGraphicsScene,
     QGraphicsTextItem,
     QGraphicsView,
+    QGroupBox,
     QGridLayout,
     QLabel,
     QMessageBox,
@@ -1140,23 +1141,24 @@ class MRSM_Presentation():
 
             self.serviceWidgets += [self.bgLabel]
 
-            self.lHTMLText1 = QLabel(parent.lcls("#106"))
-            self.lHTMLText1.setWordWrap(True)
-            self.lHTMLText1.setMinimumWidth(1000)
-            self.lHTMLText1.setMaximumWidth(1000)
+            self.saServiceWorkdesk = QScrollArea()
+            self.saServiceWorkdesk.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            self.saServiceWorkdesk.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+            self.grid.addWidget(self.saServiceWorkdesk,0,15,6,18)                                    
+            self.saServiceWorkdesk.verticalScrollBar().sliderMoved.connect(self.reset_idle_timer)
+            
+            self.groupBox_Illumination = QGroupBox("Illumination")
+            self.groupLayout_Illumination = QVBoxLayout(self.groupBox_Illumination)
+            
+            self.groupLayout_Illumination.addWidget(QPushButton("LED1"))
+            self.groupLayout_Illumination.addWidget(QPushButton("LED2"))
+            self.groupLayout_Illumination.addWidget(QPushButton("LED3"))
+            self.groupLayout_Illumination.addWidget(QPushButton("LED4"))
 
-            
-            # self.grid.addWidget(self.lHTMLText1,0,0,4,27)
-            self.saHTMLText1 = QScrollArea()
-            self.saHTMLText1.setWidget(self.lHTMLText1)
-            self.saHTMLText1.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-            self.saHTMLText1.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-            self.grid.addWidget(self.saHTMLText1,0,0,4,28)                                    
-            self.saHTMLText1.verticalScrollBar().sliderMoved.connect(self.reset_idle_timer)
-            self.lHTMLText1.setObjectName("lHTMLText1")  # this is for stylesheet reference 
-            
+            self.saServiceWorkdesk.setWidget(self.groupBox_Illumination)
+
             # self.infoWidgets += [self.lHTMLText1]
-            self.serviceWidgets += [self.saHTMLText1]
+            self.serviceWidgets += [self.saServiceWorkdesk]
 
             #IH241108 added
             self.status_update_timer = QTimer()
@@ -1459,6 +1461,7 @@ class MRSM_Presentation():
         self.showIntro.activate()
         # IH241113 for debugging only   DEBUGACTIVATION
         # self.showMagnetometer.activate()
+        # self.showService.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()
