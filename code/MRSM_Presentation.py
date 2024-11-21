@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#      Last update: IH241120
+#      Last update: IH241121
 #
 #
 """
@@ -121,6 +121,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSpinBox,
+    QHBoxLayout,
     QVBoxLayout,
     QWidget,            
 )                  
@@ -1133,6 +1134,16 @@ class MRSM_Presentation():
             self.bgLabel = QLabel("",self.parent.MRSM_Window)
             self.grid.addWidget(self.bgLabel,0,0,4,32)  #IH240723 do not change this!
             
+            # IH241121 added picture on the left-hand side
+            self.pixmapService = QPixmap("resources/images/diverse/MRSM_fullview_240722.jpg")
+            self.serviceScene  = QGraphicsScene(self.parent.MRSM_Window)                                  
+            self.pixmapServiceScaled = self.pixmapService.scaled(700,220,  #IH240917 700,220 was OK
+                    aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+            self.patientServiceOnScene = self.serviceScene.addPixmap(self.pixmapServiceScaled)                 
+            self.serviceImagePane =  QGraphicsView(self.serviceScene)   
+            self.grid.addWidget(self.serviceImagePane, 0,0,5,15)              
+            self.serviceWidgets += [self.serviceImagePane]
+
             #IH240729 This is necessary to prevent the image from voluntarily resizing
             self.bgLabel.setMinimumHeight(300)            
             self.bgLabel.setMaximumHeight(300)            
@@ -1146,19 +1157,65 @@ class MRSM_Presentation():
             self.saServiceWorkdesk.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.grid.addWidget(self.saServiceWorkdesk,0,15,6,18)                                    
             self.saServiceWorkdesk.verticalScrollBar().sliderMoved.connect(self.reset_idle_timer)
-            
-            self.groupBox_Illumination = QGroupBox("Illumination")
-            self.groupLayout_Illumination = QVBoxLayout(self.groupBox_Illumination)
-            
-            self.groupLayout_Illumination.addWidget(QPushButton("LED1"))
-            self.groupLayout_Illumination.addWidget(QPushButton("LED2"))
-            self.groupLayout_Illumination.addWidget(QPushButton("LED3"))
-            self.groupLayout_Illumination.addWidget(QPushButton("LED4"))
-
-            self.saServiceWorkdesk.setWidget(self.groupBox_Illumination)
-
-            # self.infoWidgets += [self.lHTMLText1]
+            self.saServiceWorkdesk.setContentsMargins(20,10,20,10) # IH241121 PROBLEM this does not work as expected
             self.serviceWidgets += [self.saServiceWorkdesk]
+
+            self.layoutServiceWorkdesk = QVBoxLayout()            
+            self.layoutServiceWorkdesk.setContentsMargins(20,10,20,10)
+            self.saServiceWorkdesk.setLayout(self.layoutServiceWorkdesk)
+            
+
+            self.groupBox_Illumination = QGroupBox("Illumination")
+            self.groupLayout_Illumination = QHBoxLayout(self.groupBox_Illumination)
+            self.groupLayout_Illumination.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_Illumination)
+            
+            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED1"))
+            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED2"))
+            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED3"))
+            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED4"))
+            
+            #---------------------------------------
+
+            self.groupBox_Debug1 = QGroupBox("Debug1")
+            self.groupLayout_Debug1 = QHBoxLayout(self.groupBox_Debug1)
+            self.groupLayout_Debug1.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_Debug1)
+            
+            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED1"))
+            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED2"))
+            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED3"))
+            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED4"))
+            
+            self.groupBox_Debug1.setFixedHeight(30)
+            #---------------------------------------
+
+            self.groupBox_Debug2 = QGroupBox("Debug2")
+            self.groupLayout_Debug2 = QHBoxLayout(self.groupBox_Debug2)
+            self.groupLayout_Debug2.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_Debug2)
+            
+            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED1"))
+            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED2"))
+            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED3"))
+            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED4"))
+            
+            self.groupBox_Debug2.setFixedHeight(30)
+            #---------------------------------------
+
+            self.groupBox_Debug3 = QGroupBox("Debug3")
+            self.groupLayout_Debug3 = QHBoxLayout(self.groupBox_Debug3)
+            self.groupLayout_Debug3.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_Debug3)
+            
+            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED1"))
+            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED2"))
+            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED3"))
+            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED4"))
+            
+            self.groupBox_Debug3.setFixedHeight(30)
+            #---------------------------------------
+
 
             #IH241108 added
             self.status_update_timer = QTimer()
