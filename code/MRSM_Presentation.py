@@ -107,6 +107,7 @@ from PyQt6.QtCore import (
 
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QGraphicsItem,
@@ -1159,62 +1160,52 @@ class MRSM_Presentation():
             self.saServiceWorkdesk.verticalScrollBar().sliderMoved.connect(self.reset_idle_timer)
             self.saServiceWorkdesk.setContentsMargins(20,10,20,10) # IH241121 PROBLEM this does not work as expected
             self.serviceWidgets += [self.saServiceWorkdesk]
-
-            self.layoutServiceWorkdesk = QVBoxLayout()            
-            self.layoutServiceWorkdesk.setContentsMargins(20,10,20,10)
-            self.saServiceWorkdesk.setLayout(self.layoutServiceWorkdesk)
             
-
-            self.groupBox_Illumination = QGroupBox("Illumination")
+            w = QWidget()
+            w.setMinimumHeight(1000) # IH211121 only change if more vertical space is needed
+            w.setMinimumWidth(680)  # IH241121 do not change
+            self.saServiceWorkdesk.setWidget(w)
+            self.layoutServiceWorkdesk = QVBoxLayout(w)            
+            self.layoutServiceWorkdesk.setContentsMargins(20,10,20,10)
+            
+            self.groupBox_Illumination = QGroupBox("Illumination ON/OFF")
+            self.groupBox_Illumination.setFixedHeight(100)
             self.groupLayout_Illumination = QHBoxLayout(self.groupBox_Illumination)
             self.groupLayout_Illumination.setContentsMargins(20,10,20,10)
             self.layoutServiceWorkdesk.addWidget(self.groupBox_Illumination)
             
-            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED1"))
-            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED2"))
-            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED3"))
-            self.groupLayout_Illumination.addWidget(parent.MRSM_PushButton("LED4"))
+            self.cbLED_Group1 = QCheckBox(" LED Group 1")
+            self.cbLED_Group2 = QCheckBox(" LED Group 2")
+            self.cbLED_Group3 = QCheckBox(" LED Group 3")
+
+            self.groupLayout_Illumination.addWidget(self.cbLED_Group1)
+            self.groupLayout_Illumination.addWidget(self.cbLED_Group2)
+            self.groupLayout_Illumination.addWidget(self.cbLED_Group3)
             
+            # IH241121 TODO implement functionality of the checkboxes
             #---------------------------------------
 
-            self.groupBox_Debug1 = QGroupBox("Debug1")
-            self.groupLayout_Debug1 = QHBoxLayout(self.groupBox_Debug1)
-            self.groupLayout_Debug1.setContentsMargins(20,10,20,10)
-            self.layoutServiceWorkdesk.addWidget(self.groupBox_Debug1)
+            self.groupBox_Audio = QGroupBox("Audio")
+            self.groupBox_Audio.setFixedHeight(100)
+            self.groupLayout_Audio = QHBoxLayout(self.groupBox_Audio)
+            self.groupLayout_Audio.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_Audio)
             
-            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED1"))
-            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED2"))
-            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED3"))
-            self.groupLayout_Debug1.addWidget(parent.MRSM_PushButton("LED4"))
+            self.cbAudio_PlayInInfiniteLoop = QCheckBox("Play in Infinite Loop")
+            self.bAudio_PlayTest = parent.MRSM_PushButton("Play test")
             
-            self.groupBox_Debug1.setFixedHeight(30)
+            self.groupLayout_Audio.addWidget(self.bAudio_PlayTest)
+            self.groupLayout_Audio.addWidget(self.cbAudio_PlayInInfiniteLoop)
+            
+            # IH241121 TODO implement functionality of the checkboxes
             #---------------------------------------
-
-            self.groupBox_Debug2 = QGroupBox("Debug2")
-            self.groupLayout_Debug2 = QHBoxLayout(self.groupBox_Debug2)
-            self.groupLayout_Debug2.setContentsMargins(20,10,20,10)
-            self.layoutServiceWorkdesk.addWidget(self.groupBox_Debug2)
             
-            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED1"))
-            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED2"))
-            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED3"))
-            self.groupLayout_Debug2.addWidget(parent.MRSM_PushButton("LED4"))
-            
-            self.groupBox_Debug2.setFixedHeight(30)
             #---------------------------------------
-
-            self.groupBox_Debug3 = QGroupBox("Debug3")
-            self.groupLayout_Debug3 = QHBoxLayout(self.groupBox_Debug3)
-            self.groupLayout_Debug3.setContentsMargins(20,10,20,10)
-            self.layoutServiceWorkdesk.addWidget(self.groupBox_Debug3)
-            
-            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED1"))
-            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED2"))
-            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED3"))
-            self.groupLayout_Debug3.addWidget(parent.MRSM_PushButton("LED4"))
-            
-            self.groupBox_Debug3.setFixedHeight(30)
-            #---------------------------------------
+            self.groupBox_Others = QGroupBox("Others")
+            self.groupBox_Others.setMinimumHeight(100)
+            self.groupLayout_Others = QHBoxLayout(self.groupBox_Others)
+            self.groupLayout_Others.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_Others)
 
 
             #IH241108 added
@@ -1582,7 +1573,7 @@ class MRSM_Presentation():
             self.MRSM_Window.showFullScreen()
 
     class MessageDialog(QDialog):
-        def __init__(self, messageText="", dialogObjectName="messageDialog", parent: QWidget | None = ...) -> None:
+        def __init__(self, parent: QWidget,messageText="", dialogObjectName="messageDialog", ) -> None:
             super().__init__(parent)
             self.buttonBox = QDialogButtonBox(
                     QDialogButtonBox.StandardButton.Close
