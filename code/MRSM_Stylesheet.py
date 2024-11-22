@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH241120
+#      Last update: IH241122
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -61,7 +61,8 @@ QPushButton#bTransversal:disabled
     background-color: green;
 }
 
-QPushButton#bStore:pressed
+QPushButton#bStore:pressed,
+QPushButton#bPlayTest:pressed
 { 
     background-color: lightgreen;
 }

@@ -4,13 +4,13 @@
 
 #-------------------------------------------------------------------------------
 #
-#   The Magnetic Resonance Scanner Mockup Project
+#      The Magnetic Resonance Scanner Mockup Project
 #
 #
 #      M  R  S  M  _  I  m  a  g  e  B  a  s  e  .  p  y 
 #
 #
-#      Last update: IH241007
+#      Last update: IH241122
 #-------------------------------------------------------------------------------
 
 
@@ -36,7 +36,9 @@ class Organ(Enum):
         HAND        =   4
         WHOLESPINE  =   5
 
-        KNEE2       =   6   #IH241007 CNn-segmented knee supplied by Andrej K
+        KNEE2       =   6   # IH241007 CNN-segmented knee supplied by Andrej K
+
+        XMASTREE    =   7   # IH241122 seasonal feature
 
 class ImagingPlane(Enum):
         ARBITRARY   =   0
@@ -155,6 +157,28 @@ class ImageBase():
                 'pixmapScaled':    None   
             },  
         ]
+
+        # IH241122 added seasonal feature
+        self.MRimages.extend([
+            {'organ':  Organ.XMASTREE, 
+             'imagingPlane' : ImagingPlane.CORONAL, 
+                'JPGFileRelativePath': "resources/images/diverse/pngimg.com - christmas_tree_PNG20.png",
+                'pixmapOriginal':   None,  
+                'pixmapScaled':    None   
+            },
+            {'organ':  Organ.XMASTREE, 
+             'imagingPlane' : ImagingPlane.TRANSVERSAL, 
+                'JPGFileRelativePath': "resources/images/diverse/pngimg.com - christmas_tree_PNG54.png",
+                'pixmapOriginal':   None,  
+                'pixmapScaled':    None   
+            },
+            {'organ':  Organ.XMASTREE, 
+             'imagingPlane' : ImagingPlane.SAGITTAL, 
+                'JPGFileRelativePath': "resources/images/diverse/pngimg.com - christmas_tree_PNG76.png",
+                'pixmapOriginal':   None,  
+                'pixmapScaled':    None   
+            },
+        ])
 
         for im in self.MRimages:
               #IH240724 WARNING  We do not check file accessibility here

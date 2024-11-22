@@ -4,13 +4,13 @@
 
 #-------------------------------------------------------------------------------
 #
-#   The Magnetic Resonance Scanner Mockup Project
+#      The Magnetic Resonance Scanner Mockup Project
 #
 #
 #      M  R  S  M  _  D  e  m  o  .  p  y 
 #
 #
-#   for __version__ , see MRSM_Globals
+#      for __version__ , see MRSM_Globals
 #
 #
 """
@@ -172,9 +172,15 @@ class MSRM_Demo_QApplication(QApplication):
             "exportDirectory",
             "."
         )
+        seasonalEdition_option = QCommandLineOption(
+            "x",
+            "Use seasonal (Xmas) features",
+            # defaut is not to use this
+        )
         parser.addOption(language_option)
         parser.addOption(magFieldVisualization_option)
         parser.addOption(exportDirectory_option)
+        parser.addOption(seasonalEdition_option)
                 
         parser.process(self)
 
@@ -185,6 +191,7 @@ class MSRM_Demo_QApplication(QApplication):
 
         self.hasToUseMagFieldVisualization = parser.isSet(magFieldVisualization_option)
         self.exportDirectory = parser.value(exportDirectory_option)
+        self.hasToUseSeasonalFeatures = parser.isSet(seasonalEdition_option)
         pass
         
 
@@ -200,6 +207,7 @@ MRSM_presentation = MRSM_Presentation(
         language=MRSM_application.app_language,
         hardwareController=MRSM_controller,
         hasToUseMagFieldVisualization=MRSM_application.hasToUseMagFieldVisualization,
+        hasToUseSeasonalFeatures=MRSM_application.hasToUseSeasonalFeatures,
         )
 MRSM_presentation.show()
 MRSM_application.exec()

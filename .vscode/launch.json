@@ -37,7 +37,19 @@
             "program": "code/MRSM_Demo.py",
             "args":
                 [""                
-                ,"-l=SK"   
+                ,"-l=SK"  
+                ,"-d=C:/TEMP"             
+                ]
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "Xmas MRSM_Demo SK",
+            "program": "code/MRSM_Demo.py",
+            "args":
+                [""                
+                ,"-l=SK"  
+                ,"-x" 
                 ,"-d=C:/TEMP"             
                 ]
         },

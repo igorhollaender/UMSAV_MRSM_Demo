@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#      Last update: IH241121
+#      Last update: IH241122
 #
 #
 """
@@ -85,6 +85,7 @@ from MRSM_Globals import __version__
 from MRSM_Utilities import error_message, debug_message
 
 from PyQt6.QtGui import (
+    QBrush,
     QColor,
     QFont,
     QPen,
@@ -143,8 +144,6 @@ from MRSM_Stylesheet import MRSM_Stylesheet
 from MRSM_TextContent import Language, LanguageAbbrev, MRSM_Texts
 from MRSM_DataExporter import JSONDataExporter
 # from MRSM_FieldVisualizer import FieldPlotCanvas  # IH241118 will be activated later, depending on command line parameter
-
-
 
 class PoorMansLocalizer():
     """
@@ -253,7 +252,11 @@ class MRSM_Presentation():
             self.lTitle.setObjectName("lTitle")  # this is for stylesheet reference 
             self.introWidgets += [self.lTitle]
 
-            self.lVersion = QLabel(__version__)
+            
+            self.lVersion = QLabel(__version__ 
+                                    # IH241122 added
+                                   + " (Seasonal Edition)" if self.parent.hasToUseSeasonalFeatures else "" )
+
             self.grid.addWidget(self.lVersion,4,2)
             self.lVersion.setObjectName("lVersion")  
             self.introWidgets += [self.lVersion]
@@ -306,6 +309,9 @@ class MRSM_Presentation():
             self.timer.stop()
     
     class ShowMain():
+
+        ROLLING_DURATION_MSEC = 2000
+        SEASONAL_ROLLING_DURATION_MSEC = 11000
 
         class RollShade(QLabel):
             def __init_subclass__(cls) -> None:
@@ -469,7 +475,30 @@ class MRSM_Presentation():
 
                 #IH240917 HACK covering a unpleasant bar under the patient image with a rectangle
                 self.patientScene.addRect(0,223,472,27,brush=Qt.GlobalColor.darkCyan,pen=Qt.GlobalColor.transparent)
-                
+        
+                # IH241122 added
+                if self.parent.hasToUseSeasonalFeatures:
+                    # add Xmas tree icon
+                    xMasTreeCentroid = QPointF(70,60)
+                    radius = 40
+                    self.patientScene.addEllipse(
+                        QRectF(xMasTreeCentroid.x()-radius,xMasTreeCentroid.y()-radius,radius*2,radius*2),
+                        pen=Qt.GlobalColor.green,
+                        brush=Qt.GlobalColor.red
+                    )
+                    xmasTreePolygon = QPolygonF(  # origin is in the tree centroid
+                        # IH241122 TODO
+                        [QPointF(70,60),QPointF(90,90),QPointF(50,90),QPointF(70,60),
+                         QPointF(70,50),QPointF(85,70),QPointF(55,70),QPointF(70,50),
+                         QPointF(70,40),QPointF(85,60),QPointF(55,60),QPointF(70,40),
+                         QPointF(70,30),QPointF(80,40),QPointF(60,40),QPointF(70,30),
+                        ]
+                        )
+                    # TODO transform polygon    
+                    self.patientScene.addPolygon(
+                        xmasTreePolygon,
+                        brush=Qt.GlobalColor.darkBlue
+                    )
              
                 # organ graphics buttons
                 #  
@@ -496,6 +525,14 @@ class MRSM_Presentation():
                 self.organButton[Organ.KNEE2] = self.OrganButton(143,135,40,40,self)
                 self.organButton[Organ.KNEE2].setData(1,Organ.KNEE2)
                 self.patientScene.addItem(self.organButton[Organ.KNEE2])
+
+                # IH241122 added
+                if self.parent.hasToUseSeasonalFeatures:
+                    self.organButton[Organ.XMASTREE] = self.OrganButton(
+                        xMasTreeCentroid.x()-20,xMasTreeCentroid.y()-20,
+                        40,40,self)
+                    self.organButton[Organ.XMASTREE].setData(1,Organ.XMASTREE)
+                    self.patientScene.addItem(self.organButton[Organ.XMASTREE])
 
                 self.imagePaneRightmost = QGraphicsView(self.patientScene)
 
@@ -550,9 +587,7 @@ class MRSM_Presentation():
             self.animation_rollerMid  = QPropertyAnimation(self.lRollerShadePaneMid,b"pos")
             self.animation_rollerRight= QPropertyAnimation(self.lRollerShadePaneRight,b"pos")
 
-            ROLLING_DURATION_MSEC = 2000
-
-            self.animation_rollerLeft.setDuration(ROLLING_DURATION_MSEC)
+            self.animation_rollerLeft.setDuration(self.ROLLING_DURATION_MSEC)
             self.animation_rollerLeft.setStartValue(QPoint(11,-10))
             self.animation_rollerLeft.setEndValue(QPoint(11,320))
 
@@ -562,11 +597,11 @@ class MRSM_Presentation():
             # self.animation_rollerLeft.setStartValue(QPoint(self.imagePaneLeft.geometry().x(),-10))
             # self.animation_rollerLeft.setEndValue(QPoint(self.imagePaneLeft.geometry().x(),self.imagePaneLeft.geometry().height()+30))
             
-            self.animation_rollerMid.setDuration(ROLLING_DURATION_MSEC)
+            self.animation_rollerMid.setDuration(self.ROLLING_DURATION_MSEC)
             self.animation_rollerMid.setStartValue(QPoint(307,-10))
             self.animation_rollerMid.setEndValue(QPoint(307,320))
 
-            self.animation_rollerRight.setDuration(ROLLING_DURATION_MSEC)
+            self.animation_rollerRight.setDuration(self.ROLLING_DURATION_MSEC)
             self.animation_rollerRight.setStartValue(QPoint(603,-10))
             self.animation_rollerRight.setEndValue(QPoint(603,320))
 
@@ -641,7 +676,18 @@ class MRSM_Presentation():
         def presentMRScanning(self,organ :Organ) -> None:
             """
             Scenario following pressing an organ button on the patient graphics
-            """            
+            """       
+
+            # IH241122 HACK
+            if organ==Organ.XMASTREE:
+                self.animation_rollerLeft.setDuration(self.SEASONAL_ROLLING_DURATION_MSEC)
+                self.animation_rollerMid.setDuration(self.SEASONAL_ROLLING_DURATION_MSEC)
+                self.animation_rollerRight.setDuration(self.SEASONAL_ROLLING_DURATION_MSEC)
+            else:
+                self.animation_rollerLeft.setDuration(self.ROLLING_DURATION_MSEC)
+                self.animation_rollerMid.setDuration(self.ROLLING_DURATION_MSEC)
+                self.animation_rollerRight.setDuration(self.ROLLING_DURATION_MSEC)
+
             if self.isSimulationShowRunning:
                 return
             
@@ -1193,6 +1239,8 @@ class MRSM_Presentation():
             
             self.cbAudio_PlayInInfiniteLoop = QCheckBox("Play in Infinite Loop")
             self.bAudio_PlayTest = parent.MRSM_PushButton("Play test")
+            self.bAudio_PlayTest.setObjectName("bPlayTest")
+            
             
             self.groupLayout_Audio.addWidget(self.bAudio_PlayTest)
             self.groupLayout_Audio.addWidget(self.cbAudio_PlayInInfiniteLoop)
@@ -1457,12 +1505,14 @@ class MRSM_Presentation():
             language : Language=Language.ENGLISH,
             hardwareController : MRSM_Controller =None,
             hasToUseMagFieldVisualization: bool=False,
+            hasToUseSeasonalFeatures: bool=False,
             ):
         self.language = language
         self.MRSM_Window = QWidget()
         self.hardwareController = hardwareController
         self.hasToUseMagFieldVisualization = hasToUseMagFieldVisualization
-
+        self.hasToUseSeasonalFeatures = hasToUseSeasonalFeatures
+            
         #   This implementation targets the 
         #   https://www.waveshare.com/11.9inch-HDMI-LCD.htm
         #   display.
@@ -1497,7 +1547,7 @@ class MRSM_Presentation():
         self.showService = self.ShowService(self)
         
         if self.hasToUseMagFieldVisualization:
-            	from MRSM_FieldVisualizer import FieldPlotCanvas
+            from MRSM_FieldVisualizer import FieldPlotCanvas
         self.showMagnetometer = self.ShowMagnetometer(self)        
         
         self.actual_idle_break_sec = 0
@@ -1510,6 +1560,7 @@ class MRSM_Presentation():
         # IH241113 for debugging only   DEBUGACTIVATION
         # self.showMagnetometer.activate()
         # self.showService.activate()
+        # self.showMain.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()

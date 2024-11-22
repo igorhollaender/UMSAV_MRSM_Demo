@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241118
+#      Last update: IH241122
 #
 #
 """
@@ -111,6 +111,8 @@ class SoundSample(Enum):
 
         KNEE2MRISOUND           = 6 #IH241007 added
 
+        XMASTREESOUND           = 7 #IH2411122 added
+
 class BoreLEDGroup(Enum):
         GROUP1                  =   1
         GROUP2                  =   2
@@ -123,6 +125,7 @@ class MRSM_Controller():
         # audio 
 
         audioFile =  "resources/audio/MRIsounds/ytmp3free.cc_listen-to-mri-sounds-with-audio-frequency-analyzer-filmed-inside-the-mri-scan-room-youtubemp3free.org.mp3"
+        
         self.audioPlayer = AudioPlayer(audioFile)
         self.organSound = {
             Organ.BODY:         SoundSample.BODYMRISOUND,
@@ -132,6 +135,7 @@ class MRSM_Controller():
             Organ.WHOLESPINE:   SoundSample.WHOLESPINEMRISOUND,
 
             Organ.KNEE2:        SoundSample.KNEE2MRISOUND,
+            Organ.XMASTREE:     SoundSample.XMASTREESOUND,
 
             Organ.NONE:         SoundSample.NONE,
         }
@@ -174,6 +178,8 @@ class AudioPlayer():
              SoundSample.WHOLESPINEMRISOUND:   (7*60.0 + 20.0) , # 7:20,  IH240812 just for debugging, TODO implement properly
 
              SoundSample.KNEE2MRISOUND:   (5*60.0 +  0.0) ,  #IH241007 added
+             SoundSample.XMASTREESOUND:   (0.0) ,  #IH241007 added
+
              SoundSample.NONE:           0
         }
     
@@ -186,12 +192,19 @@ class AudioPlayer():
         self.mixer.quit()
 
     def play(self, soundSample : SoundSample):
-        #IH240812 TODO implement
+        
+        # IH241122 HACK
+        if soundSample==SoundSample.XMASTREESOUND:   
+            thisAudioFile = "resources/audio/diverse/jingle-bells-orchestra-127418.mp3"
+        else:
+            thisAudioFile = self.audioFile
+        
         if soundSample!=SoundSample.NONE:
+            self.mixer.music.unload()
+            self.mixer.music.load(thisAudioFile)
             self.mixer.music.play(start=self.sampleStartTime[soundSample])
     
     def stop(self):
-        #IH240812 TODO implement
         self.mixer.music.stop()    
 
 class MRSMGPIOPin(LEDBoard):        
