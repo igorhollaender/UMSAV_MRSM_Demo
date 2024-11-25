@@ -1227,6 +1227,10 @@ class MRSM_Presentation():
             self.groupLayout_Illumination.addWidget(self.cbLED_Group1)
             self.groupLayout_Illumination.addWidget(self.cbLED_Group2)
             self.groupLayout_Illumination.addWidget(self.cbLED_Group3)
+
+            self.cbLED_Group1.stateChanged.connect(self.cbLED_Group1_stateChanged)
+            self.cbLED_Group2.stateChanged.connect(self.cbLED_Group2_stateChanged)
+            self.cbLED_Group3.stateChanged.connect(self.cbLED_Group3_stateChanged)
             
             # IH241121 TODO implement functionality of the checkboxes
             #---------------------------------------
@@ -1237,9 +1241,13 @@ class MRSM_Presentation():
             self.groupLayout_Audio.setContentsMargins(20,10,20,10)
             self.layoutServiceWorkdesk.addWidget(self.groupBox_Audio)
             
+            self.playTestInfinite = False
             self.cbAudio_PlayInInfiniteLoop = QCheckBox("Play in Infinite Loop")
+            self.cbAudio_PlayInInfiniteLoop.stateChanged.connect(self.cbAudio_PlayInInfiniteLoop_stateChanged)
+
             self.bAudio_PlayTest = parent.MRSM_PushButton("Play test")
             self.bAudio_PlayTest.setObjectName("bPlayTest")
+            self.bAudio_PlayTest.clicked.connect(self.on_bAudioPlaytest_clicked)
             
             
             self.groupLayout_Audio.addWidget(self.bAudio_PlayTest)
@@ -1282,8 +1290,35 @@ class MRSM_Presentation():
         def on_status_update_timeout(self):
             currentAllValuesX = self.parent.hardwareController.magnetometer.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X)
             debug_message(f"Service Status Update:") 
-            self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)            
-    
+            self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)   
+
+        def on_bAudioPlaytest_clicked(self):
+            self.parent.hardwareController.audioPlayer.playTest(hasToplayIndefinitely=self.playTestInfinite)
+
+        def cbAudio_PlayInInfiniteLoop_stateChanged(self):
+            self.playTestInfinite = self.cbAudio_PlayInInfiniteLoop.isChecked()            
+            if not self.cbAudio_PlayInInfiniteLoop.isChecked():  
+                self.parent.hardwareController.audioPlayer.stop()     
+
+        def cbLED_Group1_stateChanged(self):                         
+            if self.cbLED_Group1.isChecked():
+                self.parent.hardwareController.rpiGPIO.boreLEDGroup1.on()
+            else:    
+                self.parent.hardwareController.rpiGPIO.boreLEDGroup1.off()
+
+        def cbLED_Group2_stateChanged(self):                        
+            if self.cbLED_Group2.isChecked():
+                self.parent.hardwareController.rpiGPIO.boreLEDGroup2.on()
+            else:    
+                self.parent.hardwareController.rpiGPIO.boreLEDGroup2.off()
+
+        def cbLED_Group3_stateChanged(self):                        
+            if self.cbLED_Group3.isChecked():
+                self.parent.hardwareController.rpiGPIO.boreLEDGroup3.on()
+            else:    
+                self.parent.hardwareController.rpiGPIO.boreLEDGroup3.off()
+
+
     class ShowMagnetometer():
         """
         Controlling and presenting magnetometric measurement

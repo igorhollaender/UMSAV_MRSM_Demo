@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241122
+#      Last update: IH241125
 #
 #
 """
@@ -190,6 +190,13 @@ class AudioPlayer():
 
     def finalize(self):
         self.mixer.quit()
+
+
+    def playTest(self,hasToplayIndefinitely=False):
+        testAudioFile = "resources/audio/diverse/stereo-test.mp3"
+        self.mixer.music.unload()
+        self.mixer.music.load(testAudioFile)
+        self.mixer.music.play(loops=-1 if hasToplayIndefinitely else 0)
 
     def play(self, soundSample : SoundSample):
         
