@@ -68,12 +68,13 @@
         {
             "type": "debugpy",
             "request": "launch",
-            "name": "(RPI) MRSM_Demo SK with Field Visualization",
+            "name": "(RPI,Xmas) MRSM_Demo SK with Field Visualization",
             "program": "code/MRSM_Demo.py",
             "args":
                 [""                
                 ,"-l=SK"      
-                ,"-f"    
+                ,"-f" 
+                ,"-x"    
                 ,"-d=/home/um/sharedX"          
                 ]
         },
