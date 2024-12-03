@@ -484,9 +484,9 @@ class MRSM_Magnetometer():
         if not IsMagneticSensorEmulated:            
             doAgain = True  
             while doAgain:
-                debug_message(  f'X: {self.getReading('4',self.MgMAxis.X)},  ' +
-                                f'Y: {self.getReading('4',self.MgMAxis.Y)},  ' +
-                                f'Z: {self.getReading('4',self.MgMAxis.Z)}')
+                debug_message(  f'X: {self.getReading("4",self.MgMAxis.X)},  ' +
+                                f'Y: {self.getReading("4",self.MgMAxis.Y)},  ' +
+                                f'Z: {self.getReading("4",self.MgMAxis.Z)}')
                 sleep(1)
                 doAgain = False
 

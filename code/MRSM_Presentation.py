@@ -1394,7 +1394,7 @@ class MRSM_Presentation():
             # self.parent.hardwareController.magnetometer.getReading(
             #    self.MgmSensorReading1.mbSensorSelector.currentText,    
             #    MRSM_Magnetometer.MgMAxis.X)
-            debug_message(f"Service Status Update:") 
+            # debug_message(f"Service Status Update:") 
             self.MgM_update_all_readings()    
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)   
 
