@@ -88,6 +88,8 @@ from PyQt6.QtGui import (
     QBrush,
     QColor,
     QFont,
+    QPainter,
+    QPalette,
     QPen,
     QPixmap,
     QPolygonF,
@@ -100,6 +102,7 @@ from PyQt6.QtCore import (
     QPoint,
     QPointF,
     QPropertyAnimation,
+    QRect,
     QRectF,
     QSequentialAnimationGroup,
     QTimer,
@@ -1190,6 +1193,9 @@ class MRSM_Presentation():
                 self.lReadingValueZ = QLabel("---")
                 self.lReadingValueZ.setObjectName("lReadingValue")
 
+                self.hbBarAll = MRSM_Presentation.ShowService.HorizontalBarWidget(100,30)
+                # IH241203 shows relative amplitude 
+                
                 layout = QHBoxLayout()
                 layout.addWidget(QLabel('S:',objectName="lFieldName"))
                 layout.addWidget(self.mbSensorSelector)
@@ -1199,12 +1205,53 @@ class MRSM_Presentation():
                 layout.addWidget(self.lReadingValueY)
                 layout.addWidget(QLabel('Z:',objectName="lFieldName"))
                 layout.addWidget(self.lReadingValueZ)
+
+                # IH241203 for debugging only
+                layout.addWidget(QLabel('A:',objectName="lFieldName"))
+                layout.addWidget(self.hbBarAll)
                 self.setLayout(layout)
 
             def updateReading(self,readingX,readingY,readingZ):
                 self.lReadingValueX.setText(str(readingX))
                 self.lReadingValueY.setText(str(readingY))
                 self.lReadingValueZ.setText(str(readingZ))
+                self.hbBarAll.setValue(
+                    (float(readingX)*float(readingX) +
+                     float(readingY)*float(readingY) +
+                     float(readingZ)*float(readingZ))/float(3 * 2**14 * 2**14)  # IH241203 TODO CHECK if correct
+                    )
+
+
+        class HorizontalBarWidget(QWidget):
+            """
+            based on implementation by CoPilot
+            """
+            def __init__(self, width, height, color_fg=Qt.GlobalColor.blue,color_bg=Qt.GlobalColor.gray,parent=None):
+                super(MRSM_Presentation.ShowService.HorizontalBarWidget, self).__init__(parent)
+                self.total_width = width
+                self.total_height = height
+                self.color_fg = color_fg
+                self.color_bg = color_bg
+                self.value = 0.5  # from 0.0 to 1.0
+
+                self.setFixedSize(self.total_width, self.total_height)
+
+            def paintEvent(self, event):
+                painter = QPainter(self)
+                rect_bg = QRect(0, 0, self.total_width, self.total_height)
+                rect_fg = QRect(0, 0, int(self.total_width*self.value), self.total_height)
+                
+                painter.fillRect(rect_bg, self.color_bg)
+                painter.fillRect(rect_fg, self.color_fg)
+                
+                painter.end()
+
+            def setValue(self,v:float) -> None:
+                """
+                v from 0.0 to 1.0
+                """
+                self.value = v;
+                self.repaint()
 
 
         def __init__(self,parent) -> None:
@@ -1287,7 +1334,7 @@ class MRSM_Presentation():
             self.groupLayout_Audio.addWidget(self.cbAudio_PlayInInfiniteLoop)
             #---------------------------------------
 
-            self.groupBox_MgmSensors = QGroupBox("Magnetometer Sensors")
+            self.groupBox_MgmSensors = QGroupBox("Magnetometer Sensors - Raw readings")
             self.groupBox_MgmSensors.setFixedHeight(250)
             self.groupLayout_MgmSensors = QVBoxLayout(self.groupBox_MgmSensors)
             # self.groupLayout_MgmSensors.setContentsMargins(20,10,20,10)
@@ -1297,7 +1344,10 @@ class MRSM_Presentation():
             self.MgmSensorReading1 = self.MagnetometerReading(availableSensorList=asl)
             self.MgmSensorReading2 = self.MagnetometerReading(availableSensorList=asl)
             self.MgmSensorReading3 = self.MagnetometerReading(availableSensorList=asl)
-            
+            self.MgmSensorReading1.mbSensorSelector.setCurrentIndex(0) # we assume the asl has at least one element
+            self.MgmSensorReading2.mbSensorSelector.setCurrentIndex(0)
+            self.MgmSensorReading3.mbSensorSelector.setCurrentIndex(0)
+
             self.groupLayout_MgmSensors.addWidget(self.MgmSensorReading1)
             self.groupLayout_MgmSensors.addWidget(self.MgmSensorReading2)
             self.groupLayout_MgmSensors.addWidget(self.MgmSensorReading3)
@@ -1319,6 +1369,7 @@ class MRSM_Presentation():
             self.status_update_timer = QTimer()
             self.status_update_timer.timeout.connect(self.on_status_update_timeout)
             
+            self.MgM_update_all_readings()
 
             self.deactivate()
 
@@ -1348,23 +1399,23 @@ class MRSM_Presentation():
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)   
 
         def MgM_update_all_readings(self):
-            useTheSameReading=False
+                    
             for msr in [
                     self.MgmSensorReading1,
                     self.MgmSensorReading2,
                     self.MgmSensorReading3]:
+                
                 msr.updateReading(
                     self.parent.hardwareController.magnetometer.getReading(
                     msr.mbSensorSelector.currentText(),    
-                    MRSM_Magnetometer.MgMAxis.X,stopTime=useTheSameReading),
+                    MRSM_Magnetometer.MgMAxis.X),
                     self.parent.hardwareController.magnetometer.getReading(
                     msr.mbSensorSelector.currentText(),    
-                    MRSM_Magnetometer.MgMAxis.Y,stopTime=True),            
+                    MRSM_Magnetometer.MgMAxis.Y),            
                     self.parent.hardwareController.magnetometer.getReading(
                     msr.mbSensorSelector.currentText(),    
-                    MRSM_Magnetometer.MgMAxis.Z,stopTime=True),
+                    MRSM_Magnetometer.MgMAxis.Z),
                     )
-                useTheSameReading=True
 
         def on_bAudioPlaytest_clicked(self):
             self.parent.hardwareController.audioPlayer.playTest(hasToplayIndefinitely=self.playTestInfinite)

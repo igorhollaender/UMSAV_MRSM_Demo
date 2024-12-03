@@ -462,7 +462,7 @@ class MRSM_Magnetometer():
             self.smbus = SMBus(1)   #using I2C bus 1
         else:
             self.availableSensors = set(self.MgMGeometry.keys())  
-            self.signalEmulator = MRSM_Magnetometer.A31301_SimpleEmulator()
+            self.signalEmulator = MRSM_Magnetometer.A31301_SimpleEmulator(self)
         
         # debug_message(self.availableSensors)
 
@@ -654,24 +654,30 @@ The values are relative to a maximum possible readout (sensor max range)",
         Simple generator of time-dependent signal reading
         """
 
-        def __init__(self) -> None:
-            self.time = time()
-            self.randomFactor = uniform(0.9,1.0) 
-            self.oldSensorPos=""
+        def __init__(self,magnetometer) -> None:
+            self.magnetometer = magnetometer                    
+            self.timeForSensor = {}
+            self.randomFactorForSensor = {}
+            for s in self.magnetometer.MgMGeometry.keys():
+                self.timeForSensor[s] = time()
+                self.randomFactorForSensor[s] = uniform(0.9,1.0) 
          
         def getReading(self,sensorPos,axis,stopTime:bool=False) -> int:
             """
             IH241203 the stopTime parameter is used to simulate readings comming immediately after each other,
             so the return value should be the same
             """
+            """
+            IH241203 BUG not working as expected
+            temporary workaround: only use stopTime=False
+            """
             
-            if sensorPos!=self.oldSensorPos and not stopTime:                
-                self.time = time()
-                self.randomFactor = uniform(0.9,1.0)            
-            self.oldSensorPos = sensorPos
+            if not stopTime:                
+                self.timeForSensor[sensorPos] = time()
+                self.randomFactorForSensor[sensorPos] = uniform(0.9,1.0)            
 
             if axis==MRSM_Magnetometer.MgMAxis.X:           
-                peakValue = int(sin(self.time/pi/10)*MRSM_Magnetometer.A31301_maxReadingRange)         
+                peakValue = int(sin(self.timeForSensor[sensorPos]/pi/10)*MRSM_Magnetometer.A31301_maxReadingRange)         
             if axis==MRSM_Magnetometer.MgMAxis.Z:                 
                 peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.7)
             if axis==MRSM_Magnetometer.MgMAxis.Y:
@@ -694,6 +700,6 @@ The values are relative to a maximum possible readout (sensor max range)",
                 spreadFactor = spreadCoefficient[sensorPos]                
 
             returnValue = int(max(-MRSM_Magnetometer.A31301_maxReadingRange,min(MRSM_Magnetometer.A31301_maxReadingRange,
-                        peakValue*spreadFactor*self.randomFactor)))
+                        peakValue*spreadFactor*self.randomFactorForSensor[sensorPos])))
             return returnValue
                     

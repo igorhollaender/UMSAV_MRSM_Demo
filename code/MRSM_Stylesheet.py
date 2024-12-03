@@ -156,7 +156,7 @@ QLabel#MessageDialogLabel {
 QComboBox#mbSensorSelector {
     font-family: 'Courier New', monospace;
     font-weight: bold; 
-    font-size: 30px; 
+    font-size: 25px; 
     background-color: #ABABff;   
     min-width: 70px;
     max-width: 70px;
@@ -165,7 +165,7 @@ QComboBox#mbSensorSelector {
 QLabel#lReadingValue {       
     font-family: 'Courier New', monospace;
     font-weight: bold; 
-    font-size: 30px; 
+    font-size: 25px; 
     background-color: #ABABff;    
     qproperty-alignment: 'AlignRight | AlignVCenter';
     min-height: 33 px;
@@ -179,4 +179,8 @@ QLabel#lFieldName {
     max-width: 20px;
 }
 
+HorizontalBarWidget {
+    min-width: 100px;
+    max-width: 100px;
+}
 """
