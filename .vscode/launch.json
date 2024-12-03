@@ -7,6 +7,7 @@
 
 
 
+
     
         {
             "type": "debugpy",
@@ -76,6 +77,17 @@
                 ,"-f" 
                 ,"-x"    
                 ,"-d=/home/um/sharedX"          
+                ]
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "MRSM_Demo SK Service",
+            "program": "code/MRSM_Demo.py",
+            "args":
+                [""                
+                ,"-l=SK"      
+                ,"-s"                 
                 ]
         },
         {

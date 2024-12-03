@@ -172,6 +172,11 @@ class MSRM_Demo_QApplication(QApplication):
             "exportDirectory",
             "."
         )
+        startService_option = QCommandLineOption(
+            "s",
+            "Start directly with service panel",
+            # default is not to use this
+        )
         seasonalEdition_option = QCommandLineOption(
             "x",
             "Use seasonal (Xmas) features",
@@ -180,6 +185,7 @@ class MSRM_Demo_QApplication(QApplication):
         parser.addOption(language_option)
         parser.addOption(magFieldVisualization_option)
         parser.addOption(exportDirectory_option)
+        parser.addOption(startService_option)
         parser.addOption(seasonalEdition_option)
                 
         parser.process(self)
@@ -192,6 +198,7 @@ class MSRM_Demo_QApplication(QApplication):
         self.hasToUseMagFieldVisualization = parser.isSet(magFieldVisualization_option)
         self.exportDirectory = parser.value(exportDirectory_option)
         self.hasToUseSeasonalFeatures = parser.isSet(seasonalEdition_option)
+        self.hasToStartWithService = parser.isSet(startService_option)
         pass
         
 
@@ -208,6 +215,7 @@ MRSM_presentation = MRSM_Presentation(
         hardwareController=MRSM_controller,
         hasToUseMagFieldVisualization=MRSM_application.hasToUseMagFieldVisualization,
         hasToUseSeasonalFeatures=MRSM_application.hasToUseSeasonalFeatures,
+        hasToStartWithService=MRSM_application.hasToStartWithService,
         )
 MRSM_presentation.show()
 MRSM_application.exec()

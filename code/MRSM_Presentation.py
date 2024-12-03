@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#      Last update: IH241122
+#      Last update: IH241203
 #
 #
 """
@@ -109,6 +109,7 @@ from PyQt6.QtCore import (
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QComboBox,
     QDialog,
     QDialogButtonBox,
     QGraphicsItem,
@@ -1172,6 +1173,40 @@ class MRSM_Presentation():
                                                  # IH241108 int is here because 1e4 would default to float
         STATUS_UPDATE_PERIOD_MSEC = 1000
 
+       
+        class MagnetometerReading(QWidget):
+
+            def __init__(self, availableSensorList: list) -> None:                
+                super().__init__()
+
+                self.mbSensorSelector = QComboBox()
+                self.mbSensorSelector.setObjectName("mbSensorSelector")
+                self.mbSensorSelector.addItems(availableSensorList)
+
+                self.lReadingValueX = QLabel("---")
+                self.lReadingValueX.setObjectName("lReadingValue")
+                self.lReadingValueY = QLabel("---")
+                self.lReadingValueY.setObjectName("lReadingValue")
+                self.lReadingValueZ = QLabel("---")
+                self.lReadingValueZ.setObjectName("lReadingValue")
+
+                layout = QHBoxLayout()
+                layout.addWidget(QLabel('S:',objectName="lFieldName"))
+                layout.addWidget(self.mbSensorSelector)
+                layout.addWidget(QLabel('X:',objectName="lFieldName"))
+                layout.addWidget(self.lReadingValueX)
+                layout.addWidget(QLabel('Y:',objectName="lFieldName"))
+                layout.addWidget(self.lReadingValueY)
+                layout.addWidget(QLabel('Z:',objectName="lFieldName"))
+                layout.addWidget(self.lReadingValueZ)
+                self.setLayout(layout)
+
+            def updateReading(self,readingX,readingY,readingZ):
+                self.lReadingValueX.setText(str(readingX))
+                self.lReadingValueY.setText(str(readingY))
+                self.lReadingValueZ.setText(str(readingZ))
+
+
         def __init__(self,parent) -> None:
 
             self.grid :   QGridLayout   = parent.grid
@@ -1232,9 +1267,7 @@ class MRSM_Presentation():
             self.cbLED_Group2.stateChanged.connect(self.cbLED_Group2_stateChanged)
             self.cbLED_Group3.stateChanged.connect(self.cbLED_Group3_stateChanged)
             
-            # IH241121 TODO implement functionality of the checkboxes
-            #---------------------------------------
-
+            
             self.groupBox_Audio = QGroupBox("Audio")
             self.groupBox_Audio.setFixedHeight(100)
             self.groupLayout_Audio = QHBoxLayout(self.groupBox_Audio)
@@ -1252,9 +1285,27 @@ class MRSM_Presentation():
             
             self.groupLayout_Audio.addWidget(self.bAudio_PlayTest)
             self.groupLayout_Audio.addWidget(self.cbAudio_PlayInInfiniteLoop)
-            
-            # IH241121 TODO implement functionality of the checkboxes
             #---------------------------------------
+
+            self.groupBox_MgmSensors = QGroupBox("Magnetometer Sensors")
+            self.groupBox_MgmSensors.setFixedHeight(250)
+            self.groupLayout_MgmSensors = QVBoxLayout(self.groupBox_MgmSensors)
+            # self.groupLayout_MgmSensors.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_MgmSensors)
+            
+            asl=sorted(self.parent.hardwareController.magnetometer.availableSensors)
+            self.MgmSensorReading1 = self.MagnetometerReading(availableSensorList=asl)
+            self.MgmSensorReading2 = self.MagnetometerReading(availableSensorList=asl)
+            self.MgmSensorReading3 = self.MagnetometerReading(availableSensorList=asl)
+            
+            self.groupLayout_MgmSensors.addWidget(self.MgmSensorReading1)
+            self.groupLayout_MgmSensors.addWidget(self.MgmSensorReading2)
+            self.groupLayout_MgmSensors.addWidget(self.MgmSensorReading3)
+            
+            self.MgmSensorReading1.mbSensorSelector.currentIndexChanged.connect(self.mbMgmSensorReading_indexChanged)
+            self.MgmSensorReading2.mbSensorSelector.currentIndexChanged.connect(self.mbMgmSensorReading_indexChanged)
+            self.MgmSensorReading3.mbSensorSelector.currentIndexChanged.connect(self.mbMgmSensorReading_indexChanged)
+            
             
             #---------------------------------------
             self.groupBox_Others = QGroupBox("Others")
@@ -1288,9 +1339,32 @@ class MRSM_Presentation():
             self.parent.idle_timer.start(self.IDLE_INACTIVITY_DURATION_SEC*1000)
 
         def on_status_update_timeout(self):
-            currentAllValuesX = self.parent.hardwareController.magnetometer.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X)
+            #currentAllValuesX = 
+            # self.parent.hardwareController.magnetometer.getReading(
+            #    self.MgmSensorReading1.mbSensorSelector.currentText,    
+            #    MRSM_Magnetometer.MgMAxis.X)
             debug_message(f"Service Status Update:") 
+            self.MgM_update_all_readings()    
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)   
+
+        def MgM_update_all_readings(self):
+            useTheSameReading=False
+            for msr in [
+                    self.MgmSensorReading1,
+                    self.MgmSensorReading2,
+                    self.MgmSensorReading3]:
+                msr.updateReading(
+                    self.parent.hardwareController.magnetometer.getReading(
+                    msr.mbSensorSelector.currentText(),    
+                    MRSM_Magnetometer.MgMAxis.X,stopTime=useTheSameReading),
+                    self.parent.hardwareController.magnetometer.getReading(
+                    msr.mbSensorSelector.currentText(),    
+                    MRSM_Magnetometer.MgMAxis.Y,stopTime=True),            
+                    self.parent.hardwareController.magnetometer.getReading(
+                    msr.mbSensorSelector.currentText(),    
+                    MRSM_Magnetometer.MgMAxis.Z,stopTime=True),
+                    )
+                useTheSameReading=True
 
         def on_bAudioPlaytest_clicked(self):
             self.parent.hardwareController.audioPlayer.playTest(hasToplayIndefinitely=self.playTestInfinite)
@@ -1318,6 +1392,8 @@ class MRSM_Presentation():
             else:    
                 self.parent.hardwareController.rpiGPIO.boreLEDGroup3.off()
 
+        def mbMgmSensorReading_indexChanged(self):            
+            self.MgM_update_all_readings()  
 
     class ShowMagnetometer():
         """
@@ -1539,8 +1615,9 @@ class MRSM_Presentation():
     def __init__(self,
             language : Language=Language.ENGLISH,
             hardwareController : MRSM_Controller =None,
-            hasToUseMagFieldVisualization: bool=False,
+            hasToUseMagFieldVisualization: bool=False, 
             hasToUseSeasonalFeatures: bool=False,
+            hasToStartWithService: bool=False,
             ):
         self.language = language
         self.MRSM_Window = QWidget()
@@ -1591,11 +1668,14 @@ class MRSM_Presentation():
         self.idle_timer.timeout.connect(self.on_idle_timeout)
 
         # 
-        self.showIntro.activate()
-        # IH241113 for debugging only   DEBUGACTIVATION
-        # self.showMagnetometer.activate()
-        # self.showService.activate()
-        # self.showMain.activate()
+        if hasToStartWithService:
+            self.showService.activate()
+        else:
+            self.showIntro.activate()
+            # IH241113 for debugging only   DEBUGACTIVATION
+            # self.showMagnetometer.activate()
+            # self.showService.activate()
+            # self.showMain.activate()
 
     def on_idle_timeout(self):
             self.quit_main_start_idle()

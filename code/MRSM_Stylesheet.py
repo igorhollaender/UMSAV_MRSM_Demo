@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH241122
+#      Last update: IH241203
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -152,4 +152,31 @@ QLabel#MessageDialogLabel {
   /* text alignment is specified in code */  
   background-color: #ABABff;
 }
+
+QComboBox#mbSensorSelector {
+    font-family: 'Courier New', monospace;
+    font-weight: bold; 
+    font-size: 30px; 
+    background-color: #ABABff;   
+    min-width: 70px;
+    max-width: 70px;
+}
+
+QLabel#lReadingValue {       
+    font-family: 'Courier New', monospace;
+    font-weight: bold; 
+    font-size: 30px; 
+    background-color: #ABABff;    
+    qproperty-alignment: 'AlignRight | AlignVCenter';
+    min-height: 33 px;
+    max-height: 33 px;
+}
+
+QLabel#lFieldName {       
+    font-size: 20px;     
+    qproperty-alignment: 'AlignRight | AlignVCenter';    
+    min-width: 20px;
+    max-width: 20px;
+}
+
 """

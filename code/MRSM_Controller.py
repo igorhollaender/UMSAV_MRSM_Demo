@@ -480,37 +480,13 @@ class MRSM_Magnetometer():
         
         #     # debug_message(f'{sensorPos}: X={self.MgMGeometry[sensorPos]["X"]}, Y={self.MgMGeometry[sensorPos]["Y"]})')
     
-
         #IH241111 for debugging only
-        if not IsMagneticSensorEmulated:
-            I2C_address = self.MgMsensorI2CAddress['4']
-            doAgain = True
+        if not IsMagneticSensorEmulated:            
+            doAgain = True  
             while doAgain:
-
-                #IH241111 PROBLEM this is very instable wiht the current test wiring
-                MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
-                LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
-                
-                MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
-                LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
-                
-                MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
-                LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
-                
-                value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
-                value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
-                value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
-
-                if(value_X & 0x4000):
-                    value_X = value_X | 0x8000
-                if(value_Y & 0x4000):
-                    value_Y = value_Y | 0x8000
-                if(value_Z & 0x4000):
-                    value_Z = value_Z | 0x8000
-
-                debug_message(f'X: {value_X},  ' +
-                            f'Y: {value_Y},  ' +
-                            f'Z: {value_Z}')
+                debug_message(  f'X: {self.getReading('4',self.MgMAxis.X)},  ' +
+                                f'Y: {self.getReading('4',self.MgMAxis.Y)},  ' +
+                                f'Z: {self.getReading('4',self.MgMAxis.Z)}')
                 sleep(1)
                 doAgain = False
 
@@ -585,11 +561,11 @@ The values are relative to a maximum possible readout (sensor max range)",
 
         self.dataExporter.export(self.readingsDict, self.exportFilename)
         
-    def getReading(self,sensorPos,axis: MgMAxis) -> int:
+    def getReading(self,sensorPos,axis: MgMAxis,stopTime:bool=False) -> int:
+        # IH241203 the stopTime parameter is only relevant for simulation
         if IsMagneticSensorEmulated:
-            return self.signalEmulator.getReading(sensorPos,axis)
+            return self.signalEmulator.getReading(sensorPos,axis,stopTime)
         else:
-            return 1234.5678
             # see A31301 datasheet, p.28
             # Output registers to use:
             #
@@ -600,7 +576,38 @@ The values are relative to a maximum possible readout (sensor max range)",
             #   Z_CHANNEL_15B (0x22:0x23[14:0])
             #       This register holds the 15-bit signed output of the Z-axis sensor output
 
-            # IH241107  TODO implement
+
+            I2C_address = self.MgMsensorI2CAddress[sensorPos]
+            
+            MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
+            LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
+                
+            MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
+            LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
+                
+            MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
+            LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
+                
+            value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
+            value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
+            value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
+
+            if(value_X & 0x4000):
+                    value_X = value_X | 0x8000
+            if(value_Y & 0x4000):
+                    value_Y = value_Y | 0x8000
+            if(value_Z & 0x4000):
+                    value_Z = value_Z | 0x8000
+
+            if axis==self.MgMAxis.X:
+                value = value_X
+            if axis==self.MgMAxis.Y:
+                value = value_Y
+            if axis==self.MgMAxis.Z:
+                value = value_Z
+
+            return value
+        
 
     def getNormalizedReading(self,sensorPos,axis: MgMAxis) -> float:
          """
@@ -648,11 +655,23 @@ The values are relative to a maximum possible readout (sensor max range)",
         """
 
         def __init__(self) -> None:
-            pass
+            self.time = time()
+            self.randomFactor = uniform(0.9,1.0) 
+            self.oldSensorPos=""
          
-        def getReading(self,sensorPos,axis) -> int:
+        def getReading(self,sensorPos,axis,stopTime:bool=False) -> int:
+            """
+            IH241203 the stopTime parameter is used to simulate readings comming immediately after each other,
+            so the return value should be the same
+            """
+            
+            if sensorPos!=self.oldSensorPos and not stopTime:                
+                self.time = time()
+                self.randomFactor = uniform(0.9,1.0)            
+            self.oldSensorPos = sensorPos
+
             if axis==MRSM_Magnetometer.MgMAxis.X:           
-                peakValue = int(sin(time()/pi/10)*MRSM_Magnetometer.A31301_maxReadingRange)         
+                peakValue = int(sin(self.time/pi/10)*MRSM_Magnetometer.A31301_maxReadingRange)         
             if axis==MRSM_Magnetometer.MgMAxis.Z:                 
                 peakValue = int(MRSM_Magnetometer.A31301_maxReadingRange*0.7)
             if axis==MRSM_Magnetometer.MgMAxis.Y:
@@ -665,13 +684,16 @@ The values are relative to a maximum possible readout (sensor max range)",
                     "7" :  0.80,                    
                     "6" :  0.30,                    
                     "D" :  0.30,                    
-                    "2" :  0.30,                    
+                    "2" :  0.30,
+
+                    "3" :  0.11, "4" :  0.12, "5" :  0.13, "8" :  0.14,
+                    "9" :  0.15, "A" :  0.16, "B" :  0.17, "E" :  0.18, "F" :  0.19,
                     }
             spreadFactor = 0.1
             if sensorPos in spreadCoefficient:
                 spreadFactor = spreadCoefficient[sensorPos]                
-            randomFactor = uniform(0.9,1.0)            
-            returnValue = max(-MRSM_Magnetometer.A31301_maxReadingRange,min(MRSM_Magnetometer.A31301_maxReadingRange,
-                        peakValue*spreadFactor*randomFactor))
+
+            returnValue = int(max(-MRSM_Magnetometer.A31301_maxReadingRange,min(MRSM_Magnetometer.A31301_maxReadingRange,
+                        peakValue*spreadFactor*self.randomFactor)))
             return returnValue
                     
