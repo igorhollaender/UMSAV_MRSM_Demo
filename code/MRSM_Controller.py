@@ -10,8 +10,8 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241125
-#
+#      Last update: IH241204
+# #
 #
 """
 Demo application to run on the Raspberry Pi MRSM controller:  
@@ -59,6 +59,18 @@ Controller of the Raspberry Pi hardware
 #       https://thelinuxcode.com/i2c-linux-utilities/
 
 
+#-------------------------------------------------------------------------------
+#   The I2C interface has to be enabled by
+#    $ sudo dtparam i2c_arm=on
+#
+#   The I2C clock frequency can be set by
+#    $ sudo dtparam i2c_arm_baudrate=1000000
+#   and then restart i2c by (this is just IH's speculation)
+#    $ sudo dtparam i2c_arm=on
+#
+#  see https://forums.raspberrypi.com/viewtopic.php?t=360996
+
+#   
 # TODOs
 #-------------------------------------------------------------------------------
 
@@ -448,6 +460,9 @@ class MRSM_Magnetometer():
         }
 
         self.MgMsensorI2CRegister = {
+             'TEMPERATURE_12B_MSB' :  0x1c,
+             'TEMPERATURE_12B_LSB' :  0x1d,
+
              'X_CHANNEL_15B_MSB' :  0x1e,
              'X_CHANNEL_15B_LSB' :  0x1f,
              'Y_CHANNEL_15B_MSB' :  0x20,
@@ -457,7 +472,8 @@ class MRSM_Magnetometer():
             }
 
         if not IsMagneticSensorEmulated:
-            self.availableSensors = set(['1','2'])  #IH241108 use actually availale sensor positions
+            self.availableSensors = set(['4'])  # IH241108 use actually available sensor positions
+                                                    # IH241204 1 is 0x60, 4 is 0x63
             self.signalEmulator = None
             self.smbus = SMBus(1)   #using I2C bus 1
         else:
@@ -482,13 +498,14 @@ class MRSM_Magnetometer():
     
         #IH241111 for debugging only
         if not IsMagneticSensorEmulated:            
-            doAgain = True  
+            doAgain = False  # IH241204 disabled
             while doAgain:
                 debug_message(  f'X: {self.getReading("4",self.MgMAxis.X)},  ' +
                                 f'Y: {self.getReading("4",self.MgMAxis.Y)},  ' +
                                 f'Z: {self.getReading("4",self.MgMAxis.Z)}')
                 sleep(1)
                 doAgain = False
+            # debug_message(  f'TEMPERATURE: {self.getTemperatureReading("4")}')
 
     def calculateSensorXY(self):
         """
@@ -560,6 +577,17 @@ The values are relative to a maximum possible readout (sensor max range)",
         }
 
         self.dataExporter.export(self.readingsDict, self.exportFilename)
+
+    def getTemperatureReading(self,sensorPos) -> int:
+        if IsMagneticSensorEmulated:
+            return self.signalEmulator.getTemperatureReading(sensorPos)
+        else:
+            I2C_address = self.MgMsensorI2CAddress[sensorPos]
+            Temperature_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['TEMPERATURE_12B_MSB'])    
+            # IH241204 TODO. implement fully
+
+            return Temperature_readout
+               
         
     def getReading(self,sensorPos,axis: MgMAxis,stopTime:bool=False) -> int:
         # IH241203 the stopTime parameter is only relevant for simulation
@@ -577,27 +605,50 @@ The values are relative to a maximum possible readout (sensor max range)",
             #       This register holds the 15-bit signed output of the Z-axis sensor output
 
 
-            I2C_address = self.MgMsensorI2CAddress[sensorPos]
-            
-            MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
-            LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
-                
-            MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
-            LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
-                
-            MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
-            LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
-                
-            value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
-            value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
-            value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
+            # IH241204 for experimenting
+            READOUT_METHOD_BYTE = False
+            READOUT_METHOD_WORD = True
 
-            if(value_X & 0x4000):
-                    value_X = value_X | 0x8000
-            if(value_Y & 0x4000):
-                    value_Y = value_Y | 0x8000
-            if(value_Z & 0x4000):
-                    value_Z = value_Z | 0x8000
+            I2C_address = self.MgMsensorI2CAddress[sensorPos]
+
+            if READOUT_METHOD_BYTE:
+                                
+                MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
+                LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
+                    
+                MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
+                LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
+                    
+                MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
+                LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
+                    
+                value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
+                value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
+                value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
+
+                if(value_X & 0x4000):
+                        value_X = value_X | 0x8000
+                if(value_Y & 0x4000):
+                        value_Y = value_Y | 0x8000
+                if(value_Z & 0x4000):
+                        value_Z = value_Z | 0x8000
+
+            if READOUT_METHOD_WORD:
+                
+                Word_X_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])    
+                Word_Y_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
+                Word_Z_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
+
+                value_X = Word_X_readout & 0x7FFF
+                value_Y = Word_Y_readout & 0x7FFF
+                value_Z = Word_Z_readout & 0x7FFF
+
+                if (value_X & 0x4000):                    
+                    value_X = value_X - 0x8000
+                if (value_Y & 0x4000):                                                   
+                    value_Y = value_Y - 0x8000
+                if (value_Z & 0x4000):                                        
+                    value_Z = value_Z - 0x8000
 
             if axis==self.MgMAxis.X:
                 value = value_X
@@ -661,6 +712,9 @@ The values are relative to a maximum possible readout (sensor max range)",
             for s in self.magnetometer.MgMGeometry.keys():
                 self.timeForSensor[s] = time()
                 self.randomFactorForSensor[s] = uniform(0.9,1.0) 
+
+        def getTemperatureReading(self,sensorPos) -> int:        
+            return 20
          
         def getReading(self,sensorPos,axis,stopTime:bool=False) -> int:
             """
