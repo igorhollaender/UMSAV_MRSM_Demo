@@ -504,8 +504,7 @@ class MRSM_Magnetometer():
                                 f'Y: {self.getReading("4",self.MgMAxis.Y)},  ' +
                                 f'Z: {self.getReading("4",self.MgMAxis.Z)}')
                 sleep(1)
-                doAgain = False
-            # debug_message(  f'TEMPERATURE: {self.getTemperatureReading("4")}')
+                doAgain = False            
 
     def calculateSensorXY(self):
         """
@@ -578,19 +577,26 @@ The values are relative to a maximum possible readout (sensor max range)",
 
         self.dataExporter.export(self.readingsDict, self.exportFilename)
 
-    def getTemperatureReading(self,sensorPos) -> int:
+    def getTemperatureReadingDegC(self,sensorPos) -> float:
         if IsMagneticSensorEmulated:
-            return self.signalEmulator.getTemperatureReading(sensorPos)
+            return self.signalEmulator.getTemperatureReadingDegC(sensorPos)
         else:
             I2C_address = self.MgMsensorI2CAddress[sensorPos]
             Temperature_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['TEMPERATURE_12B_MSB'])    
-            # IH241204 TODO. implement fully
-
-            return Temperature_readout
+            Temperature_readout &= 0x0FFF
+            if (Temperature_readout & 0x0800):
+                Temperature_readout -= 0x1000                    
+            # for formula, see A31303 Datasheet, p.13
+            Temperature_DegC = float(Temperature_readout)/8052 + 25
+            
+            return Temperature_DegC
                
         
     def getReading(self,sensorPos,axis: MgMAxis,stopTime:bool=False) -> int:
-        # IH241203 the stopTime parameter is only relevant for simulation
+
+        # sleep(0.5) # IH241204 for debugging only, make a forced pause between subsequent readings
+
+        # IH241203 the stopTime parameter is only relevant for simulation        
         if IsMagneticSensorEmulated:
             return self.signalEmulator.getReading(sensorPos,axis,stopTime)
         else:
@@ -606,8 +612,8 @@ The values are relative to a maximum possible readout (sensor max range)",
 
 
             # IH241204 for experimenting
-            READOUT_METHOD_BYTE = False
-            READOUT_METHOD_WORD = True
+            READOUT_METHOD_BYTE = True
+            READOUT_METHOD_WORD = False
 
             I2C_address = self.MgMsensorI2CAddress[sensorPos]
 
@@ -621,34 +627,58 @@ The values are relative to a maximum possible readout (sensor max range)",
                     
                 MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
                 LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
-                    
-                value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
-                value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
-                value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
 
-                if(value_X & 0x4000):
-                        value_X = value_X | 0x8000
-                if(value_Y & 0x4000):
-                        value_Y = value_Y | 0x8000
-                if(value_Z & 0x4000):
-                        value_Z = value_Z | 0x8000
+                # debug_message(f'MSB_X_readout> {MSB_X_readout}')
+                     
+                # value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
+                # value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
+                # value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
+
+            
+                value_X = ((MSB_X_readout & 0x7F) * 256) + LSB_X_readout
+                value_Y = ((MSB_Y_readout & 0x7F) * 256) + LSB_Y_readout
+                value_Z = ((MSB_Z_readout & 0x7F) * 256) + LSB_Z_readout
+
+                # IH241204 PROBLEM HERE still not OK
+                
+                if value_X >= 64*256:
+                    value_X = -(value_X-64*256)
+                if value_Y >= 64*256:
+                    value_Y = -(value_Y-64*256)
+                if value_Z >= 64*256:
+                    value_Z = -(value_Z-64*256)                    
+
+                # if MSB_X_readout > 127:
+                #     value_X = -((~value_X & ((1 << 14)-1)) + 1)
+                # if MSB_Y_readout > 127:
+                #     value_Y = -((~value_Y & ((1 << 14)-1)) + 1)                    
+                # if MSB_Z_readout > 127:
+                #     value_Z = -((~value_Z & ((1 << 14)-1)) + 1)
+
+                # if(value_X & 0x4000):
+                #         value_X = value_X | 0x8000
+                # if(value_Y & 0x4000):
+                #         value_Y = value_Y | 0x8000
+                # if(value_Z & 0x4000):
+                #         value_Z = value_Z | 0x8000
 
             if READOUT_METHOD_WORD:
                 
                 Word_X_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])    
                 Word_Y_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
                 Word_Z_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
+                # debug_message(f'Word_X_readout> {Word_X_readout}')
 
                 value_X = Word_X_readout & 0x7FFF
                 value_Y = Word_Y_readout & 0x7FFF
                 value_Z = Word_Z_readout & 0x7FFF
 
                 if (value_X & 0x4000):                    
-                    value_X = value_X - 0x8000
-                if (value_Y & 0x4000):                                                   
-                    value_Y = value_Y - 0x8000
+                    value_X -= 0x8000
+                if (value_Y & 0x8000):                                                   
+                    value_Y -= 0x8000
                 if (value_Z & 0x4000):                                        
-                    value_Z = value_Z - 0x8000
+                    value_Z -= 0x8000
 
             if axis==self.MgMAxis.X:
                 value = value_X
@@ -670,6 +700,7 @@ The values are relative to a maximum possible readout (sensor max range)",
         retDict = {}
         for sensorPos in self.MgMGeometry:
             retDict[sensorPos] = self.getNormalizedReading(sensorPos,axis)
+            
         return retDict
     
     def getNormalizedReadingForAllSensorsInScannerCoordinates(self,orientation:MgMOrientation) -> dict:
@@ -713,8 +744,8 @@ The values are relative to a maximum possible readout (sensor max range)",
                 self.timeForSensor[s] = time()
                 self.randomFactorForSensor[s] = uniform(0.9,1.0) 
 
-        def getTemperatureReading(self,sensorPos) -> int:        
-            return 20
+        def getTemperatureReadingDegC(self,sensorPos) -> float:        
+            return 25.0
          
         def getReading(self,sensorPos,axis,stopTime:bool=False) -> int:
             """
