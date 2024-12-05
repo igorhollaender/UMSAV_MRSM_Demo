@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241204
+#      Last update: IH241205
 # #
 #
 """
@@ -628,39 +628,20 @@ The values are relative to a maximum possible readout (sensor max range)",
                 MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
                 LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
 
-                # debug_message(f'MSB_X_readout> {MSB_X_readout}')
+                debug_message(f'MSB_X_readout> {MSB_X_readout},LSB_X_readout> {LSB_X_readout}' )
                      
-                # value_X = ((MSB_X_readout & 0x7F) << 8) | LSB_X_readout
-                # value_Y = ((MSB_Y_readout & 0x7F) << 8) | LSB_Y_readout
-                # value_Z = ((MSB_Z_readout & 0x7F) << 8) | LSB_Z_readout
+                value_X = ((MSB_X_readout & 0x7F) << 8) | (LSB_X_readout & 0xFF)
+                value_Y = ((MSB_Y_readout & 0x7F) << 8) | (LSB_Y_readout & 0xFF)
+                value_Z = ((MSB_Z_readout & 0x7F) << 8) | (LSB_Z_readout & 0xFF)
 
-            
-                value_X = ((MSB_X_readout & 0x7F) * 256) + LSB_X_readout
-                value_Y = ((MSB_Y_readout & 0x7F) * 256) + LSB_Y_readout
-                value_Z = ((MSB_Z_readout & 0x7F) * 256) + LSB_Z_readout
-
-                # IH241204 PROBLEM HERE still not OK
+                # IH241205 PROBLEM still not correct conversion
                 
-                if value_X >= 64*256:
-                    value_X = -(value_X-64*256)
-                if value_Y >= 64*256:
-                    value_Y = -(value_Y-64*256)
-                if value_Z >= 64*256:
-                    value_Z = -(value_Z-64*256)                    
-
-                # if MSB_X_readout > 127:
-                #     value_X = -((~value_X & ((1 << 14)-1)) + 1)
-                # if MSB_Y_readout > 127:
-                #     value_Y = -((~value_Y & ((1 << 14)-1)) + 1)                    
-                # if MSB_Z_readout > 127:
-                #     value_Z = -((~value_Z & ((1 << 14)-1)) + 1)
-
-                # if(value_X & 0x4000):
-                #         value_X = value_X | 0x8000
-                # if(value_Y & 0x4000):
-                #         value_Y = value_Y | 0x8000
-                # if(value_Z & 0x4000):
-                #         value_Z = value_Z | 0x8000
+                if(value_X & 0x4000):
+                        value_X -= 0x8000
+                if(value_Y & 0x4000):
+                        value_Y -= 0x8000
+                if(value_Z & 0x4000):
+                        value_Z -= 0x8000
 
             if READOUT_METHOD_WORD:
                 
@@ -745,7 +726,7 @@ The values are relative to a maximum possible readout (sensor max range)",
                 self.randomFactorForSensor[s] = uniform(0.9,1.0) 
 
         def getTemperatureReadingDegC(self,sensorPos) -> float:        
-            return 25.0
+            return 25.0 + uniform(-0.5,+0.5) 
          
         def getReading(self,sensorPos,axis,stopTime:bool=False) -> int:
             """

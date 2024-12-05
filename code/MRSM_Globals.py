@@ -10,16 +10,19 @@
 #      M  R  S  M  _  G l o b a l s  .  p  y 
 #
 #
-#      Last update: IH241204
+#      Last update: IH241205
 #-------------------------------------------------------------------------------
 
 
-__version__                 = "MRSM_Demo IH241204a"
+__version__                 = "MRSM_Demo IH241205a"
+
+IsDeployedOnRaspberryPi     = False
 
 
-IsWaveShareDisplayEmulated  = False   # set to False for real application
-IsRaspberryPi5Emulated      = False   # set to False for real application
-IsMagneticSensorEmulated    = False   # set to False for real application
+IsWaveShareDisplayEmulated  = not IsDeployedOnRaspberryPi
+IsRaspberryPi5Emulated      = not IsDeployedOnRaspberryPi
+IsMagneticSensorEmulated    = not IsDeployedOnRaspberryPi  
+
 IsQtMultimediaAvailable     = False  # IH240722 I had problems 
                                      # installing QtMultimedia on Raspberry OS,
                                      # so this is a workaround
