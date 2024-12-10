@@ -550,7 +550,7 @@ class MRSM_Magnetometer():
 
     def setHolderAxialRotationAngle(self,rotationAngleDeg):
         """
-        rotation angle is degrees, 0 is showing up, clockwise in the cranial view
+        rotation angle in degrees, 0 is showing up, clockwise in the cranial view
         """
         self.holderRotationAngleDeg = rotationAngleDeg
         self.calculateSensorXY()
@@ -583,6 +583,7 @@ The values are relative to a maximum possible readout (sensor max range)",
             "readings_X":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X),
             "readings_Y":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Y),
             "readings_Z":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Z),
+            "reading_Temperature":      self.getTemperatureReadingForAllSensors(),
         }
 
         self.dataExporter.export(self.readingsDict, self.exportFilename)
@@ -741,6 +742,13 @@ The values are relative to a maximum possible readout (sensor max range)",
         retDict = {}
         for sensorPos in self.MgMGeometry:
             retDict[sensorPos] = self.getNormalizedReading(sensorPos,axis)
+            
+        return retDict
+    
+    def getTemperatureReadingForAllSensors(self) -> dict:
+        retDict = {}
+        for sensorPos in self.MgMGeometry:
+            retDict[sensorPos] = self.getTemperatureReadingDegC(sensorPos)
             
         return retDict
     
