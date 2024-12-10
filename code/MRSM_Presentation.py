@@ -1427,7 +1427,7 @@ class MRSM_Presentation():
             #    self.MgmSensorReading1.mbSensorSelector.currentText,    
             #    MRSM_Magnetometer.MgMAxis.X)
             # debug_message(f"Service Status Update:") 
-            debug_message(  f'TEMPERATURE[°C], (sensor 4): {self.parent.hardwareController.magnetometer.getTemperatureReadingDegC("4"):.2f}')
+            # debug_message(  f'TEMPERATURE[°C], (sensor 4): {self.parent.hardwareController.magnetometer.getTemperatureReadingDegC("4"):.2f}')
             self.MgM_update_all_readings()    
             self.status_update_timer.start(self.STATUS_UPDATE_PERIOD_MSEC)   
 

@@ -83,7 +83,7 @@ Controller of the Raspberry Pi hardware
 from enum import Enum
 from time import sleep, time, asctime
 from math import sin,cos,pi,radians
-from random import random, uniform
+from random import random, uniform, choice
 
 
 from MRSM_Globals import IsRaspberryPi5Emulated, IsMagneticSensorEmulated, __version__
@@ -471,19 +471,26 @@ class MRSM_Magnetometer():
              'Z_CHANNEL_15B_LSB' :  0x23,
             }
 
+        self.availableSensors = set() 
         if not IsMagneticSensorEmulated:
-            self.availableSensors = set(['4'])  # IH241108 use actually available sensor positions
-                                                    # IH241204 1 is 0x60, 4 is 0x63
             self.signalEmulator = None
             self.smbus = SMBus(1)   #using I2C bus 1
+            self.availableSensors.add('4')  # IH241108 use actually available sensor positions
+                                                    # IH241204 1 is 0x60, 4 is 0x63
+
         else:
             self.availableSensors = set(self.MgMGeometry.keys()) 
             # IH241210 for debugging only 
-            self.availableSensors = set(['1','3','4','A','B','F'])  
-                
+            self.availableSensors = set(['1','3','4','A','B','F'])      
             self.signalEmulator = MRSM_Magnetometer.A31301_SimpleEmulator(self)
         
+        # IH241210 EXPERIMENTAL
+        for s in self.MgMGeometry.keys():
+            if self.CheckI2CDeviceAvailability(s):
+                self.availableSensors.add(s)
+
         # debug_message(self.availableSensors)
+        assert(len(self.availableSensors)>0)
 
         self.calculateSensorXY()
 
@@ -579,6 +586,26 @@ The values are relative to a maximum possible readout (sensor max range)",
         }
 
         self.dataExporter.export(self.readingsDict, self.exportFilename)
+
+    def CheckI2CDeviceAvailability(self,sensorPos) -> bool:
+            """
+            IH241210 TODO to be tested
+
+            see
+            https://forums.raspberrypi.com/viewtopic.php?t=114401
+
+            """
+            if IsMagneticSensorEmulated:
+                return choice([True,False]) # IH241210 random choice
+            
+            isAvailable=True
+            try:
+                self.smbus.write_byte(self.MgMsensorI2CAddress[sensorPos],0) #IH241210 in forum, they claim this to be better than read_byte
+            except Exception as e:
+                debug_message(f'I2C Device Check: sensor {sensorPos} at {self.MgMsensorI2CAddress[sensorPos]}:{e}')
+                isAvailable=False
+            finally:
+                return isAvailable
 
     def getTemperatureReadingDegC(self,sensorPos) -> float:
           
