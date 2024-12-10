@@ -10,11 +10,11 @@
 #      M  R  S  M  _  G l o b a l s  .  p  y 
 #
 #
-#      Last update: IH241205
+#      Last update: IH241210
 #-------------------------------------------------------------------------------
 
 
-__version__                 = "MRSM_Demo IH241205a"
+__version__                 = "MRSM_Demo IH241210a"
 
 IsDeployedOnRaspberryPi     = False
 

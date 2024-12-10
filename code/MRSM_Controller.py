@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241205
+#      Last update: IH241210
 # #
 #
 """
@@ -477,7 +477,10 @@ class MRSM_Magnetometer():
             self.signalEmulator = None
             self.smbus = SMBus(1)   #using I2C bus 1
         else:
-            self.availableSensors = set(self.MgMGeometry.keys())  
+            self.availableSensors = set(self.MgMGeometry.keys()) 
+            # IH241210 for debugging only 
+            self.availableSensors = set(['1','3','4','A','B','F'])  
+                
             self.signalEmulator = MRSM_Magnetometer.A31301_SimpleEmulator(self)
         
         # debug_message(self.availableSensors)
@@ -578,16 +581,27 @@ The values are relative to a maximum possible readout (sensor max range)",
         self.dataExporter.export(self.readingsDict, self.exportFilename)
 
     def getTemperatureReadingDegC(self,sensorPos) -> float:
+          
+        def convert_12bitSignedInt_to_int(msb,lsb):
+            """
+            IH241210 TODO to be tested
+            """
+            if msb>7:
+                b = bytearray(bytes([msb,lsb]))
+                b[0] = ~b[0] & 0x07
+                b[1] = ~b[1] & 0xFF
+                v = -b[0]*256 - b[1]-1
+            else:
+                v = msb*256 + lsb
+            return v
+          
         if IsMagneticSensorEmulated:
             return self.signalEmulator.getTemperatureReadingDegC(sensorPos)
         else:
             I2C_address = self.MgMsensorI2CAddress[sensorPos]
             Temperature_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['TEMPERATURE_12B_MSB'])    
-            Temperature_readout &= 0x0FFF
-            if (Temperature_readout & 0x0800):
-                Temperature_readout -= 0x1000                    
             # for formula, see A31303 Datasheet, p.13
-            Temperature_DegC = float(Temperature_readout)/8052 + 25
+            Temperature_DegC = float(convert_12bitSignedInt_to_int(Temperature_readout))/8052 + 25
             
             return Temperature_DegC
                
@@ -596,6 +610,20 @@ The values are relative to a maximum possible readout (sensor max range)",
 
         # sleep(0.5) # IH241204 for debugging only, make a forced pause between subsequent readings
 
+
+        def convert_15bitSignedInt_to_int(msb,lsb):
+            """
+            IH241210 TODO to be tested
+            """
+            if msb>63:
+                b = bytearray(bytes([msb,lsb]))
+                b[0] = ~b[0] & 0x3F
+                b[1] = ~b[1] & 0xFF
+                v = -b[0]*256 - b[1]-1
+            else:
+                v = msb*256 + lsb
+            return v
+    
         # IH241203 the stopTime parameter is only relevant for simulation        
         if IsMagneticSensorEmulated:
             return self.signalEmulator.getReading(sensorPos,axis,stopTime)
@@ -613,7 +641,7 @@ The values are relative to a maximum possible readout (sensor max range)",
 
             # IH241204 for experimenting
             READOUT_METHOD_BYTE = True
-            READOUT_METHOD_WORD = False
+            READOUT_METHOD_WORD = False # IH241210 OBSOLETE
 
             I2C_address = self.MgMsensorI2CAddress[sensorPos]
 
@@ -629,20 +657,25 @@ The values are relative to a maximum possible readout (sensor max range)",
                 LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
 
                 debug_message(f'MSB_X_readout> {MSB_X_readout},LSB_X_readout> {LSB_X_readout}' )
+
+                value_X = convert_15bitSignedInt_to_int(MSB_X_readout,LSB_X_readout)
+                value_Y = convert_15bitSignedInt_to_int(MSB_Y_readout,LSB_Y_readout)
+                value_Z = convert_15bitSignedInt_to_int(MSB_Z_readout,LSB_Z_readout)
                      
-                value_X = ((MSB_X_readout & 0x7F) << 8) | (LSB_X_readout & 0xFF)
-                value_Y = ((MSB_Y_readout & 0x7F) << 8) | (LSB_Y_readout & 0xFF)
-                value_Z = ((MSB_Z_readout & 0x7F) << 8) | (LSB_Z_readout & 0xFF)
+                # value_X = ((MSB_X_readout & 0x7F) << 8) | (LSB_X_readout & 0xFF)
+                # value_Y = ((MSB_Y_readout & 0x7F) << 8) | (LSB_Y_readout & 0xFF)
+                # value_Z = ((MSB_Z_readout & 0x7F) << 8) | (LSB_Z_readout & 0xFF)
 
-                # IH241205 PROBLEM still not correct conversion
+                # # IH241205 PROBLEM still not correct conversion
                 
-                if(value_X & 0x4000):
-                        value_X -= 0x8000
-                if(value_Y & 0x4000):
-                        value_Y -= 0x8000
-                if(value_Z & 0x4000):
-                        value_Z -= 0x8000
+                # if(value_X & 0x4000):
+                #         value_X -= 0x8000
+                # if(value_Y & 0x4000):
+                #         value_Y -= 0x8000
+                # if(value_Z & 0x4000):
+                #         value_Z -= 0x8000
 
+            # IH241210 OBSOLETE
             if READOUT_METHOD_WORD:
                 
                 Word_X_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])    

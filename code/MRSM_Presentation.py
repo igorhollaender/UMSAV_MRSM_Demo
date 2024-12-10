@@ -10,7 +10,7 @@
 #      M  R  S  M  _  P  r  e  s  e  n  t  a  t  i  o  n  .  p  y 
 #
 #
-#      Last update: IH241203
+#      Last update: IH241210
 #
 #
 """
@@ -1176,7 +1176,21 @@ class MRSM_Presentation():
                                                  # IH241108 int is here because 1e4 would default to float
         STATUS_UPDATE_PERIOD_MSEC = 1000
 
-       
+        class TemperatureReading(QWidget):
+            def __init__(self, sensorLabel: str) -> None:                
+                super().__init__()
+                layout = QHBoxLayout()
+                layout.addWidget(QLabel(sensorLabel,objectName="lSensorName"))
+                self.lReadingTemperature = QLabel("---",objectName="lTemperatureReadingValue")
+                layout.addWidget(self.lReadingTemperature)
+                layout.setContentsMargins(0,0,10,0)
+            
+                self.setLayout(layout)
+            
+            def updateReading(self,readingTemperature):
+                self.lReadingTemperature.setText(f' {readingTemperature:.2f} ')
+                
+
         class MagnetometerReading(QWidget):
 
             def __init__(self, availableSensorList: list) -> None:                
@@ -1355,7 +1369,26 @@ class MRSM_Presentation():
             self.MgmSensorReading1.mbSensorSelector.currentIndexChanged.connect(self.mbMgmSensorReading_indexChanged)
             self.MgmSensorReading2.mbSensorSelector.currentIndexChanged.connect(self.mbMgmSensorReading_indexChanged)
             self.MgmSensorReading3.mbSensorSelector.currentIndexChanged.connect(self.mbMgmSensorReading_indexChanged)
-            
+
+             #---------------------------------------
+
+            self.groupBox_MgmAvailTemp = QGroupBox("Magnetometer Sensors - Availability and Temperature Readings [degC]")
+            self.groupBox_MgmAvailTemp.setFixedHeight(250)
+            self.groupLayout_MgmAvailTemp = QGridLayout(self.groupBox_MgmAvailTemp)
+            # self.groupLayout_MgmAvailTemp.setContentsMargins(20,10,20,10)
+            self.layoutServiceWorkdesk.addWidget(self.groupBox_MgmAvailTemp)
+            row,column = 0,0
+            self.tempReadings = {}
+            for sensorName in self.parent.hardwareController.magnetometer.MgMGeometry.keys():
+                self.tempReadings[sensorName] = self.TemperatureReading(
+                    sensorLabel=f'{sensorName} ({self.parent.hardwareController.magnetometer.MgMsensorI2CAddress[sensorName]})')
+                self.tempReadings[sensorName].setEnabled(sensorName in asl)
+                self.groupLayout_MgmAvailTemp.addWidget(self.tempReadings[sensorName],row,column)
+                if column<4:
+                     column+=1
+                else:
+                     column=0
+                     row+=1
             
             #---------------------------------------
             self.groupBox_Others = QGroupBox("Others")
@@ -1370,7 +1403,6 @@ class MRSM_Presentation():
             self.status_update_timer.timeout.connect(self.on_status_update_timeout)
             
             self.MgM_update_all_readings()
-
             self.deactivate()
 
         def activate(self):            
@@ -1417,6 +1449,10 @@ class MRSM_Presentation():
                     msr.mbSensorSelector.currentText(),    
                     MRSM_Magnetometer.MgMAxis.Z),
                     )
+            for sensorName in self.parent.hardwareController.magnetometer.availableSensors:
+                self.tempReadings[sensorName].updateReading(
+                    self.parent.hardwareController.magnetometer.getTemperatureReadingDegC(sensorName)
+                )
 
         def on_bAudioPlaytest_clicked(self):
             self.parent.hardwareController.audioPlayer.playTest(hasToplayIndefinitely=self.playTestInfinite)

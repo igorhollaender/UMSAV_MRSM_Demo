@@ -10,7 +10,7 @@
 #      M  R  S  M  _  S  t  y  l  e  s  h  e  e  t  .  p  y 
 #
 9
-#      Last update: IH241203
+#      Last update: IH241210
 #-------------------------------------------------------------------------------
 
 # for examples, see
@@ -182,5 +182,21 @@ QLabel#lFieldName {
 HorizontalBarWidget {
     min-width: 100px;
     max-width: 100px;
+}
+
+QLabel#lTemperatureReadingValue {       
+    font-family: 'Courier New', monospace;
+    font-weight: bold; 
+    qproperty-alignment: 'AlignCenter | AlignVCenter';
+}
+
+QLabel#lTemperatureReadingValue:enabled {       
+    background-color: #ABABff;    
+}
+
+QLabel#lSensorName {         
+    qproperty-alignment: 'AlignRight | AlignVCenter';  
+    min-width: 50px;
+    max-width: 50px;  
 }
 """
