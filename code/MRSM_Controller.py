@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241210
+#      Last update: IH241211
 # #
 #
 """
@@ -577,13 +577,14 @@ This is an MRSM export file.
             "holderAxialPositionMM":    self.holderAxialPositionMm,
             "holderRotationAngleDeg":   self.holderRotationAngleDeg,
             "readings_comment":         """
-The readings are given in the sensor's own coordinate system. 
-The values are relative to a maximum possible readout (sensor max range)",
+The magnetic field readings are given in the sensor's own coordinate system. 
+The values are relative to a maximum possible readout (sensor max range).
+The temperature readings are given in Celsius degrees.
 """,
             "readings_X":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.X),
             "readings_Y":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Y),
             "readings_Z":               self.getNormalizedReadingForAllSensors(MRSM_Magnetometer.MgMAxis.Z),
-            "reading_Temperature":      self.getTemperatureReadingForAllSensors(),
+            "readings_Temperature":      self.getTemperatureReadingForAllSensors(),
         }
 
         self.dataExporter.export(self.readingsDict, self.exportFilename)
