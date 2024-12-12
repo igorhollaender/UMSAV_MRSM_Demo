@@ -10,7 +10,7 @@
 #      M  R  S  M  _  C  o  n  t  r  o  l  l  e  r  .  p  y 
 #
 #
-#      Last update: IH241211
+#      Last update: IH241212
 # #
 #
 """
@@ -604,7 +604,7 @@ The temperature readings are given in Celsius degrees.
             try:
                 self.smbus.write_byte(self.MgMsensorI2CAddress[sensorPos],0) #IH241210 in forum, they claim this to be better than read_byte
             except Exception as e:
-                debug_message(f'I2C Device Check: sensor {sensorPos} at {self.MgMsensorI2CAddress[sensorPos]}:{e}')
+                debug_message(f'I2C Device Check: sensor {sensorPos} at {self.MgMsensorI2CAddress[sensorPos]}:{e} (probably sensor missing)')
                 isAvailable=False
             finally:
                 return isAvailable
@@ -613,7 +613,7 @@ The temperature readings are given in Celsius degrees.
           
         def convert_12bitSignedInt_to_int(msb,lsb):
             """
-            IH241210 TODO to be tested
+            IH241212 tested on RPI 
             """
             if msb>7:
                 b = bytearray(bytes([msb,lsb]))
@@ -628,9 +628,16 @@ The temperature readings are given in Celsius degrees.
             return self.signalEmulator.getTemperatureReadingDegC(sensorPos)
         else:
             I2C_address = self.MgMsensorI2CAddress[sensorPos]
-            Temperature_readout = self.smbus.read_word_data(I2C_address,   self.MgMsensorI2CRegister['TEMPERATURE_12B_MSB'])    
+            try:
+                Temperature_readout_MSB = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['TEMPERATURE_12B_MSB'])    
+                Temperature_readout_LSB = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['TEMPERATURE_12B_LSB']) 
+            except Exception as e:
+                return 0
+            
+            # debug_message(f'MSB_temp_readout> {Temperature_readout_MSB},LSB_temp_readout> {Temperature_readout_LSB}' )
+
             # for formula, see A31303 Datasheet, p.13
-            Temperature_DegC = float(convert_12bitSignedInt_to_int(Temperature_readout))/8052 + 25
+            Temperature_DegC = float(convert_12bitSignedInt_to_int(Temperature_readout_MSB, Temperature_readout_LSB))/8.052 + 25
             
             return Temperature_DegC
                
@@ -642,7 +649,7 @@ The temperature readings are given in Celsius degrees.
 
         def convert_15bitSignedInt_to_int(msb,lsb):
             """
-            IH241210 TODO to be tested
+            IH241212 Tested on RPI OK
             """
             if msb>63:
                 b = bytearray(bytes([msb,lsb]))
@@ -675,17 +682,19 @@ The temperature readings are given in Celsius degrees.
             I2C_address = self.MgMsensorI2CAddress[sensorPos]
 
             if READOUT_METHOD_BYTE:
-                                
-                MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
-                LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
-                    
-                MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
-                LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
-                    
-                MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
-                LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
+                try:
+                    MSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_MSB'])
+                    LSB_X_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['X_CHANNEL_15B_LSB'])
+                        
+                    MSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_MSB'])
+                    LSB_Y_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Y_CHANNEL_15B_LSB'])
+                        
+                    MSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_MSB'])
+                    LSB_Z_readout = self.smbus.read_byte_data(I2C_address,   self.MgMsensorI2CRegister['Z_CHANNEL_15B_LSB'])
+                except Exception as e: #IH241212 in case I2C is not responding
+                    return 0
 
-                debug_message(f'MSB_X_readout> {MSB_X_readout},LSB_X_readout> {LSB_X_readout}' )
+                # debug_message(f'MSB_X_readout> {MSB_X_readout},LSB_X_readout> {LSB_X_readout}' )
 
                 value_X = convert_15bitSignedInt_to_int(MSB_X_readout,LSB_X_readout)
                 value_Y = convert_15bitSignedInt_to_int(MSB_Y_readout,LSB_Y_readout)
